@@ -1,0 +1,11 @@
+*.exe
+*.a
+*.o
+
+*.jpg
+*.png
+*.bmp
+
+
+pictures/
+
