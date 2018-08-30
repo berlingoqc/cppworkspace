@@ -1,16 +1,10 @@
 #include "../../../include/capture.hpp"
+#include "../../../include/video.hpp"
 #include "../../../include/file.hpp"
-#include <tclap/CmdLine.h>
 
 
-void manipulateRedGreenBlue(cv::Mat& image) {
- for(int y = 0; y < image.rows;++y) 
-	for( int x = 0; x < image.cols;++x)
-	{
-		// get le pixel
-		Vec3b vec = image.at<Vec3b>(Point(x,y));
-		// set le pixel avec le resultat de la fonction passé
-        // Fait la manipluation sur le pixel
+class RGBtoBlackVideo : public PixelVideoModifier {
+	Vec3b Manipulate(Vec3b vec) {
         int r = vec[2];
         int g = vec[1];
         int b = vec[0];
@@ -23,36 +17,53 @@ void manipulateRedGreenBlue(cv::Mat& image) {
 		} else if ( g > 140 && r < 100 & b < 100 ) {
 			vec = Vec3b(0,0,0);
 		}
-	    image.at<Vec3b>(Point(x,y)) = vec;
-	}
+		return vec;
 }
+};
+
+class ContBrighVideo : public PixelVideoModifier {
+	double 	alpha;
+	int 	beta;
+
+	public:
+		ContBrighVideo(double a,int b) {
+			alpha = a;
+			beta = b;
+		}
+
+	protected:
+		Vec3b Manipulate(Vec3b vec) {
+			for (int c = 0;c < 3; c++) {
+				vec[c] = saturate_cast<uchar>(alpha*vec[c]+beta);
+			}
+			return vec;
+		}
+
+		bool HandleKey(int k) {
+			switch(k) {
+				// descend alpha
+				case 'a':
+					if(alpha > 1.0) alpha -= 0.10;
+				break;
+				// monte alpha
+				case 'd':
+					if(alpha < 3.0) alpha += 0.10;
+				break;
+				// monte beta
+				case 'w':
+					if(beta > 0) beta -= 10;
+				break;
+				// descend beta
+				case 's':
+					if(beta < 100) beta += 10;
+				break;
+			}
+			return false;
+		}
+};
 
 int main(int argv,char ** argc)
 {
-	std::string fileName;
-	std::string outputFileName;
-
-	int width = 1280;
-	int height = 720;
-	  cv::VideoCapture cap(0);
-            if(!cap.isOpened()) {
-		        return 1;
-            }
-            cap.set(CAP_PROP_FRAME_HEIGHT,height);
-            cap.set(CAP_PROP_FRAME_WIDTH,width);
-            string windowName = "Capturing " + fileName;
-
-        	cv::namedWindow(windowName);
-
-        	while(true) {
-
-        		cv::Mat img;
-				cap >> img;
-				manipulateRedGreenBlue(img);
-                imshow(windowName,img);
-        		if(cv::waitKey(30) >= 0) {
-        			// set l'image comment etant elle save
-    			    break;
-		        }
-			}
+	RGBtoBlackVideo video;
+	video.Start();
 }

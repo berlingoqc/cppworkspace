@@ -1,3 +1,4 @@
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/utility.hpp>
@@ -17,10 +18,7 @@ const string Extensions[] = {".jpg"};
 
 
 void SharpenImage(const Mat& image, Mat& result);
-
-void lolol() {
-    std::cout << "there is " << cuda::getCudaEnabledDeviceCount() << " cuda device on this computer" << std::endl;
-}
+cv::Mat FuncBlendImage(double alpha,const Mat& image,const Mat& blendimage);
 
 struct Resolution {
     int Width;
@@ -125,7 +123,8 @@ class ImageWrapper {
         // TransformPixel ...
 		void TransformPixel() {
             if(this->manipulator != NULL) {
-
+                std::cerr << "Manipulator to transform pixel is not set" << std::endl;
+                return;
             }
             for(int y = 0; y < this->image.rows;++y) 
 		        for( int x = 0; x < this->image.cols;++x)
@@ -133,7 +132,7 @@ class ImageWrapper {
 			        // get le pixel
 			        Vec3b vec = this->image.at<Vec3b>(Point(x,y));
 			        // set le pixel avec le resultat de la fonction passé
-			        this->image.at<Vec3b>(Point(x,y)) = this->manipulator();
+			        this->image.at<Vec3b>(Point(x,y)) = this->manipulator(vec);
 		        }
         }
 
@@ -189,7 +188,7 @@ class ImageModifier : public ImagesWrapper {
 
 
 
-cv::Mat& FuncBlendImage(double alpha,const Mat& image,const Mat& blendimage) {
+cv::Mat FuncBlendImage(double alpha,const Mat& image,const Mat& blendimage) {
     Mat dst;
     double beta = ( 1.0 - alpha);
     addWeighted(image,alpha,blendimage,beta,0.0,dst);
