@@ -97,7 +97,15 @@ class ImageWrapper {
 		void SetManipulatePixel(cv::Vec3b(*manipulate)(cv::Vec3b)) {
             this->manipulator = manipulate;
         }
-        
+
+        void BlendImage(double alpha,std::string img) {
+            cv::Mat i = imread(img);
+            if(!i.empty()) {
+                return;
+            }
+            OnNewImage(FuncBlendImage(alpha,this->image,i));
+        }
+
 
         void SharpenImageMask() {
             Mat m;
@@ -119,13 +127,13 @@ class ImageWrapper {
             if(this->manipulator != NULL) {
 
             }
-            for(int y = 0; y < this->image.cols;++y) 
+            for(int y = 0; y < this->image.rows;++y) 
 		        for( int x = 0; x < this->image.cols;++x)
 		        {
 			        // get le pixel
-			        Vec3b color = this->image.at<Vec3b>(Point(x,y));
+			        Vec3b vec = this->image.at<Vec3b>(Point(x,y));
 			        // set le pixel avec le resultat de la fonction passé
-			        this->image.at<Vec3b>(Point(x,y)) = this->manipulator(color);
+			        this->image.at<Vec3b>(Point(x,y)) = this->manipulator();
 		        }
         }
 
@@ -176,9 +184,17 @@ class ImageModifier : public ImagesWrapper {
     
     public:
         ImageModifier() {
-            
         }
 };
+
+
+
+cv::Mat& FuncBlendImage(double alpha,const Mat& image,const Mat& blendimage) {
+    Mat dst;
+    double beta = ( 1.0 - alpha);
+    addWeighted(image,alpha,blendimage,beta,0.0,dst);
+    return dst;
+}
 
 
 void SharpenImage(const Mat& image, Mat& result) {
