@@ -11,54 +11,65 @@
 #include <math.h>
 
 // Constante de l'écran
-const int SCREEN_WIDTH  = 640;
-const int SCREEN_HEIGHT = 480;
+const int DEFAULT_SCREEN_WIDTH  = 640;
+const int DEFAULT_SCREEN_HEIGHT = 480;
 const int SCREEN_FPS    = 60;
 
 
-// Mode de couleur
-const int COLOR_MODE_CYAN = 0;
-const int COLOR_MODE_MULTI = 1;
-
-bool isMax = false;
-
-int windowId;
-
-int ScreenHeight = SCREEN_HEIGHT;
-int ScreenWidth = SCREEN_WIDTH;
-
-int MiddleWidth;
-int MiddleHeight;
-
 namespace engine
 {
+    // enum screenpositions contient les positions possible pour placer rapidement notre fenetre
+    enum screenpositions { topleft, topright, center, bottomleft, bottomright };
+
     // APPINFO est une structure qui contient les informations relatives au démarre d'une nouvelle application OpenGL
     struct APPINFO {
-                char title[128];
-                int windowWidth;
-                int windowHeight;
+            char title[128];
+            int windowWidth;
+            int windowHeight;
+    };
 
-                union
-                {
-                    struct
-                    {
-                        unsigned int    fullscreen :1;
-                        unsigned int    vsync      :1;
-                        unsigned int    debug      :1;
-                    };
-                    unsigned int        all;
-                } flags;
+    class GlutEngine {
+        bool    isMax;
+        int     windowId;
+        int     wHeight, wWidth, sHeight, sWidth;
 
+        void(*render)(void);
+        void(*mainloop)(int);
+        void(*keybinding)(unsigned char,int,int);
+        void(*funckeybinding)(int,int,int);
+
+
+        public:
+            GlutEngine(int) {
+                isMax = false;
+            }
+            bool Init(APPINFO,int,char**);    
+
+            void PutWindow(screenpositions position);
+            void PutWindow(int x, int y);
+
+            void ResizeBy(int x,int y);
+            void SetFullScreen(bool on);
+            
+            void SetRenderFunc(void(*r)(void)) { render = r; }
+            void SetMainFunc(void (*m)(int)) { mainloop = m;}
+            void SetKeyFunc(void(*k)(unsigned char key,int x , int y)) { keybinding = k; }
+            void SetFuncKeyFunc(void(*f)(int key, int x,int y)) { funckeybinding = f; }
+      
+            void EndApp();
+        private:
+            bool InitGL();
+    
     };
 
 
-    bool InitGL() {
+    bool GlutEngine::InitGL() {
         // Initialize la matrix de projection
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
 
         // Initialize le mode Ortho pour pour changer le system de cordoner
-        glOrtho(0.0,SCREEN_WIDTH,SCREEN_HEIGHT,0.0,1.0,-1.0);
+        glOrtho(0.0,wWidth,wHeight,0.0,1.0,-1.0);
 
         // Initialize la matrix de modelview
         glMatrixMode(GL_MODELVIEW);
@@ -77,79 +88,94 @@ namespace engine
         return true;
     }
 
-    void EndGlutApp() {
+    void GlutEngine::EndApp() {
         glutDestroyWindow(windowId);
     }
 
 
-    void ToggleFullscreen(bool on) {
+    void GlutEngine::SetFullScreen(bool on) {
         if(on && !isMax) {
             glutFullScreen();
             isMax = true;
         } else if(!on && isMax) {
-            glutReshapeWindow(ScreenWidth,ScreenHeight);
+            glutReshapeWindow(wWidth,wHeight);
             isMax = false;
         }
     }
 
-    void ResizeBy(int px) {
-        ScreenHeight    += px;
-        ScreenWidth     += px;
+    void GlutEngine::ResizeBy(int x,int y) {
+        if(isMax) return;
+        wHeight    += y;
+        wWidth     += x;
 
-        glutReshapeWindow(ScreenWidth,ScreenHeight);
+        glutReshapeWindow(wWidth,wHeight);
     }
 
-    void CenterScreen() {
-        int h = MiddleHeight - glutGet(GLUT_WINDOW_HEIGHT) /2;
-        int w = glutGet(GLUT_WINDOW_WIDTH) / 2;
-        w = MiddleWidth - w;
-
+    void GlutEngine::PutWindow(screenpositions position) {
+        if(isMax) return;
+        int h, w;
+        h = 0;
+        w = 0;
+        switch(position) {
+            case center:
+                h = (sHeight/2) - glutGet(GLUT_WINDOW_HEIGHT) /2;
+                w = (sWidth/2) - glutGet(GLUT_WINDOW_WIDTH) / 2;
+            break;
+            case bottomright:
+                w = glutGet(GLUT_SCREEN_WIDTH) - glutGet(GLUT_WINDOW_WIDTH);
+                h = glutGet(GLUT_SCREEN_HEIGHT) - glutGet(GLUT_WINDOW_HEIGHT);
+            break;
+            case topleft:
+                h = 0;
+                w = 0;
+            break;
+            case bottomleft:
+            break;
+            case topright:
+            break;
+        }
         glutPositionWindow(w,h);
     }
-
-    void PutBottomRightCorner() {
-        int width = glutGet(GLUT_SCREEN_WIDTH);
-        int height = glutGet(GLUT_SCREEN_HEIGHT);
-        int wWidth = glutGet(GLUT_WINDOW_WIDTH);
-        int wHeight = glutGet(GLUT_WINDOW_HEIGHT);
-
-        glutPositionWindow(width-wWidth,height-wHeight);
-    }
-
     // InitGlutApp initialize une nouveau application avec Glut qui render simplement la scene de la function callback
-    void InitGlutApp(APPINFO info,int argc,char** argv, void (*display)( void ), void (*mainloop)(int), void (*keybinding)(unsigned char,int,int),void (*specialKeyBinging)(int,int,int)) {
+    bool GlutEngine::Init(APPINFO info,int argc,char** argv) {
         glutInit(&argc, argv); // Initialize GLUT chez pas ce que les arguments de la cmd font
 
         // Crée une windows double buffer le gros
         glutInitDisplayMode(GLUT_DOUBLE);
 
-        ScreenHeight = info.windowHeight;
-        ScreenWidth = info.windowWidth;
+        wHeight = info.windowHeight;
+        wWidth = info.windowWidth;
+
+        sHeight = glutGet(GLUT_SCREEN_HEIGHT);
+        sWidth = glutGet(GLUT_SCREEN_WIDTH);
+
         glutInitWindowSize(info.windowWidth, info.windowHeight);   // Set la H&W de départ
         glutInitWindowPosition(50, 50); // Set la position de départ
         windowId = glutCreateWindow(info.title); // Crée notre windows avec un titre bien sur
 
         // Effectue l'init des shits d'opengl
         if (!InitGL()) {
-            return;
+            return false;
         }
 
         glutKeyboardFunc(keybinding);
-        glutSpecialFunc(specialKeyBinging);
+        glutSpecialFunc(funckeybinding);
 
-        glutDisplayFunc(display); // Enregistre le callback pour le redraw
+        glutDisplayFunc(render); // Enregistre le callback pour le redraw
 
         glutTimerFunc(1000/SCREEN_FPS, mainloop,0);
 
         glutMainLoop();           // Enter the infinitely event-processing loop
+
+        return true;
     }
 
     // BasicAppInfo retourne une structure rempli des info par default
     APPINFO BasicAppInfo() {
         APPINFO info;
         strcpy(info.title,"Demo");
-        info.windowHeight = SCREEN_HEIGHT;
-        info.windowWidth = SCREEN_WIDTH;
+        info.windowHeight = DEFAULT_SCREEN_HEIGHT;
+        info.windowWidth = DEFAULT_SCREEN_WIDTH;
         return info;
     }
 };

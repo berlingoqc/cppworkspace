@@ -1,0 +1,14 @@
+CPPFLAGS=-O0 -g2 -Wall -c -fmessage-length=0
+LDLIBS=-lglu32 -lopengl32 -lfreeglut -lglew32
+EXEC_NAME=test.exe
+
+all : $(EXEC_NAME)
+
+test.o: test.cpp
+	gcc $(CPPFLAGS)  -o test.o test.cpp
+
+test.exe: test.o
+	gcc -o test.exe test.o $(LDLIBS)
+
+clean :
+	rm *.exe *.o

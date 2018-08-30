@@ -178,7 +178,7 @@ class ImageModifier : public ImagesWrapper {
         ImageModifier() {
             
         }
-}
+};
 
 
 void SharpenImage(const Mat& image, Mat& result) {

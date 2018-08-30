@@ -1,0 +1,10 @@
+LDLIBS=-lopencv_core342 -lopencv_videoio342 -lopencv_imgproc342 -lopencv_highgui342 -lopencv_imgcodecs342 
+EXEC_NAME=sharpencv.exe
+
+all : $(EXEC_NAME)
+
+$(EXEC_NAME): sharpencv.cpp
+	g++ -o $(EXEC_NAME) sharpencv.cpp $(LDLIBS)
+
+clean :
+	rm *.exe
