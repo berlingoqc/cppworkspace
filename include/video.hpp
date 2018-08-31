@@ -1,4 +1,4 @@
-#include "capture.hpp"
+#include "cvheaders.hpp"
 
 
 
@@ -19,7 +19,9 @@ class PixelVideoModifier {
         }
 
 	protected:
-		virtual cv::Vec3b Modifier(cv::Vec3b);
+		virtual cv::Vec3b Modifier(cv::Vec3b v) {
+			return v;
+		}
 		virtual bool HandleKey(int k) {
 			if(cv::waitKey(0)) {
 				return true;
@@ -59,5 +61,5 @@ class PixelVideoModifier {
            return true;
         }
     
-}
+};
 

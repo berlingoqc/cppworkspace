@@ -1,10 +1,10 @@
 #include "../../../include/capture.hpp"
 #include "../../../include/video.hpp"
-#include "../../../include/file.hpp"
+//#include "../../../include/file.hpp"
 
 
 class RGBtoBlackVideo : public PixelVideoModifier {
-	Vec3b Manipulate(Vec3b vec) {
+	Vec3b Modifier(Vec3b vec) {
         int r = vec[2];
         int g = vec[1];
         int b = vec[0];
@@ -32,14 +32,15 @@ class ContBrighVideo : public PixelVideoModifier {
 		}
 
 	protected:
-		Vec3b Manipulate(Vec3b vec) {
+
+		virtual Vec3b Modifier(Vec3b vec) {
 			for (int c = 0;c < 3; c++) {
 				vec[c] = saturate_cast<uchar>(alpha*vec[c]+beta);
 			}
 			return vec;
 		}
 
-		bool HandleKey(int k) {
+		virtual bool HandleKey(int k) {
 			switch(k) {
 				// descend alpha
 				case 'a':
@@ -57,6 +58,9 @@ class ContBrighVideo : public PixelVideoModifier {
 				case 's':
 					if(beta < 100) beta += 10;
 				break;
+				case 'q':
+					return true;
+				break;
 			}
 			return false;
 		}
@@ -64,6 +68,11 @@ class ContBrighVideo : public PixelVideoModifier {
 
 int main(int argv,char ** argc)
 {
+	/*
+	ContBrighVideo video(0.5,50);
+	video.Start();
+	*/
 	RGBtoBlackVideo video;
 	video.Start();
+	
 }

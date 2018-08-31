@@ -1,6 +1,6 @@
 #ifdef _WIN32
     #include <io.h>
-    //#define access      _access_s;
+    #define access      _access_s;
 #else
     #include <unistd.h>
 #endif
@@ -26,9 +26,10 @@ std::string JoinString(std::string Strings[],int nbr,char sep) {
     return ss.str();
 }
 
-
+// FileExists a reimplementer sans access
 bool FileExists(std::string &Filename) {
-    return access(Filename.c_str(),0) == 0;
+    return true;
+    //return access(Filename.c_str(),0) == 0;
 }
 
 std::string GetFileExtensions(std::string &Filename) {
