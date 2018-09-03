@@ -68,11 +68,11 @@ class ContBrighVideo : public PixelVideoModifier {
 
 int main(int argv,char ** argc)
 {
-	/*
+	
 	ContBrighVideo video(0.5,50);
 	video.Start();
-	*/
+	/*
 	RGBtoBlackVideo video;
 	video.Start();
-	
+	*/
 }
