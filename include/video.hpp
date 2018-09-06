@@ -12,16 +12,16 @@ class PixelVideoModifier {
 	            for( int x = 0; x < image.cols;++x)
 	            {
 		            // get le pixel
-		            cv::Vec3b vec = image.at<cv::Vec3b>(Point(x,y));
+					cv:Vec3b *vec = image.ptr<cv::Vec3b>(Point(x,y));
 		            // set le pixel avec le resultat de la fonction passé
-	                image.at<cv::Vec3b>(Point(x,y)) = Modifier(vec);
+	                Modifier(vec);
 	            }
         }
 
 	protected:
-		virtual cv::Vec3b Modifier(cv::Vec3b v) {
-			return v;
-		}
+		// Modifier est la fonction qui est appeler pour modifier mon pixel
+		virtual void Modifier(cv::Vec3b *v) { }
+		// HandleKey est la fonction qui parse les key entrer par l'usager
 		virtual bool HandleKey(int k) {
 			if(cv::waitKey(0)) {
 				return true;
@@ -34,6 +34,7 @@ class PixelVideoModifier {
 
         bool Start() {
             cv::VideoCapture cap(device);
+			
             if(!cap.isOpened()) {
 		        return false;
             }
@@ -49,6 +50,8 @@ class PixelVideoModifier {
         			std::cerr << "Error capturing " << std::endl;
         			return false;
         		}
+				// change l'image capturer de colorspace pour HSV
+				cv::cvtColor(img,)
 				// applique la modification sur l'image
 				iterateImage(img);
 				// l'affiche

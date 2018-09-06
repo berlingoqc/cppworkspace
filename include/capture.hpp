@@ -77,109 +77,18 @@ class ImageWrapper {
         bool Save(std::string outputName) {
             return cv::imwrite(outputName,this->image);
         }
-    	// SetManipulatePixel 
-		void SetManipulatePixel(cv::Vec3b(*manipulate)(cv::Vec3b)) {
-            this->manipulator = manipulate;
-        }
-
-        void BlendImage(double alpha,std::string img) {
-            cv::Mat i = imread(img);
-            if(!i.empty()) {
-                return;
-            }
-            OnNewImage(FuncBlendImage(alpha,this->image,i));
-        }
-
-
-        void SharpenImageMask() {
-            Mat m;
-            SharpenImage(this->image,m);
-            OnNewImage(m);
-        }
-
-        void SharpenImageFilter2D() {
-            Mat m;
-            Mat kernel = (Mat_<char>(3,3) << 0, -1, 0,
-                                             -1, 5, -1,
-                                              0, -1, 0);
-            cv::filter2D(this->image,m,this->image.depth(),kernel);
-            OnNewImage(m);
-        }
-
-        // TransformPixel ...
-		void TransformPixel() {
-            if(this->manipulator != NULL) {
-                std::cerr << "Manipulator to transform pixel is not set" << std::endl;
-                return;
-            }
-            for(int y = 0; y < this->image.rows;++y) 
-		        for( int x = 0; x < this->image.cols;++x)
-		        {
-			        // get le pixel
-			        Vec3b vec = this->image.at<Vec3b>(Point(x,y));
-			        // set le pixel avec le resultat de la fonction passé
-			        this->image.at<Vec3b>(Point(x,y)) = this->manipulator(vec);
-		        }
-        }
 
     protected:
+
+        virtual void OnKeyPress(int k) {
+
+        }
         virtual void OnNewImage(cv::Mat img) {
             this->image = img;
         }
             
 };
 
-
-class ImagesWrapper : public ImageWrapper {
-    int currentIndex;
-    vector<cv::Mat> images;
-
-    public:
-        ImagesWrapper() : ImageWrapper() {
-            // index commence a -1 pour dire qu'il n'y a pas de show a show
-            currentIndex = -1;
-        }
-
-        bool PreviousImage() {
-            if (this->currentIndex <= 0)
-                return false;
-            currentIndex--;
-            this->images = images[currentIndex];
-            return true;
-        }
-
-        bool NextImage() {
-            if (this->currentIndex+1 >= this->images.size())
-                return false;
-            currentIndex++;
-            this->images = images[currentIndex];
-            return true;
-        }
-    protected:
-        
-        void OnNewImage(cv::Mat img) {
-            images.push_back(this->image);
-            this->currentIndex++;
-            this->image = img;
-        }
-};
-
-
-class ImageModifier : public ImagesWrapper {
-    
-    public:
-        ImageModifier() {
-        }
-};
-
-
-
-cv::Mat FuncBlendImage(double alpha,const Mat& image,const Mat& blendimage) {
-    Mat dst;
-    double beta = ( 1.0 - alpha);
-    addWeighted(image,alpha,blendimage,beta,0.0,dst);
-    return dst;
-}
 
 
 void SharpenImage(const Mat& image, Mat& result) {
