@@ -1,11 +1,17 @@
 #include <stdio.h>
-#include <cuda_runtime.h>
+
+#ifdef __linux__
+    #include "cuda_runtime.h"
+#elif _WIN32
+    #include <cuda_runtime.h>
+#endif
 
 static void HandleError(cudaError_t err, const char *file, int line) {
-    if (err != cudaSuccess) {
-        printf("%s in %s at line %d\n",cudaGetErrorString(err), file,line);
-        exit(EXIT_FAILURE);
-    }
+	if (err != cudaSuccess) {
+		printf("%s in %s at line %d\n", cudaGetErrorString(err), file, line);
+		return;
+		//exit(EXIT_FAILURE);
+	}
 }
 
 #define HANDLE_ERROR(err) (HandleError(err,__FILE__.__LINE__))
@@ -15,7 +21,6 @@ static void HandleError(cudaError_t err, const char *file, int line) {
     exit(EXIT_FAILURE);}}
 
 // Round le resultat de a / b a l'int superieur le plus pres
-int iDivUp(int a,int b) {
-    return (a % b != 0) ? ( a / b +1) : (a/b);
+int iDivUp(int a, int b) {
+	return (a % b != 0) ? (a / b + 1) : (a / b);
 }
-
