@@ -1,6 +1,6 @@
-#include "../../include/engine.h"
+#include "../../include/engine.hpp"
 
-using namespace engine;
+using namespace ENGINE;
 
 GlutEngine* app;
 
@@ -82,7 +82,7 @@ void mainLoop(int val) {
 }
 
 int main(int argc,char** argv) {
-   engine::APPINFO info = engine::BasicAppInfo();
+   ENGINE::APPINFO info = engine::BasicAppInfo();
    GlutEngine g(0);
    app = &g;
    app->SetMainFunc(mainLoop);
@@ -90,6 +90,6 @@ int main(int argc,char** argv) {
    app->SetKeyFunc(keybinding);
    app->SetFuncKeyFunc(specialkeybinding);
    app->Init(info,argc,argv);
-
+   app-­>Run();
    return 0;
 }

@@ -1,14 +1,7 @@
 #ifndef __ENGINE_H__
 #define __ENGINE_H__
 
-// Import des header de opengl
-#include <GL/glew.h>
-#include <GL/glut.h>
-
-// Import des autres headers 
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
+#include "headers.hpp"
 
 // Constante de l'écran
 const int DEFAULT_SCREEN_WIDTH  = 640;
@@ -16,7 +9,7 @@ const int DEFAULT_SCREEN_HEIGHT = 480;
 const int SCREEN_FPS    = 60;
 
 
-namespace engine
+namespace ENGINE
 {
     // enum screenpositions contient les positions possible pour placer rapidement notre fenetre
     enum screenpositions { topleft, topright, center, bottomleft, bottomright };
@@ -33,6 +26,7 @@ namespace engine
         int     windowId;
         int     wHeight, wWidth, sHeight, sWidth;
 
+
         void(*render)(void);
         void(*mainloop)(int);
         void(*keybinding)(unsigned char,int,int);
@@ -44,6 +38,7 @@ namespace engine
                 isMax = false;
             }
             bool Init(APPINFO,int,char**);    
+            void Run();
 
             void PutWindow(screenpositions position);
             void PutWindow(int x, int y);
@@ -57,6 +52,7 @@ namespace engine
             void SetFuncKeyFunc(void(*f)(int key, int x,int y)) { funckeybinding = f; }
       
             void EndApp();
+
         private:
             bool InitGL();
     
@@ -163,11 +159,14 @@ namespace engine
 
         glutDisplayFunc(render); // Enregistre le callback pour le redraw
 
-        glutTimerFunc(1000/SCREEN_FPS, mainloop,0);
-
-        glutMainLoop();           // Enter the infinitely event-processing loop
+        glewInit();
 
         return true;
+    }
+
+    void GlutEngine::Run() {
+        glutTimerFunc(1000/SCREEN_FPS, mainloop,0);
+        glutMainLoop();
     }
 
     // BasicAppInfo retourne une structure rempli des info par default
