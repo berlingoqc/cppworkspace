@@ -1,5 +1,7 @@
 #include "../../../include/cvheaders.hpp"
 #include "../../../include/cudaheaders.hpp"
+#include <tclap/CmdLine.h>
+
 #include <iostream>
 #include <string>
 
@@ -7,92 +9,104 @@
 using namespace std;
 using namespace cv;
 
-void ModifPixelByScalar(Mat& image, int scalar) {
-	for (int y = 0; y < image.rows; ++y)
-		for (int x = 0; x < image.cols; ++x)
-		{
-			// get le pixel
-			Vec3b vec = image.at<cv::Vec3b>(Point(x, y));
-			// le multiplie par le scalar pass� en fonction
-			image.at<Vec3b>(Point(x, y)) = vec * scalar;
-		}
-}
 
 const int ARRAY_SIZE = 300;
 
 extern "C" cudaError_t StartKernel_ScalairArray_Int(uchar *pArrayA, int k, uchar *pArrayR, int size);
+extern "C" cudaError_t StartKernel_SorelFiltre(uchar *pArrayA,uchar *pArrarR, int size);
 
-void TestPixelScalarCPU() {
-	Mat img = imread("D:\\test.jpg");
-	if (img.empty()) {
-		std::cerr << "Failed to load image" << std::endl;
-		return;
+// TestPixelScalarCPU effectue la tache de pixel * scalair sur le cpu et affiche le temps d'execution
+void TestPixelScalarCPU(Mat img,int scalar) {
+	uchar* pPixel = img.ptr<uchar>(0);
+	int sizeImg = img.rows * (img.cols);
+
+	// Crée mon image de retour avec la meme grosseur et le meme type
+	Mat imgRetour(img.size(), img.type());
+	uchar* pPixelR = imgRetour.ptr<uchar>(0);
+
+	for (int y = 0; y < sizeImg; ++y) {
+		pPixelR[y] = pPixel[y]*scalar;
 	}
-	ModifPixelByScalar(img, 3);
-	imshow("Troplolol", img);
-	waitKey();
+	imshow("TestPixelScalarCPU", imgRetour);
 }
 
-void TestPixelScalarGPU() {
-	Mat img = imread("D:\\test.jpg",IMREAD_GRAYSCALE);
-	if (img.empty()) {
-		std::cerr << "Failed to load image" << std::endl;
-		return;
-	}
-	// Valide que l'image est seulement a un channels
-	CV_Assert(img.depth() == CV_8U);
+// TestPixelScalarGPU effectue la tache de pixel * scalair sur le gpu et affiche le temps d'execution
+void TestPixelScalarGPU(Mat img,int scalar) {
 	// Get le pointeur du debut de l'image
 	uchar* pPixel = img.ptr<uchar>(0);
 	int sizeImg = img.rows * (img.cols);
 
-	int i = pPixel[sizeImg-1];
-	int f = pPixel[0];
-
-
-
-	// Cr�e mon image de retour avec la meme grosseur et le meme type
+	// Crée mon image de retour avec la meme grosseur et le meme type
 	Mat imgRetour(img.size(), img.type());
 	uchar* pPixelR = imgRetour.ptr<uchar>(0);
 
 	
-	cudaError_t t = StartKernel_ScalairArray_Int(pPixel, 2, pPixelR, sizeImg);
+	cudaError_t t = StartKernel_ScalairArray_Int(pPixel, scalar, pPixelR, sizeImg);
+
 	if (t == cudaSuccess) {
 		// Successfully excute kernel
-		imshow("lol", imgRetour);
-		waitKey();
+		imshow("TestPixelScalarGPU", imgRetour);
 	}
 	else {
 		std::cerr << "Cuda error : " << cudaGetErrorString(t) << std::endl;
 	}
+}
 
-
+// TestSorelGPU démarre le kernel pour effectuer le filtre sorel sur l'image
+void TestSorelGPU(Mat img) {
+	// Pour appliquer mon filtre sorel je convertit l'image en float
+	imshow("TestSorelGPU",img);
 }
 
 
 int main(int argv, char ** argc) {
-	
-	TestPixelScalarGPU();
+	std::string fileName;
+	try {
+		TCLAP::CmdLine cmd("Laboratoire 1 Système Industriel Intélligent",' ',"1.0");
 
-	uchar pArrayA[ARRAY_SIZE], pArrayR[ARRAY_SIZE];
-	int k = 3;
+		// Définit un argument pour le nom du fichier a traiter
+		TCLAP::ValueArg<std::string> fileArg("f","file","File to use for transformation",false,"test.jpg","string");
+		cmd.add(fileArg);
 
+		cmd.parse(argv,argc);
+		fileName = fileArg.getValue();
 
-	for (int i = 0; i<ARRAY_SIZE; i++) {
-		pArrayA[i] = i + 1;
-	}
-
-
-	cudaError_t t = StartKernel_ScalairArray_Int(pArrayA, k, pArrayR, ARRAY_SIZE);
-	if (t == cudaSuccess) {
-		for (int i = 0; i<ARRAY_SIZE; i++) {
-			printf("Element %d = %d\r\n", i, pArrayR[i]);
-		}
-		return 0;
-	}
-	else {
-		printf("Echer a d�marrer le kernel");
+	} catch(TCLAP::ArgException &e) {
+		std::cerr << "Error: " << e.error() << " for arg " << e.argId() << std::endl;
 		return 1;
 	}
-	return 0;
 
+
+    std::cout << "Starting with image : " << fileName << std::endl;
+
+	Mat img = imread("test.jpg",IMREAD_GRAYSCALE);
+	if (img.empty()) {
+		std::cerr << "Failed to load image" << std::endl;
+		return 1;
+	}
+
+	// Affiche la grandeur de l'image
+	std::cout << "Width : " << img.cols << " Height : " << img.rows << std::endl;
+
+	// Valide que l'image est seulement a un channels
+	CV_Assert(img.depth() == CV_8U);
+
+
+	std::cout << "Starting execution on CPU" << std::endl;
+	TestPixelScalarCPU(img,3);
+
+	std::cout << "Starting execution on GPU" << std::endl;
+	TestPixelScalarGPU(img,3);
+	
+	std::cout << "Starting preparation for Sorel filtre on GPU" << std::endl;
+	TestSorelGPU(img);
+
+	// Attend un key pour fermer le programme 
+	if(waitKey() > 0) {
+		std::cout << "Goodbye" << std::endl;
+		return 0;
+	}
+
+
+	return 0;
 }

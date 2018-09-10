@@ -20,16 +20,18 @@ class RGBtoBlackVideo : public PixelVideoModifier {
 			return v[0] >= bot[0] && v[0] <= top[0] && v[1] >= bot[1] && v[1] <= top[1] && v[2] >= bot[2] && v[2] <= top[2];
 		}
 
+		void SetTo(Vec3b *vec,int value) { vec[0]=value; vec[1]=value; vec[2]=value; }
+
 	protected:
 		void Modifier(Vec3b * vec) {
-			if(Between(vec,lower_blue,higher_blue)) {
-				vec = Vec3b(0,0,0);
-			} else if(Between(vec,lower_red,higher_red)) {
-				vec = Vec3b(0,0,0);
-			} else if(Between(vec,lower_yellow,higher_yellow)) {
-				vec = Vec3b(0,0,0);
+			if(Between(*vec,lower_green,higher_green)) {
+				SetTo(vec,0);
+			} else if(Between(*vec,lower_red,higher_red)) {
+				SetTo(vec,0);
+			} else if(Between(*vec,lower_yellow,higher_yellow)) {
+				SetTo(vec,0);
 			} else {
-				vec = Vec3b(255,255,255);
+				SetTo(vec,255);
 			}
 		}
 };

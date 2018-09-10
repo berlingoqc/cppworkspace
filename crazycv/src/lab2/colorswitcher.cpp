@@ -68,7 +68,10 @@ class ContBrighVideo : public PixelVideoModifier {
 
 int main(int argv,char ** argc)
 {
-	
+
+
+	printf(getBuildInformation().c_str());
+
 	ContBrighVideo video(0.5,50);
 	video.Start();
 	/*

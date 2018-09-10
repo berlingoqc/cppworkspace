@@ -1,10 +1,8 @@
 #include <stdio.h>
+#include "cuda_runtime.h"
 
-#ifdef __linux__
-    #include "cuda_runtime.h"
-#elif _WIN32
-    #include <cuda_runtime.h>
-#endif
+
+typedef unsigned char uchar;
 
 static void HandleError(cudaError_t err, const char *file, int line) {
 	if (err != cudaSuccess) {

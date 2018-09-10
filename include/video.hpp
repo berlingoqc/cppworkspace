@@ -12,7 +12,7 @@ class PixelVideoModifier {
 	            for( int x = 0; x < image.cols;++x)
 	            {
 		            // get le pixel
-					cv:Vec3b *vec = image.ptr<cv::Vec3b>(Point(x,y));
+					cv:Vec3b* vec = image.ptr<Vec3b>(x,y);
 		            // set le pixel avec le resultat de la fonction passé
 	                Modifier(vec);
 	            }
@@ -51,7 +51,7 @@ class PixelVideoModifier {
         			return false;
         		}
 				// change l'image capturer de colorspace pour HSV
-				cv::cvtColor(img,)
+				//cv::cvtColor(img,CV_BGR2HSV);
 				// applique la modification sur l'image
 				iterateImage(img);
 				// l'affiche

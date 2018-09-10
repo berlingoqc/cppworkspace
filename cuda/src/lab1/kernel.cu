@@ -1,33 +1,19 @@
-#include <stdio.h>
-#include "cuda_runtime.h"
-
-typedef unsigned char uchar;
-
-static void HandleError(cudaError_t err, const char *file, int line) {
-	if (err != cudaSuccess) {
-		printf("%s in %s at line %d\n", cudaGetErrorString(err), file, line);
-		return;
-		//exit(EXIT_FAILURE);
-	}
-}
-
-#define HANDLE_ERROR(err) (HandleError(err,__FILE__.__LINE__))
-
-#define HANDLE_NULL(a) { \
-    if (a == NULL) { printf("Host memory failed in %s at line %d\n", __FILE__,__LINE__);\
-    exit(EXIT_FAILURE);}}
-
-// Round le resultat de a / b a l'int superieur le plus pres
-int iDivUp(int a, int b) {
-	return (a % b != 0) ? (a / b + 1) : (a / b);
-}
-
+#include "../../include/helpme.h"
 
 // Je suis un kerne qui multiplie les elements d'une liste par une scalaire pis qui les mets dans une autre liste
 __global__ static void Kernel_ScalairArray_Int(uchar *ArrayA, int k, uchar *ArrayR,int size) {
     int index =  blockIdx.x * blockDim.x + threadIdx.x;
     ArrayR[index] = ArrayA[index] * k;
 }
+
+float sobelX[3][3]={{-1,0,1},{-2,0,2},{-1,0,1}};
+float kernelY[3][3]={{-1,-2,-1},{0,0,0},{-1,0,1}};
+
+// Je suis un kernel qui applique le filre de sobel
+__global__ static void Kernel_SobelOperator(float *ArrayA, int k, float *ArrayR, int size) {
+
+}
+
 
 int BLOCK_SIZE = 50;
 
