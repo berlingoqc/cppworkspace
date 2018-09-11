@@ -1,5 +1,5 @@
 LDLIBS=-lopencv_core -lopencv_videoio -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lcuda -lcudart
-EXEC_NAME=testcuda.exe
+EXEC_NAME=test.exe
 
 all : $(EXEC_NAME)
 
@@ -10,4 +10,4 @@ kernel.o:
 	nvcc -g -G -arch sm_30 -c kernel.cu
 
 clean :
-	rm *.exe *.o
+	rm -f *.exe *.o

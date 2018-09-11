@@ -37,13 +37,12 @@ int main(int argc,char** argv) {
    app->Init(info,argc,argv);
 
 
-    // Initialize no MyShaders
-    ENGINE::MyShader MyShader;
-    if(!MyShader.OpenMyShader("vertex.glsl","fragment.glsl")) {
-        MyShader.PrintErrorStack();
-        return -1;
-    }
-
+   // Initialize no MyShaders
+   ENGINE::MyShader MyShader;
+   if(!MyShader.OpenMyShader("vertex.glsl","fragment.glsl")) {
+       return -1;
+   }
+   MyShader.Use();
 
 
    app->Run();

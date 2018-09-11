@@ -74,16 +74,34 @@ namespace ENGINE {
                 } catch (std::ifstream::failure e) {
                     strcpy(ErrorMessage,"ERROR MyShader file not succesfully read");
                 }
-                return "";
+                return "";/*
+                	std::string shaderCode;
+	                std::ifstream file(filePath, std::ios::in);
+
+                	if (!file.good())
+                	{
+                		std::cout << "Can't read file " << filePath << std::endl;
+                		std::terminate();
+                	}
+
+                	file.seekg(0, std::ios::end);
+                	shaderCode.resize((unsigned int)file.tellg());
+                	file.seekg(0, std::ios::beg);
+                	file.read(&shaderCode[0], shaderCode.size());
+                	file.close();
+                    return shaderCode;*/
             }
             // CompileMyShader compile le MyShader
-            unsigned int CompileMyShader(const char * code,GLenum type,std::string nameType) {
+            unsigned int CompileMyShader(std::string code,GLenum type,std::string nameType) {
                 unsigned int item;
                 int success;
-                char infoLog[512];
+
+                const char* sPtr = code.c_str();
+                const int sSize = code.size();
 
                 item = glCreateShader(type);
-                glShaderSource(item,1,&code,NULL);
+                glShaderSource(item,1,&sPtr,&sSize);
+                glCompileShader(item);
                 if(CheckCompileErrors(item,nameType)) {
                     return item;
                 }
@@ -97,8 +115,9 @@ namespace ENGINE {
                 if(nameType != "PROGRAM") {
                     glGetShaderiv(MyShader,GL_COMPILE_STATUS, &success);
                     if(success == GL_FALSE) {
-                        GLint maxLen = 0;
-                        glGetShaderInfoLog(MyShader,1024,&maxLen,infoLog);
+                        int infoLength = 0;
+                        glGetShaderiv(MyShader,GL_INFO_LOG_LENGTH, &infoLength);
+                        glGetShaderInfoLog(MyShader,infoLength,NULL,infoLog);
                         std::cerr << "ERROR Compilation of type : " << nameType << std::endl << infoLog << std::endl; 
                         return false;
                     }

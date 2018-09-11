@@ -1,6 +1,6 @@
 // Import des header de opengl
 #include <GL/glew.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 
 // Import des autres headers 
 #include <cstring>
@@ -8,4 +8,5 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <math.h>
+#include <math.h> 
+#include <vector>

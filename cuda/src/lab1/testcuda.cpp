@@ -4,10 +4,14 @@
 
 #include <iostream>
 #include <string>
-
+#include <math.h>
 
 using namespace std;
 using namespace cv;
+
+
+float sobelX[3][3]={{-1,0,1},{-2,0,2},{-1,0,1}};
+float sobelY[3][3]={{-1,-2,-1},{0,0,0},{-1,0,1}};
 
 
 const int ARRAY_SIZE = 300;
@@ -52,6 +56,44 @@ void TestPixelScalarGPU(Mat img,int scalar) {
 	}
 }
 
+void TestSorelCPU(Mat img) {
+	uchar* pPixel = img.ptr<uchar>(0);
+	int sizeImg = img.rows * (img.cols);
+
+	// Crée mon image de retour avec la meme grosseur et le meme type
+	Mat imgRetour(img.size(), img.type());
+	for (int y=1;y<img.rows-1;y++) {
+		for (int x=1;x<img.cols-1;x++) {
+			// Get le 6 points nécessaire au tour
+			int tl = img.at<uchar>(Point(x-1,y-1));
+			int ml = img.at<uchar>(Point(x-1,y));
+			int bl = img.at<uchar>(Point(x-1,y+1));
+
+			int tr = img.at<uchar>(Point(x+1,y+1));
+			int mr = img.at<uchar>(Point(x+1,y));
+			int br = img.at<uchar>(Point(x+y,y+1));
+
+			int tm = img.at<uchar>(Point(x,y-1));
+			int bm = img.at<uchar>(Point(x,y+1));
+
+			int gx = tl * sobelX[0][0] + ml * sobelX[1][0] + bl * sobelX[2][0] + tr * sobelX[0][2] + mr * sobelX[1][2] + br * sobelX[2][2];
+			int gy = tl * sobelY[0][0] + tm * sobelY[0][1] + tr * sobelY[0][2] + bl * sobelY[2][0] + bm * sobelY[2][1] + br * sobelY[2][2];
+
+			int g = sqrt(pow(gx,2)+pow(gy,2));
+			if(g > 255) {
+				g = g / 9;
+			}
+
+			imgRetour.at<uchar>(Point(x,y)) = g ; 
+		}
+	}
+
+	imshow("TestSorelCPU",imgRetour);
+	waitKey();
+
+}
+
+
 // TestSorelGPU démarre le kernel pour effectuer le filtre sorel sur l'image
 void TestSorelGPU(Mat img) {
 	// Pour appliquer mon filtre sorel je convertit l'image en float
@@ -91,15 +133,15 @@ int main(int argv, char ** argc) {
 	// Valide que l'image est seulement a un channels
 	CV_Assert(img.depth() == CV_8U);
 
-
+	/*
 	std::cout << "Starting execution on CPU" << std::endl;
 	TestPixelScalarCPU(img,3);
 
 	std::cout << "Starting execution on GPU" << std::endl;
 	TestPixelScalarGPU(img,3);
-	
+	*/	
 	std::cout << "Starting preparation for Sorel filtre on GPU" << std::endl;
-	TestSorelGPU(img);
+	TestSorelCPU(img);
 
 	// Attend un key pour fermer le programme 
 	if(waitKey() > 0) {
