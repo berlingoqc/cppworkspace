@@ -10,14 +10,30 @@ using namespace std;
 using namespace cv;
 
 
-float sobelX[3][3]={{-1,0,1},{-2,0,2},{-1,0,1}};
-float sobelY[3][3]={{-1,-2,-1},{0,0,0},{-1,0,1}};
+int sobelX[3][3]={{-1,0,1},{-2,0,2},{-1,0,1}};
+int sobelY[3][3]={{-1,-2,-1},{0,0,0},{-1,0,1}};
 
 
 const int ARRAY_SIZE = 300;
 
 extern "C" cudaError_t StartKernel_ScalairArray_Int(uchar *pArrayA, int k, uchar *pArrayR, int size);
 extern "C" cudaError_t StartKernel_SorelFiltre(uchar *pArrayA,uchar *pArrarR, int size);
+extern "C" cudaError_t StartKernel_RGB_TO_HSV(uchar3 *pArrayA,float3 *pArrayR,int size);
+
+
+void HsvToRgb(Mat img) {
+	uchar3* pPixel = img.ptr<uchar3>(0);
+	int sizeImg = img.rows * img.cols;
+
+	Mat imgRetour = Mat::zeros(img.size(),CV_32F);
+	float3* pPixelR = imgRetour.ptr<float3>(0);
+
+	cudaError_t t = StartKernel_RGB_TO_HSV(pPixel,pPixelR,sizeImg);
+	if (t != cudaSuccess) {
+		printf("GPU error : %s \n",cudaGetErrorString(t));
+	}
+
+}
 
 // TestPixelScalarCPU effectue la tache de pixel * scalair sur le cpu et affiche le temps d'execution
 void TestPixelScalarCPU(Mat img,int scalar) {

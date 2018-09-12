@@ -46,11 +46,12 @@ namespace ENGINE {
                 return s;
             }
 
-            void Use() {
-                glUseProgram(ID);
+            unsigned int GetShaderID() {
+                return ID;
             }
 
             void PrintErrorStack() {
+                std::cout << ErrorMessage << std::endl;
             }
 
             
@@ -74,22 +75,7 @@ namespace ENGINE {
                 } catch (std::ifstream::failure e) {
                     strcpy(ErrorMessage,"ERROR MyShader file not succesfully read");
                 }
-                return "";/*
-                	std::string shaderCode;
-	                std::ifstream file(filePath, std::ios::in);
-
-                	if (!file.good())
-                	{
-                		std::cout << "Can't read file " << filePath << std::endl;
-                		std::terminate();
-                	}
-
-                	file.seekg(0, std::ios::end);
-                	shaderCode.resize((unsigned int)file.tellg());
-                	file.seekg(0, std::ios::beg);
-                	file.read(&shaderCode[0], shaderCode.size());
-                	file.close();
-                    return shaderCode;*/
+                return "";
             }
             // CompileMyShader compile le MyShader
             unsigned int CompileMyShader(std::string code,GLenum type,std::string nameType) {

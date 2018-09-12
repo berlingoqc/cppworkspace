@@ -5,10 +5,20 @@ using namespace ENGINE;
 GlutEngine* app;
 
 
+unsigned int ShaderID;
+
 
 // Display mon quad dans une couleur qui change selon le keyboard
 void display() {
+    glClearColor(0.2f,0.3f,0.3f,1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+    
+    glUseProgram(ShaderID);
+
+    // update la couleur uniforme
+    float value = generateFloat(); 
+    float greenValue
+    
     // update screen
     glutSwapBuffers();
 }
@@ -42,8 +52,7 @@ int main(int argc,char** argv) {
    if(!MyShader.OpenMyShader("vertex.glsl","fragment.glsl")) {
        return -1;
    }
-   MyShader.Use();
-
+   ShaderID = MyShader.GetShaderID();
 
    app->Run();
    return 0;

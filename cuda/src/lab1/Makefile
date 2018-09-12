@@ -1,13 +1,13 @@
 LDLIBS=-lopencv_core -lopencv_videoio -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lcuda -lcudart
-EXEC_NAME=test.exe
+EXEC_NAME=lab1.exe
 
 all : $(EXEC_NAME)
 
-$(EXEC_NAME): kernel.o
-	g++ -g -I/usr/local/cuda/include -L/usr/local/cuda/lib64 -o $(EXEC_NAME) testcuda.cpp kernel.o $(LDLIBS)
+$(EXEC_NAME): hsvtorgbkernel.o
+	g++ -g -I/usr/local/cuda/include -L/usr/local/cuda/lib64 -o $(EXEC_NAME) lab1.cpp hsvtorgbkernel.o $(LDLIBS)
 
-kernel.o:
-	nvcc -g -G -arch sm_30 -c kernel.cu
+hsvtorgbkernel.o:
+	nvcc -g -G -arch sm_30 -c hsvtorgbkernel.cu
 
 clean :
 	rm -f *.exe *.o

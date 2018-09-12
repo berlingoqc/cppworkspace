@@ -9,6 +9,10 @@ const int DEFAULT_SCREEN_HEIGHT = 480;
 const int SCREEN_FPS    = 60;
 
 
+float generateFloat() {
+    return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+}
+
 namespace ENGINE
 {
     // enum screenpositions contient les positions possible pour placer rapidement notre fenetre

@@ -6,12 +6,13 @@ __global__ static void Kernel_ScalairArray_Int(uchar *ArrayA, int k, uchar *Arra
     ArrayR[index] = ArrayA[index] * k;
 }
 
-//float sobelX[3][3]={{-1,0,1},{-2,0,2},{-1,0,1}};
-//float kernelY[3][3]={{-1,-2,-1},{0,0,0},{-1,0,1}};
+__device__ int sobelX[3][3]={{-1,0,1},{-2,0,2},{-1,0,1}};
+__device__ int sobelY[3][3]={{-1,-2,-1},{0,0,0},{-1,0,1}};
 
 // Je suis un kernel qui applique le filre de sobel
-__global__ static void Kernel_SobelOperator(float *ArrayA, int k, float *ArrayR, int size) {
-
+__global__ static void Kernel_SobelOperator(float *ArrayA, int k, float *ArrayR, int size,int rows,int cols) {
+    // Faut je get les nombres autour de mon index pou
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
 }
 
 

@@ -1,3 +1,5 @@
+#ifndef HELPME_H
+#define HELPME_H
 #include <stdio.h>
 #include "cuda_runtime.h"
 
@@ -22,3 +24,4 @@ static void HandleError(cudaError_t err, const char *file, int line) {
 int iDivUp(int a, int b) {
 	return (a % b != 0) ? (a / b + 1) : (a / b);
 }
+#endif
