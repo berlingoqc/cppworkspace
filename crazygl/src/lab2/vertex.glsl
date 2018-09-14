@@ -1,7 +1,12 @@
 #version 460 core
-out vec4 vertexColor;
+layout(location=0) in vec4 Position;
+layout(location=1) in vec4 Couleur;
 
-void main()  {
-    gl_Position = vec4(0.0,0.0,0.0,1.0);
-    vertexColor = vec4(0.5,0.0,0.0,1.0);
+out vec4 coul;
+
+void main()
+{
+	gl_Position = Position;
+
+	coul = Couleur;
 }

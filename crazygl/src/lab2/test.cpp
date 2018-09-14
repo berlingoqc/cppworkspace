@@ -7,6 +7,52 @@ GlutEngine* app;
 
 unsigned int ShaderID;
 
+void createDrawing()
+{
+	GLuint buffSommets, buffCouleurs;
+
+	GLfloat sommets[20] = {
+		-0.5f, 0.0f, 0.0f,1.0f,
+		0.5f, 0.0f, 0.0f,1.0f,
+		-0.25f, -1.0f, 0.0f,1.0f,
+		0.0f, 0.5f, 0.0f, 1.0f,
+		0.25f, -1.0f, 0.0f,1.0f
+	};
+
+	glGenBuffers(1, &buffSommets);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, buffSommets);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(sommets), sommets, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	GLfloat couleurs[20] = {
+		0.5f, 0.0f, 0.0f,1.0f,
+		0.5f, 0.0f, 0.0f,1.0f,
+		0.0f, 1.0f, 0.0f,1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+		0.0f, 1.0f, 0.3f,1.0f
+	};
+
+	glGenBuffers(1, &buffCouleurs);
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, buffCouleurs);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(couleurs), couleurs, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	
+}
+
+void createDrawingLine() {
+    GLuint buffSommets;
+    GLfloat sommets[4] = {
+        -1.0f,-1.0f,1.0f,1.0f
+    };
+    glGenBuffers(1, &buffSommets);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER,buffSommets);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(sommets), sommets, GL_STATIC_DRAW);
+    glVertexAttribPointer(1,4, GL_FLOAT, GL_FALSE, 0,0);
+}
+
 
 // Display mon quad dans une couleur qui change selon le keyboard
 void display() {
@@ -15,12 +61,13 @@ void display() {
     
     glUseProgram(ShaderID);
 
-    // update la couleur uniforme
-    float value = generateFloat(); 
-    float greenValue
-    
-    // update screen
-    glutSwapBuffers();
+
+    glDrawArrays(GL_LINE,0,1);
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+
+
+	glFlush();
 }
 
 void keybinding(unsigned char key,int x,int y) {

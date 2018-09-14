@@ -69,7 +69,9 @@ namespace ENGINE
         glLoadIdentity();
 
         // Initialize le mode Ortho pour pour changer le system de cordoner
-        glOrtho(0.0,wWidth,wHeight,0.0,1.0,-1.0);
+        //glOrtho(0.0,wWidth,wHeight,0.0,1.0,-1.0);
+
+        glPolygonMode(GL_FRONT,GL_FILL);
 
         // Initialize la matrix de modelview
         glMatrixMode(GL_MODELVIEW);
@@ -141,7 +143,7 @@ namespace ENGINE
         glutInit(&argc, argv); // Initialize GLUT chez pas ce que les arguments de la cmd font
 
         // Crée une windows double buffer le gros
-        glutInitDisplayMode(GLUT_DOUBLE);
+        glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
 
         wHeight = info.windowHeight;
         wWidth = info.windowWidth;

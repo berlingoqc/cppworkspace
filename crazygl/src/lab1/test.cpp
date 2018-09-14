@@ -5,11 +5,6 @@ using namespace ENGINE;
 GlutEngine* app;
 
 
-
-float generateFloat() {
-    return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-}
-
 // Display mon quad dans une couleur qui change selon le keyboard
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -82,7 +77,7 @@ void mainLoop(int val) {
 }
 
 int main(int argc,char** argv) {
-   ENGINE::APPINFO info = engine::BasicAppInfo();
+   ENGINE::APPINFO info = ENGINE::BasicAppInfo();
    GlutEngine g(0);
    app = &g;
    app->SetMainFunc(mainLoop);
@@ -90,6 +85,6 @@ int main(int argc,char** argv) {
    app->SetKeyFunc(keybinding);
    app->SetFuncKeyFunc(specialkeybinding);
    app->Init(info,argc,argv);
-   app-­>Run();
+   app->Run();
    return 0;
 }
