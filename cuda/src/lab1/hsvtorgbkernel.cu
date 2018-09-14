@@ -1,63 +1,64 @@
 #include "../../include/helpme.h"
 
-__device__ float max(float a,float b,float c) {
-    if( a > b && a > c) return a;
-    if (b > a && b > c) return b;
-    return c;
-}
-
-__device__ float min(float a,float b,float c) {
-    if (a < b && a < c) return a;
-    if (b < a && b < c) return b;
-    return c;
-}
+#define BLOCK_SIZE  50
 
 
-__global__ static void Kernel_RGB_TO_HSV(uchar3 *ArrayA,float3 *ArrayR,int size) {
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
+struct Threeshold_HSV {
+    float3 lowerValue;
+    float3 higherValue;
 
-    float Bs = ArrayA[index].z/255.0;
-    float Gs = ArrayA[index].y/255.0;
-    float Rs = ArrayA[index].x/255.0;
-
-    float CMax = max(Bs,Gs,Rs);
-    float CMin = min(Bs,Gs,Rs);
-
-    float Delta = CMax - CMin;
-
-    float h;
-    if(Delta == 0) {
-        h = 0;
-    } else if(CMax == Rs) {
-        h = 60 * (int((Gs-Bs)/Delta)%6);
-    } else if (CMax == Gs) {
-        h = 60 * (((Bs-Rs)/Delta)+2);
-    } else { // Bs
-        h = 60 * (((Rs-Gs)/Delta)+4);
+    __device__ bool InRange(float3 v) {
+        if( v.x >= lowerValue.x && v.y >= lowerValue.y && v.z >= lowerValue.z) {
+            
+        }
     }
 
-    float s;
-    if (CMax == 0) {
-        s = 0;
-    } else {
-        s = Delta/CMax;
-    }
+}
+
+
+__global__ static void Kernel_Filter_BG_HSV(float3* arrayhsv,uchar3* arrayr,int size) {
+
+}
+
+extern "C" cudaError_t StartKernel_Object_Detection(uchar3 *pArrayA, uchar3* pArrayR, int size) {
+    ValidPlateform(false);
+    int BLOCK_COUNT = getBlockCount_1D_1D(size,BLOCK_SIZE);
     
-    ArrayR[index] = make_float3(h,s,CMax);
+    // Crée les pointeurs cuda pour nos images
+    uchar3 *pArrayInitial;   // L'Array de mon image initial
+    uchar3 *pArrayFilterBG;  // L'Array de mon image avec le bg filtrer
+    uchar3 *pArraySobel;     // L'Array de mon image avec le filtre sobel
+
+    float3 *pArrayHSV;       // L'array de mon image en hsv
+
+    // Alloue l'espace mémoire pour changer mon image en hsv
+    size_t memSize = size * sizeof(uchar3);
+    size_t memSizeF = size * sizeof(float3);
+
+    HANDLE_ERROR(cudaMalloc((void**)&pArrayInitial,memSize));
+    HANDLE_ERROR(cudaMalloc((void**)&pArrayHSV,memSizeF));
+
+    HANDLE_ERROR(cudaMemcpy(pArrayInitial,pArrayA,memSize,cudaMemcpyHostToDevice));
+
+    // Démarre le kernel pour transformer l'image en HSV
+    Kernel_RGB_TO_HSV<<<BLOCK_COUNT,BLOCK_SIZE>>>((uchar3*)pArrayInitial,(float3*)pArrayHSV,(int)size);
+
+
+    // Pendant que sa process alloc le rest de ma mémoire pour les autres transformations
+    
+    // aloue la mémoire pour notre image filterbg
+    HANDLE_ERROR(cudaMalloc((void**)pArrayFilterBG,memSize));
+    
+    
+
 }
 
 
 extern "C" cudaError_t StartKernel_RGB_TO_HSV(uchar3 *pArrayA,float3 *pArrayR,int size) {
 
-    int BLOCK_SIZE = 50;
-    int BLOCK_COUNT = iDivUp(size,BLOCK_SIZE);
-    printf("Starting cuda kernel with %d 1D Blocks and %d 1D Threads\r\n",BLOCK_COUNT,BLOCK_SIZE);
+    ValidPlateform(false);
+    int BLOCK_COUNT = getBlockCount_1D_1D(size,BLOCK_SIZE);
 
-    // Assure qu'on peut belle et bien utiliser cuda
-    cudaError_t cudaStatus = cudaSetDevice(0);
-    if(cudaStatus != cudaSuccess) {
-        return cudaStatus;
-    }
     //Crée nos pointeur utiliser par cuda
     uchar3 *ArrayA;
     float3 *ArrayR;
@@ -65,7 +66,7 @@ extern "C" cudaError_t StartKernel_RGB_TO_HSV(uchar3 *pArrayA,float3 *pArrayR,in
     // Alloue l'espace mémoire des deux ArrayRices sur le gpu
     // calcul de l'espace de notre array de pixel qui représente l'image
     size_t memSize = size * sizeof(uchar3);
-    cudaStatus = cudaMalloc( (void**)&ArrayA,memSize);
+    cudaError_t cudaStatus = cudaMalloc( (void**)&ArrayA,memSize);
     
 	if(cudaStatus != cudaSuccess){
         printf("Failed to allocate uchar3\n");
