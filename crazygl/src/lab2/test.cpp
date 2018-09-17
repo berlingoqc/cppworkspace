@@ -50,7 +50,7 @@ void createDrawingLine() {
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER,buffSommets);
     glBufferData(GL_ARRAY_BUFFER, sizeof(sommets), sommets, GL_STATIC_DRAW);
-    glVertexAttribPointer(1,4, GL_FLOAT, GL_FALSE, 0,0);
+    glVertexAttribPointer(0,4, GL_FLOAT, GL_FALSE, 0,0);
 }
 
 
@@ -61,10 +61,10 @@ void display() {
     
     glUseProgram(ShaderID);
 
+    createDrawingLine();
 
     glDrawArrays(GL_LINE,0,1);
     glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
 
 
 	glFlush();
