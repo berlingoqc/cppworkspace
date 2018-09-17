@@ -6,9 +6,36 @@ GlutEngine* app;
 
 
 unsigned int ShaderID;
+unsigned int vaoID[1];
 
-void createDrawing()
-{
+
+void createDrawingLine() {
+    /*
+        1. Generer le vertex array object
+        2. Lier le vertex array object
+        3. Générer le vertex buffer object
+        4. Lier le vertex buffer object
+    */
+    GLuint vboID;
+    
+    GLfloat sommets[4] = {
+        -1.0f,-1.0f,1.0f,1.0f
+    };
+
+    //glGenVertexArrays(1, &vaoID[0]); // Crée le VAO
+    //glBindVertexArray(vaoID[0]); // Lier le VAO pour l'utiliser
+
+
+    glGenBuffers(1, &vboID); // Generer le VBO
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER,vboID);  // Lier le VBO
+    glBufferData(GL_ARRAY_BUFFER, 4*sizeof(GLfloat), sommets, GL_STATIC_DRAW); // Définir la taille, les données et le type du VBO
+    
+    glVertexAttribPointer(0,2, GL_FLOAT, GL_FALSE, 0,0); // Définit le pointeur d'attributs des sommets
+
+    //glEnableVertexAttribArray(0); // Désactive le VAO
+    //glBindVertexArray(0); // Désactiver le VBO
+    /*
 	GLuint buffSommets, buffCouleurs;
 
 	GLfloat sommets[20] = {
@@ -24,33 +51,7 @@ void createDrawing()
 	glBindBuffer(GL_ARRAY_BUFFER, buffSommets);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(sommets), sommets, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-	GLfloat couleurs[20] = {
-		0.5f, 0.0f, 0.0f,1.0f,
-		0.5f, 0.0f, 0.0f,1.0f,
-		0.0f, 1.0f, 0.0f,1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 1.0f, 0.3f,1.0f
-	};
-
-	glGenBuffers(1, &buffCouleurs);
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, buffCouleurs);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(couleurs), couleurs, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	
-}
-
-void createDrawingLine() {
-    GLuint buffSommets;
-    GLfloat sommets[4] = {
-        -1.0f,-1.0f,1.0f,1.0f
-    };
-    glGenBuffers(1, &buffSommets);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER,buffSommets);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(sommets), sommets, GL_STATIC_DRAW);
-    glVertexAttribPointer(0,4, GL_FLOAT, GL_FALSE, 0,0);
+    */
 }
 
 
@@ -58,14 +59,16 @@ void createDrawingLine() {
 void display() {
     glClearColor(0.2f,0.3f,0.3f,1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    
-    glUseProgram(ShaderID);
+
+   	glUseProgram(ShaderID);
+	
 
     createDrawingLine();
+	//glLineWidth(15.0);
+	glDrawArrays(GL_LINES, 0, 2);
 
-    glDrawArrays(GL_LINE,0,1);
-    glDisableVertexAttribArray(0);
-
+	glDisableVertexAttribArray(0);
+	//glDisableVertexAttribArray(1);
 
 	glFlush();
 }
