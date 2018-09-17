@@ -36,7 +36,7 @@ __device__ bool InRange(float3 v) {
 
 __global__ static void Kernel_Sobel_Operator(uchar* ArrayA, uchar* ArrayR, int cols, int rows) {
     int index = getGlobalIDx_1D_1D();
-    int mtindex = index - cols; // Middle Top
+    int mtindex = index - cols;
     int mbindex = index + cols; // Middle Bottom
     // Si on n'est sur les board on fait rien
     if(mtindex < 0 || mbindex > (rows*cols)) {
@@ -62,7 +62,6 @@ __global__ static void Kernel_Sobel_Operator(uchar* ArrayA, uchar* ArrayR, int c
     if(val > 255) {
         val = 255;
     }
-
     ArrayR[index] = (uchar)val;
 }
 
