@@ -4,8 +4,10 @@
 #include "cuda_runtime.h"
 
 
+// Typedef pour les uchar comme en c++
 typedef unsigned char uchar;
 
+// HandleError est une fonction qui affiche en détail un erreur cuda et l'emplacement 
 static void HandleError(cudaError_t err, const char *file, int line) {
 	if (err != cudaSuccess) {
 		printf("%s in %s at line %d\n", cudaGetErrorString(err), file, line);
@@ -13,14 +15,29 @@ static void HandleError(cudaError_t err, const char *file, int line) {
 	}
 }
 
+// HANDLE_ERROR definit pour englober automatiquement le fichier et la ligne ou l'erreur arrive
 #define HANDLE_ERROR(err) { \
 	HandleError(err,__FILE__,__LINE__);}
 
+// HANDLE_NULL meme chose mais valide si le retourne est null
 #define HANDLE_NULL(a) { \
     if (a == NULL) { printf("Host memory failed in %s at line %d\n", __FILE__,__LINE__);\
     exit(EXIT_FAILURE);}}
 
 
+/*struct Threeshold_HSV {
+    float3 lowerValue;
+    float3 higherValue;
+
+    __device__ bool InRange(float3 v) {
+        if( v.x >= lowerValue.x && v.y >= lowerValue.y && v.z >= lowerValue.z
+            && v.x <= higherValue.x && v.y <= higherValue.y && v.z <= higherValue.z) {
+            return true;
+        }
+        return false;
+    }
+};
+*/
 // Round le resultat de a / b a l'int superieur le plus pres
 int iDivUp(int a, int b) {
 	return (a % b != 0) ? (a / b + 1) : (a / b);

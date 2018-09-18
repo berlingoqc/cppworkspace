@@ -3,19 +3,6 @@
 #define BLOCK_SIZE  50
 
 
-struct Threeshold_HSV {
-    float3 lowerValue;
-    float3 higherValue;
-
-    __device__ bool InRange(float3 v) {
-        if( v.x >= lowerValue.x && v.y >= lowerValue.y && v.z >= lowerValue.z
-            && v.x <= higherValue.x && v.y <= higherValue.y && v.z <= higherValue.z) {
-            return true;
-        }
-        return false;
-    }
-};
-
 
 __device__ int sobelX[3][3] {{-1,0,1},{-2,0,2},{-1,0,1}};
 __device__ int sobelY[3][3] {{1,2,1},{0,0,0},{-1,-2,-1}};
