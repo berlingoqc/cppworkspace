@@ -9,12 +9,31 @@ const int DEFAULT_SCREEN_HEIGHT = 480;
 const int SCREEN_FPS    = 60;
 
 
+const float Maxndc = 1.0f;
+const float Minndc = -1.0f;
+
 float generateFloat() {
     return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 }
 
 namespace ENGINE
 {
+    template<typename T>
+    struct Position {
+        T x;
+        T y;
+    };
+
+    Position<float> ConvertToNDC(int x,int y) {
+        Position<float> p;
+        int sizeY = glutGet(GLUT_WINDOW_HEIGHT);
+        int sizeX = glutGet(GLUT_WINDOW_WIDTH);
+        p.x =  (x * (Maxndc - Minndc))/sizeX + Minndc;
+        p.y = -(y-sizeY) * (Maxndc - Minndc)/sizeY + Minndc;
+        return p;
+    }
+
+
     // enum screenpositions contient les positions possible pour placer rapidement notre fenetre
     enum screenpositions { topleft, topright, center, bottomleft, bottomright };
 
@@ -31,10 +50,11 @@ namespace ENGINE
         int     wHeight, wWidth, sHeight, sWidth;
 
 
-        void(*render)(void);
-        void(*mainloop)(int);
-        void(*keybinding)(unsigned char,int,int);
-        void(*funckeybinding)(int,int,int);
+        void(*render)(void) = NULL;
+        void(*mainloop)(int) = NULL;
+        void(*keybinding)(unsigned char,int,int) = NULL;
+        void(*funckeybinding)(int,int,int) = NULL;
+        void(*mousebinding)(int,int,int,int) = NULL;
 
 
         public:
@@ -54,6 +74,7 @@ namespace ENGINE
             void SetMainFunc(void (*m)(int)) { mainloop = m;}
             void SetKeyFunc(void(*k)(unsigned char key,int x , int y)) { keybinding = k; }
             void SetFuncKeyFunc(void(*f)(int key, int x,int y)) { funckeybinding = f; }
+            void SetMouseFunc(void(*m)(int,int,int,int)) { mousebinding = m; }
       
             void EndApp();
 
@@ -162,6 +183,7 @@ namespace ENGINE
 
         glutKeyboardFunc(keybinding);
         glutSpecialFunc(funckeybinding);
+        glutMouseFunc(mousebinding);
 
         glutDisplayFunc(render); // Enregistre le callback pour le redraw
 

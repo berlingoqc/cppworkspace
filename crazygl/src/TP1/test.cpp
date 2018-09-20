@@ -2,17 +2,17 @@
 #include "../../include/shaders.hpp"
 using namespace ENGINE;
 
-// Variable globale pour mon engine (wrapper autour de glut)
 GlutEngine* app;
 
-// Variable pour l'identifiant de mon program de shader compiler
-unsigned int ShaderID;
 
-// Vector content la liste de point utilisé pour render les formes a l'écran
+unsigned int ShaderID;
+unsigned int vaoID[1];
+
+bool displayLine = false;
+
 std::vector<Position<float>> listPoint;
 
-enum OptionMenu { CLEAR_SCREEN, DRAW_POINTS, DRAW_LINES, DRAW_TRIANGLE, DRAW_QUADS, DRAW_CON_LINES, EXIT_APP };
-enum OptionColor { RED , GREEN , BLUE, YELLOW, RANDOM };
+enum OptionMenu { CLEAR_POINTS, DRAWING_TRIANGLE, DRAWING_LINE, EXIT_APP };
 
 void genBuffer(GLuint* id,int position,int size,const void * data) {
     glGenBuffers(1, id); // Generer le VBO
