@@ -29,6 +29,13 @@ namespace ENGINE
         T y;
     };
 
+    template<typename T>
+    struct RGBColor {
+        T R;
+        T G;
+        T B;
+    };
+
     Position<float> ConvertToNDC(int x,int y) {
         Position<float> p;
         int sizeY = glutGet(GLUT_WINDOW_HEIGHT);
@@ -60,6 +67,7 @@ namespace ENGINE
         void(*keybinding)(unsigned char,int,int) = NULL;
         void(*funckeybinding)(int,int,int) = NULL;
         void(*mousebinding)(int,int,int,int) = NULL;
+        void(*mouseMove)(int,int) = NULL;
 
 
         public:
@@ -80,6 +88,7 @@ namespace ENGINE
             void SetKeyFunc(void(*k)(unsigned char key,int x , int y)) { keybinding = k; }
             void SetFuncKeyFunc(void(*f)(int key, int x,int y)) { funckeybinding = f; }
             void SetMouseFunc(void(*m)(int,int,int,int)) { mousebinding = m; }
+            void SetMouseMouveFunc(void(*m)(int,int)) { mouseMove = m; }
       
             void EndApp();
 
@@ -189,7 +198,7 @@ namespace ENGINE
         glutKeyboardFunc(keybinding);
         glutSpecialFunc(funckeybinding);
         glutMouseFunc(mousebinding);
-
+        glutMotionFunc(mouseMove);
         glutDisplayFunc(render); // Enregistre le callback pour le redraw
 
         glewInit();

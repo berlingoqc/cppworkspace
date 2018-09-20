@@ -5,15 +5,20 @@ using namespace ENGINE;
 
 // DEFINITION ENUM
 enum MENU_OPTIONS { CLEAR_DRAWING, DRAWING_MODE, COLOR_MODE, BACKGROUND_RESET, EXIT_APP };
-enum DRAWING_OPTIONS { DRAW_POINTS, DRAW_LINES, DRAW_TRIANGLE, DRAW_QUADS };
+enum DRAWING_OPTIONS { DRAW_POINTS, DRAW_LINES, DRAW_TRIANGLE, DRAW_QUADS, DRAW_FREE };
 enum COLORS_OPTIONS { RED_OPTION=0, GREEN_OPTION, BLUE_OPTION, WHITE_OPTION, RANDOM_OPTION };
 
-// Définition de mes couleurs
-const GLfloat colors [4][3] {
+const RGBColor<float> colors[4] {
     { 1.0, 0.0, 0.0 }, // RED
     { 0.0, 1.0, 0.0 }, // GREEN
     { 0.0, 0.0, 1.0 }, // BLUE
     { 1.0, 1.0, 1.0 }  // WHITE
+};
+const std::string shapesName[5] {
+    "Points", "Lignes", "Triangles", "Quads", "Ligne continue"
+};
+const std::string colorsName[5] {
+    "Rouge", "Vert", "Blue", "Blanc", "Aleatoire"
 };
 
 // DEFINITON VARIABLE GLOBALE
@@ -31,12 +36,16 @@ DRAWING_OPTIONS DrawingMode = DRAW_POINTS;
 COLORS_OPTIONS  ColorDrawing = RED_OPTION;
 COLORS_OPTIONS  ColorBackGround = WHITE_OPTION;
 
-GLfloat randomColor[3];
+RGBColor<float> randomColor;
+RGBColor<float> randomColorBG;
+
+bool leftPressed = false;
 
 GLenum ShapeMode = GL_POINTS;
 int NumberSommetShape = 1;
 
 std::vector<Position<float>> ListPointDrawing;
+std::vector<RGBColor<float>> ListColorDrawing;
 std::vector<Position<float>> ListPointEnter;
 
 // DEFINITION FONCTION PRIVER
@@ -45,8 +54,14 @@ void keybinding(unsigned char key,int x,int y) {}
 void specialkeybinding(int key, int x , int y) {}
 
 
-void generateRandomColor() {
-    randomColor[0] = generateFloat(); randomColor[1] = generateFloat(); randomColor[3] = generateFloat();
+void renderString(float x,float y, void* font, const char* str) {
+    glColor3f(0.0,0.0,0.0);
+    glRasterPos2f(x,y);
+    glutBitmapString(font,(u_char*)str);
+}
+
+void generateRandomColor(RGBColor<float>& randomColor) {
+    randomColor.R = generateFloat(); randomColor.G = generateFloat(); randomColor.B = generateFloat();
 }
 
 // genBuffer generer un buffer
@@ -65,6 +80,14 @@ void createVBOVector() {
     glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE, 0,0);
 }
 
+// createVBOColor crée le vbo pour les couleurs des vertexs
+void createVBOColor() {
+    GLuint vboID;
+
+    genBuffer(&vboID,1,ListColorDrawing.size() * sizeof(RGBColor<float>),ListColorDrawing.data());
+    glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,0,0);
+}
+
 // createVBOPoint crée le vbo pour les points inserer pour la forme
 void createVBOPoint() {
     GLuint vboID;
@@ -76,9 +99,9 @@ void createVBOPoint() {
 // setBackgroundColor set la background color selon le mode courrant
 void setBackGroundColor() {
     if(ColorBackGround == RANDOM_OPTION) {
-        glClearColor(randomColor[0],randomColor[1],randomColor[2],1.0f);
+        glClearColor(randomColorBG.R,randomColorBG.G,randomColorBG.B,1.0f);
     } else {
-        glClearColor(colors[ColorBackGround][0],colors[ColorBackGround][1],colors[ColorBackGround][2],1.0f);
+        glClearColor(colors[ColorBackGround].R,colors[ColorBackGround].G,colors[ColorBackGround].B,1.0f);
     }
     glClear(GL_COLOR_BUFFER_BIT);
 }
@@ -91,50 +114,100 @@ void display() {
     // bind notre programme de shader
    	glUseProgram(ShaderID);
 
+    glPointSize(10.0);
+    if(DrawingMode == DRAW_FREE) {
+        glLineWidth(3.0);
+    } else {
+        glLineWidth(10.0);
+    }
 
 
     // Dessine les formes entrer
     createVBOVector();
+    createVBOColor();
     glDrawArrays(ShapeMode,0,ListPointDrawing.size());
 
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
 
     // Dessine les points entrer pour la prochaine former a dessiner
-    glPointSize(10.0);
     createVBOPoint();
     glDrawArrays(GL_POINTS,0,ListPointEnter.size());
 
 
 	glDisableVertexAttribArray(0);
 
+    std::stringstream info;
+    info << "FORME : " << shapesName[DrawingMode] << "      COULEUR : " << colorsName[ColorDrawing] << "    " << ListPointEnter.size() << "/"<< NumberSommetShape;
+    renderString(-1.0,0.95,GLUT_BITMAP_TIMES_ROMAN_10,info.str().c_str());
 
 	glFlush();
+}
+
+
+
+void onNewPosition(Position<float> p) {
+        // Ajout le point a la liste temporaire de point
+        ListPointEnter.push_back(p);
+        // Si on n'a le nombre de sommet pour la shape voulue
+        if(ListPointEnter.size() == NumberSommetShape) {
+            // Pour le nombre de point ajout la couleur
+        
+            for(int i=0; i<ListPointEnter.size();i++) {
+                RGBColor<float> f;
+                if(ColorDrawing == RANDOM_OPTION) {
+                    generateRandomColor(f);
+                } else {
+                    f = colors[ColorDrawing];
+                }
+                ListColorDrawing.push_back(f);
+            }
+            // Envoie le contenu dans ma list de point a dessiner et vide le contenu de cette forme
+            std::copy(ListPointEnter.begin(),ListPointEnter.end(),std::back_inserter(ListPointDrawing));
+
+            ListPointEnter.clear();
+        } 
+} 
+
+void mouseMouve(int x, int y) {
+    if(leftPressed && DrawingMode == DRAW_FREE) {
+        Position<float> p = ENGINE::ConvertToNDC(x,y);
+        ListPointDrawing.push_back(p);
+        RGBColor<float> f;
+        if(ColorDrawing == RANDOM_OPTION) {
+            generateRandomColor(f);
+        } else {
+            f = colors[ColorDrawing];
+        }
+        ListColorDrawing.push_back(f);
+     }
 }
 
 void mousebinding(int button, int state, int x,int y) {
     Position<float> p = ENGINE::ConvertToNDC(x,y);
     if(button == 0 && state == 0) {
-        // Ajout le point a la liste temporaire de point
-        ListPointEnter.push_back(p);
-        // Si on n'a le nombre de sommet pour la shape voulue
-        if(ListPointEnter.size() == NumberSommetShape) {
-            // Envoie le contenu dans ma list de point a dessiner et vide le contenu de cette forme
-            std::copy(ListPointEnter.begin(),ListPointEnter.end(),std::back_inserter(ListPointDrawing));
-            ListPointEnter.clear();
-        }
+        leftPressed = true;
+        if(DrawingMode == DRAW_FREE) return;
+        onNewPosition(p);
+    } else if (button == 0 && state == 1) {
+        leftPressed = false;
     }
 }
+
+
 void traitementMenuPrincipal(int value) {
     switch(value) {
         case CLEAR_DRAWING:
             // Clear les vectors de point
             ListPointDrawing.clear();
+            ListColorDrawing.clear();
             ListPointEnter.clear();
         break;
         case BACKGROUND_RESET:
             // Set la couleur du background avec la couleurs selectioner pour dessiner
             ColorBackGround = ColorDrawing;
             if(ColorDrawing == RANDOM_OPTION) {
-                generateRandomColor();
+                generateRandomColor(randomColorBG);
             }
         break;
         case EXIT_APP:
@@ -146,9 +219,6 @@ void traitementMenuPrincipal(int value) {
 
 void traitementMenuCouleur(int value) {
     ColorDrawing = (COLORS_OPTIONS)value;
-    if (value == RANDOM_OPTION) {
-        
-    }
 }
 
 void traitementMenuShape(int value) {
@@ -173,9 +243,15 @@ void traitementMenuShape(int value) {
             NumberSommetShape = 4;
             ShapeMode = GL_QUADS;
         break;
+        case DRAW_FREE:
+            DrawingMode = DRAW_FREE;
+            NumberSommetShape = 0;
+            ShapeMode = GL_LINE_STRIP;
+        break;
     }
 
     ListPointEnter.clear();
+    ListColorDrawing.clear();
     ListPointDrawing.clear();
 }
 
@@ -187,6 +263,7 @@ void createMenu() {
     glutAddMenuEntry("Ligne", DRAW_LINES);
     glutAddMenuEntry("Triangle", DRAW_TRIANGLE);
     glutAddMenuEntry("Quad", DRAW_QUADS);
+    glutAddMenuEntry("Free",DRAW_FREE);
 
     smCouleur = glutCreateMenu(traitementMenuCouleur);
     glutAddMenuEntry("Rouge", RED_OPTION);
@@ -208,6 +285,7 @@ void createMenu() {
 void mainLoop(int val) {
     glutPostRedisplay();
     // Roule la frame une autre fois
+    //mainLoop(val);
     glutTimerFunc(1000/SCREEN_FPS,mainLoop,val);
 }
 
@@ -220,6 +298,7 @@ int main(int argc,char** argv) {
    app->SetKeyFunc(keybinding);
    app->SetFuncKeyFunc(specialkeybinding);
    app->SetMouseFunc(mousebinding);
+   app->SetMouseMouveFunc(mouseMouve);
    app->Init(info,argc,argv);
 
 
