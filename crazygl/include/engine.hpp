@@ -3,21 +3,26 @@
 
 #include "headers.hpp"
 
-// Constante de l'écran
-const int DEFAULT_SCREEN_WIDTH  = 640;
-const int DEFAULT_SCREEN_HEIGHT = 480;
-const int SCREEN_FPS    = 60;
 
-
-const float Maxndc = 1.0f;
-const float Minndc = -1.0f;
-
-float generateFloat() {
-    return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-}
 
 namespace ENGINE
 {
+
+    // Constante de l'écran
+    const int DEFAULT_SCREEN_WIDTH  = 640;
+    const int DEFAULT_SCREEN_HEIGHT = 480;
+    const int SCREEN_FPS    = 60;
+
+
+    const float Maxndc = 1.0f;
+    const float Minndc = -1.0f;
+
+
+
+    float generateFloat() {
+        return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    }
+
     template<typename T>
     struct Position {
         T x;

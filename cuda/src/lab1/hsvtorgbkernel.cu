@@ -36,7 +36,7 @@ __global__ static void Kernel_Sobel_Operator(uchar* ArrayA, uchar* ArrayR, int c
     int rb = ArrayA[mbindex + 1];       // Right Bottom
     int ml = ArrayA[index - 1];    // MiddleLeft
     int mr = ArrayA[index + 1];    // MiddleRight
-	int mt = ArrayA[mtindex];
+	int mt = ArrayA[mtindex];       
 	int mb = ArrayA[mbindex];
 
 	int x_weight = lt * sobelX[0][0] + ml * sobelX[1][0] + lb * sobelX[2][0] + rt * sobelX[0][2] + mr * sobelX[1][2] + rb * sobelX[2][2];

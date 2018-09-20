@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/test.exe",
+            "program": "${workspaceFolder}/tp1.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
