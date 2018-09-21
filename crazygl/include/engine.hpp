@@ -18,9 +18,28 @@ namespace ENGINE
     const float Minndc = -1.0f;
 
 
-
+    
     float generateFloat() {
         return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    }
+
+
+    void renderString(float x,float y, void* font, const char* str) {
+        glColor3f(0.0,0.0,0.0);
+        glRasterPos2f(x,y);
+        glutBitmapString(font,(unsigned char*)str);
+    }
+
+    void generateRandomColor(RGBColor<float>& randomColor) {
+        randomColor.R = generateFloat(); randomColor.G = generateFloat(); randomColor.B = generateFloat();
+    }
+
+    // genBuffer generer un buffer
+    void genBuffer(GLuint* id,int position,int size,const void * data) {
+        glGenBuffers(1, id); // Generer le VBO
+        glBindBuffer(GL_ARRAY_BUFFER,*id);  // Lier le VBO
+        glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW); // Définir la taille, les données et le type du VBO
+        glEnableVertexAttribArray(position); // Enable l'attribut qu'on veut activer
     }
 
     template<typename T>

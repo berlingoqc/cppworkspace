@@ -1,4 +1,4 @@
-#version 460 core
+#version 330 core
 in vec4 coul;
 
 out vec4 color;

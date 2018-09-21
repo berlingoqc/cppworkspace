@@ -4,7 +4,7 @@
 using namespace ENGINE;
 
 // DEFINITION ENUM
-enum MENU_OPTIONS { CLEAR_DRAWING, DRAWING_MODE, COLOR_MODE, BACKGROUND_RESET, EXIT_APP };
+enum MENU_OPTIONS { CLEAR_DRAWING, DRAWING_MODE, COLOR_MODE, BACKGROUND_RESET,SAVE_DRAWING, EXIT_APP };
 enum DRAWING_OPTIONS { DRAW_POINTS, DRAW_LINES, DRAW_TRIANGLE, DRAW_QUADS, DRAW_FREE };
 enum COLORS_OPTIONS { RED_OPTION=0, GREEN_OPTION, BLUE_OPTION, WHITE_OPTION, RANDOM_OPTION };
 
@@ -53,24 +53,6 @@ std::vector<Position<float>> ListPointEnter;
 void keybinding(unsigned char key,int x,int y) {}
 void specialkeybinding(int key, int x , int y) {}
 
-
-void renderString(float x,float y, void* font, const char* str) {
-    glColor3f(0.0,0.0,0.0);
-    glRasterPos2f(x,y);
-    glutBitmapString(font,(u_char*)str);
-}
-
-void generateRandomColor(RGBColor<float>& randomColor) {
-    randomColor.R = generateFloat(); randomColor.G = generateFloat(); randomColor.B = generateFloat();
-}
-
-// genBuffer generer un buffer
-void genBuffer(GLuint* id,int position,int size,const void * data) {
-    glGenBuffers(1, id); // Generer le VBO
-    glBindBuffer(GL_ARRAY_BUFFER,*id);  // Lier le VBO
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW); // Définir la taille, les données et le type du VBO
-    glEnableVertexAttribArray(position); // Enable l'attribut qu'on veut activer
-}
 
 // createVBOVector crée le vbo avec le vecteur de point a dessiner
 void createVBOVector() {
@@ -210,6 +192,10 @@ void traitementMenuPrincipal(int value) {
                 generateRandomColor(randomColorBG);
             }
         break;
+        case SAVE_DRAWING:
+        
+
+        break;
         case EXIT_APP:
             glDeleteProgram(ShaderID);
             glutLeaveMainLoop();
@@ -277,6 +263,7 @@ void createMenu() {
     glutAddSubMenu("Formes", smShape);
     glutAddMenuEntry("Reset BG", BACKGROUND_RESET);
     glutAddMenuEntry("Effacer", CLEAR_DRAWING);
+    glutAddMenuEntry("Sauvegarder", SAVE_DRAWING);
     glutAddMenuEntry("Exit",EXIT_APP);
 
     glutAttachMenu(GLUT_RIGHT_BUTTON);
