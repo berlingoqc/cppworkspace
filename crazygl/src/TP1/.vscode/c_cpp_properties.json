@@ -3,7 +3,8 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "/home/wq/stb-master/"
             ],
             "defines": [],
             "compilerPath": "D:\\TDM-GCC-64\\bin\\gcc.exe",

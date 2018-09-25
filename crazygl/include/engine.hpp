@@ -3,6 +3,10 @@
 
 #include "headers.hpp"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
 
 
 namespace ENGINE
@@ -17,6 +21,19 @@ namespace ENGINE
     const float Maxndc = 1.0f;
     const float Minndc = -1.0f;
 
+
+    template<typename T>
+    struct Position {
+        T x;
+        T y;
+    };
+
+    template<typename T>
+    struct RGBColor {
+        T R;
+        T G;
+        T B;
+    };
 
     
     float generateFloat() {
@@ -42,18 +59,6 @@ namespace ENGINE
         glEnableVertexAttribArray(position); // Enable l'attribut qu'on veut activer
     }
 
-    template<typename T>
-    struct Position {
-        T x;
-        T y;
-    };
-
-    template<typename T>
-    struct RGBColor {
-        T R;
-        T G;
-        T B;
-    };
 
     Position<float> ConvertToNDC(int x,int y) {
         Position<float> p;
@@ -63,6 +68,24 @@ namespace ENGINE
         p.y = -(y-sizeY) * (Maxndc - Minndc)/sizeY + Minndc;
         return p;
     }
+
+    void takeScreenShot() {
+        int gW = glutGet(GLUT_WINDOW_WIDTH);
+        int gH = glutGet(GLUT_WINDOW_HEIGHT);
+
+        unsigned char* buffer = (unsigned char*)malloc(gW * gH * 3);
+        glReadPixels(0,0,gW,gH,GL_RGB,GL_UNSIGNED_BYTE,buffer);
+        char name[512];
+        long int t = time (NULL);
+        sprintf(name,"screenshot_%ld.png",t);
+
+
+        unsigned char* last_row = buffer + (gW * 3 * (gH - 1));
+        if(!stbi_write_png(name,gW,gH,3,last_row, -3 * gW)) {
+            std::cerr << "Error: could not write screenshot file " << name << std::endl;
+        }
+    }
+
 
 
     // enum screenpositions contient les positions possible pour placer rapidement notre fenetre

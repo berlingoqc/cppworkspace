@@ -1,9 +1,9 @@
-CPPFLAGS=-O0 -g2 -Wall -c -fmessage-length=0 -I/usr/include
+CPPFLAGS=-O0 -g2 -Wall -c -fmessage-length=0
 
 ifeq ($(OS),Windows_NT)
 	LDLIBS=-lopengl32 -lglu32 -lfreeglut -lglew32
 else
-	LDLIBS=-lGL -lglut -lGLU -lGLEW
+	LDLIBS=-lGL -lglut -lGLU -lGLEW -lpthread
 endif
 
 EXEC_NAME=tp1.exe

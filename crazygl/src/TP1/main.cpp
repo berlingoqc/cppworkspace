@@ -1,6 +1,7 @@
 #include "../../include/engine.hpp"
 #include "../../include/shaders.hpp"
 
+
 using namespace ENGINE;
 
 // DEFINITION ENUM
@@ -14,6 +15,7 @@ const RGBColor<float> colors[4] {
     { 0.0, 0.0, 1.0 }, // BLUE
     { 1.0, 1.0, 1.0 }  // WHITE
 };
+
 const std::string shapesName[5] {
     "Points", "Lignes", "Triangles", "Quads", "Ligne continue"
 };
@@ -25,7 +27,6 @@ const std::string colorsName[5] {
 
 // Variable pour l'application glut
 GlutEngine* app;
-
 
 // Variable de l'identifiant de mon program de shader
 unsigned int ShaderID;
@@ -193,8 +194,8 @@ void traitementMenuPrincipal(int value) {
             }
         break;
         case SAVE_DRAWING:
-        
-
+            // Démare l'operation de sauvegarde dans un thread pour pas freeze le display
+            takeScreenShot();
         break;
         case EXIT_APP:
             glDeleteProgram(ShaderID);
@@ -249,14 +250,14 @@ void createMenu() {
     glutAddMenuEntry("Ligne", DRAW_LINES);
     glutAddMenuEntry("Triangle", DRAW_TRIANGLE);
     glutAddMenuEntry("Quad", DRAW_QUADS);
-    glutAddMenuEntry("Free",DRAW_FREE);
+    glutAddMenuEntry("Ligne continue",DRAW_FREE);
 
     smCouleur = glutCreateMenu(traitementMenuCouleur);
     glutAddMenuEntry("Rouge", RED_OPTION);
     glutAddMenuEntry("Bleue", BLUE_OPTION);
     glutAddMenuEntry("Vert", GREEN_OPTION);
     glutAddMenuEntry("Blanc", WHITE_OPTION);
-    glutAddMenuEntry("Aléatoire", RANDOM_OPTION);
+    glutAddMenuEntry("Aleatoire", RANDOM_OPTION);
 
     menuPrincipal = glutCreateMenu(traitementMenuPrincipal);
     glutAddSubMenu("Couleurs",smCouleur);
