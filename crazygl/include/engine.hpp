@@ -3,6 +3,7 @@
 
 #include "headers.hpp"
 
+#include <time.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -27,6 +28,24 @@ namespace ENGINE
         T x;
         T y;
     };
+
+
+    void Translation(Position<float> *points,int size,float valueX,float valueY) {
+        for(int i=0;i<size;i++) {
+            points[i].x += valueX;
+            points[i].y += valueY;
+        }
+    }
+
+    void Reflect(Position<float> *points,int size,bool abs,bool ord) {
+        for(int i=0;i<size;i++) {
+            if(abs)
+                points[i].y = -points[i].y;
+            if(ord)
+                points[i].x = -points[i].x;
+        }
+    }
+
 
     template<typename T>
     struct RGBColor {
