@@ -1,3 +1,7 @@
+#ifndef CVHEADERS_H
+#define CVHEADERS_H
+
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/utility.hpp>
@@ -8,5 +12,4 @@
 #include <string>
 
 
-using namespace std;
-using namespace cv;
+#endif // CVHEADERS_H

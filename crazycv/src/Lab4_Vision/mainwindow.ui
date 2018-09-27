@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QLabel" name="lblImage">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>401</width>
+      <height>261</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>image</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>400</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFichier">
+    <property name="title">
+     <string>Fichier</string>
+    </property>
+    <widget class="QMenu" name="menuNouvelle_Image">
+     <property name="title">
+      <string>Nouvelle Image</string>
+     </property>
+     <addaction name="actionDepuis_fichier"/>
+     <addaction name="actionDepuis_cam_ra"/>
+    </widget>
+    <addaction name="menuNouvelle_Image"/>
+    <addaction name="actionR_initialiser_Origine"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuitter_2"/>
+    <addaction name="actionSuivante"/>
+    <addaction name="actionQuitter"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuitter_3"/>
+   </widget>
+   <widget class="QMenu" name="menuBackend">
+    <property name="title">
+     <string>Backend</string>
+    </property>
+    <addaction name="actionCustom"/>
+    <addaction name="actionOpenCV"/>
+   </widget>
+   <widget class="QMenu" name="menuCouleur">
+    <property name="title">
+     <string>Couleur</string>
+    </property>
+    <addaction name="actionVers_Grayscale"/>
+    <addaction name="actionVers_Black_White"/>
+    <addaction name="actionVers_HSV"/>
+   </widget>
+   <widget class="QMenu" name="menuInformation">
+    <property name="title">
+     <string>Information</string>
+    </property>
+    <addaction name="actionHistogramme_couleur"/>
+    <addaction name="actionD_taille_image"/>
+   </widget>
+   <widget class="QMenu" name="menuTransformation">
+    <property name="title">
+     <string>Transformation</string>
+    </property>
+    <widget class="QMenu" name="menuEnlever_bruit">
+     <property name="title">
+      <string>Enlever bruit</string>
+     </property>
+     <addaction name="actionPasse_haut"/>
+     <addaction name="actionPasse_bas"/>
+    </widget>
+    <widget class="QMenu" name="menuFiltre">
+     <property name="title">
+      <string>Filtre</string>
+     </property>
+     <addaction name="actionMoyenne"/>
+     <addaction name="actionM_dianne"/>
+    </widget>
+    <addaction name="menuEnlever_bruit"/>
+    <addaction name="menuFiltre"/>
+   </widget>
+   <addaction name="menuFichier"/>
+   <addaction name="menuBackend"/>
+   <addaction name="menuCouleur"/>
+   <addaction name="menuInformation"/>
+   <addaction name="menuTransformation"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionDepuis_fichier">
+   <property name="text">
+    <string>Depuis fichier</string>
+   </property>
+  </action>
+  <action name="actionDepuis_cam_ra">
+   <property name="text">
+    <string>Depuis caméra</string>
+   </property>
+  </action>
+  <action name="actionR_initialiser_Origine">
+   <property name="text">
+    <string>Réinitialiser Origine</string>
+   </property>
+  </action>
+  <action name="actionQuitter">
+   <property name="text">
+    <string>Sauvegarder</string>
+   </property>
+  </action>
+  <action name="actionQuitter_2">
+   <property name="text">
+    <string>Précédente</string>
+   </property>
+  </action>
+  <action name="actionSuivante">
+   <property name="text">
+    <string>Suivante</string>
+   </property>
+  </action>
+  <action name="actionQuitter_3">
+   <property name="text">
+    <string>Quitter</string>
+   </property>
+  </action>
+  <action name="actionCustom">
+   <property name="text">
+    <string>Custom</string>
+   </property>
+  </action>
+  <action name="actionOpenCV">
+   <property name="text">
+    <string>OpenCV</string>
+   </property>
+  </action>
+  <action name="actionVers_Grayscale">
+   <property name="text">
+    <string>Vers Grayscale</string>
+   </property>
+  </action>
+  <action name="actionVers_Black_White">
+   <property name="text">
+    <string>Vers Black&amp;White</string>
+   </property>
+  </action>
+  <action name="actionVers_HSV">
+   <property name="text">
+    <string>Vers HSV</string>
+   </property>
+  </action>
+  <action name="actionHistogramme_couleur">
+   <property name="text">
+    <string>Histogramme couleur</string>
+   </property>
+  </action>
+  <action name="actionD_taille_image">
+   <property name="text">
+    <string>Détaille image</string>
+   </property>
+  </action>
+  <action name="actionPasse_haut">
+   <property name="text">
+    <string>Passe-haut</string>
+   </property>
+  </action>
+  <action name="actionPasse_bas">
+   <property name="text">
+    <string>Passe-bas</string>
+   </property>
+  </action>
+  <action name="actionMoyenne">
+   <property name="text">
+    <string>Moyenne</string>
+   </property>
+  </action>
+  <action name="actionM_dianne">
+   <property name="text">
+    <string>Médianne</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
