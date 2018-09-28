@@ -13,21 +13,7 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralWidget">
-   <widget class="QLabel" name="lblImage">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>401</width>
-      <height>261</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>image</string>
-    </property>
-   </widget>
-  </widget>
+  <widget class="QWidget" name="centralWidget"/>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
@@ -51,11 +37,11 @@
     <addaction name="menuNouvelle_Image"/>
     <addaction name="actionR_initialiser_Origine"/>
     <addaction name="separator"/>
-    <addaction name="actionQuitter_2"/>
+    <addaction name="actionPrecedente"/>
     <addaction name="actionSuivante"/>
-    <addaction name="actionQuitter"/>
+    <addaction name="actionSauvegarder"/>
     <addaction name="separator"/>
-    <addaction name="actionQuitter_3"/>
+    <addaction name="actionQuitter"/>
    </widget>
    <widget class="QMenu" name="menuBackend">
     <property name="title">
@@ -130,12 +116,12 @@
     <string>Réinitialiser Origine</string>
    </property>
   </action>
-  <action name="actionQuitter">
+  <action name="actionSauvegarder">
    <property name="text">
     <string>Sauvegarder</string>
    </property>
   </action>
-  <action name="actionQuitter_2">
+  <action name="actionPrecedente">
    <property name="text">
     <string>Précédente</string>
    </property>
@@ -145,7 +131,7 @@
     <string>Suivante</string>
    </property>
   </action>
-  <action name="actionQuitter_3">
+  <action name="actionQuitter">
    <property name="text">
     <string>Quitter</string>
    </property>

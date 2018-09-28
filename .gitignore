@@ -6,6 +6,6 @@
 *.png
 *.bmp
 
-
+*Debug/
 pictures/
 

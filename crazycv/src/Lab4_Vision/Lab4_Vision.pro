@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -27,12 +27,14 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    imagelabel.cpp
+    imagelabel.cpp \
+    colorwidget.cpp
 
 HEADERS += \
         mainwindow.h \
     cvheaders.h \
-    imagelabel.h
+    imagelabel.h \
+    colorwidget.h
 
 FORMS += \
         mainwindow.ui
