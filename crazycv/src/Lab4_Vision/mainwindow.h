@@ -2,7 +2,16 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "imagelabel.h"
 #include "cvheaders.h"
+
+enum BackendMode {
+    CustomBackend, OpencvBackend
+};
+
+enum ColorSpace {
+    RGB_CS, HSV_CS, GS_CS, BW_CS
+};
 
 namespace Ui {
 class MainWindow;
@@ -17,7 +26,11 @@ public:
     ~MainWindow();
 
 private:
-    void SetImage(cv::Mat& m);
+    void SetImage();
+    void ValidPreviousNext();
+
+
+    ImageLabel* lblImage;
     Ui::MainWindow *ui;
 
 private slots:
@@ -26,6 +39,7 @@ private slots:
     void previousImage();
     void nextImage();
     void saveImage();
+    void resetOriginalImage();
     void closeImage();
     void quitApp();
 

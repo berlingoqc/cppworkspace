@@ -1,5 +1,8 @@
 #include "imagelabel.h"
 
+QImage::Format ImageFormatQT[2] { QImage::Format_RGB888, QImage::Format_Grayscale8 };
+
+
 
 ImageLabel::ImageLabel(QWidget *parent) :
     QLabel(parent)
@@ -10,8 +13,9 @@ ImageLabel::ImageLabel(QWidget *parent) :
     this->setSizePolicy(policy);
 }
 
-void ImageLabel::SetMat(const cv::Mat &m) {
-    QImage qI(m.data,m.cols,m.rows, static_cast<int>(m.step), QImage::Format_RGB888);
+
+void ImageLabel::SetMat(const cv::Mat &m,int colorMode) {
+    QImage qI(m.data,m.cols,m.rows, static_cast<int>(m.step), ImageFormatQT[colorMode]);
     QPixmap qPm(QPixmap::fromImage((qI)));
     setPixmap(qPm);
 }
