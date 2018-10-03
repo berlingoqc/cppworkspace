@@ -28,13 +28,15 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     imagelabel.cpp \
-    colorwidget.cpp
+    colorwidget.cpp \
+    imagewrapper.cpp
 
 HEADERS += \
         mainwindow.h \
     cvheaders.h \
     imagelabel.h \
-    colorwidget.h
+    colorwidget.h \
+    imagewrapper.h
 
 FORMS += \
         mainwindow.ui
@@ -42,12 +44,13 @@ FORMS += \
 INCLUDEPATH += $$(OPENCV_SDK_DIR)/include
 
 LIBS += -L$$(OPENCV_SDK_DIR)/x86/mingw/lib \
-        -lopencv_core343        \
-        -lopencv_highgui343     \
-        -lopencv_imgcodecs343   \
-        -lopencv_imgproc343     \
-        -lopencv_features2d343  \
-        -lopencv_calib3d343
+        -lopencv_core        \
+        -lopencv_highgui     \
+        -lopencv_imgcodecs   \
+        -lopencv_imgproc     \
+        -lopencv_features2d  \
+        -lopencv_videoio    \
+        -lopencv_calib3d
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

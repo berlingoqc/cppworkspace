@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -36,6 +36,7 @@
     </widget>
     <addaction name="menuNouvelle_Image"/>
     <addaction name="actionR_initialiser_Origine"/>
+    <addaction name="actionFermer"/>
     <addaction name="separator"/>
     <addaction name="actionPrecedente"/>
     <addaction name="actionSuivante"/>
@@ -189,6 +190,11 @@
   <action name="actionM_dianne">
    <property name="text">
     <string>Médianne</string>
+   </property>
+  </action>
+  <action name="actionFermer">
+   <property name="text">
+    <string>Fermer</string>
    </property>
   </action>
  </widget>

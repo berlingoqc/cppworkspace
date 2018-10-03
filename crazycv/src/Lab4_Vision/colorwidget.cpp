@@ -48,11 +48,10 @@ QChart* ColorWidget::createAreaChart(const QString name,int* data) const {
 
     // Definit la lower series
     QLineSeries *lowerSeries = 0;
-    QString nameS("Series ");
 
     QLineSeries *upperSeries = new QLineSeries(chart);
 
-    for(int i=0;i<256;i++) {
+    for(int i=0;i<257;i++) {
         if (lowerSeries) {
             const QVector<QPointF>& points = lowerSeries->pointsVector();
             upperSeries->append(QPointF(i, points[i].y() + data[i]));

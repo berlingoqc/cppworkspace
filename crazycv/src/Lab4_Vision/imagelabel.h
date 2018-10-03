@@ -11,7 +11,7 @@ class ImageLabel : public QLabel
 public:
     explicit ImageLabel(QWidget *parent = nullptr);
 
-    void SetMat(const cv::Mat &m);
+    void SetMat(const cv::Mat &m,int colorMode);
 public slots:
     void setPixmap(const QPixmap& pm);
 protected:
