@@ -10,8 +10,17 @@
 #include <stb_image_write.h>
 
 
+
 namespace ENGINE
 {
+    typedef float Mat4x4[4][4];
+
+    const Mat4x4 MatriceTransformation { 
+        { 1, 0, 0, 0},
+        { 0, 1, 0, 0},
+        { 0, 0, 1, 0},
+        { 0, 0 ,0, 1}
+     };
 
     // Constante de l'écran
     const int DEFAULT_SCREEN_WIDTH  = 640;
@@ -27,6 +36,8 @@ namespace ENGINE
     struct Position {
         T x;
         T y;
+        T z;
+        T w;
     };
 
 
