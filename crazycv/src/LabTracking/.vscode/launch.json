@@ -8,14 +8,14 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/colorswitcher.exe",
+            "program": "${workspaceFolder}/tracking.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": true,
             "MIMode": "gdb",
-            "miDebuggerPath": "/usr/bin/gdb",
+            "miDebuggerPath": "D:\\Qt\\Tools\\mingw530_32\\bin\\gdb.exe",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",

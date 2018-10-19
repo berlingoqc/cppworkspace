@@ -3,15 +3,9 @@
 
 #include <QMainWindow>
 #include "imagelabel.h"
+#include "imagewrapper.h"
 #include "cvheaders.h"
 
-enum BackendMode {
-    CustomBackend, OpencvBackend
-};
-
-enum ColorSpace {
-    RGB_CS, HSV_CS, GS_CS, BW_CS
-};
 
 namespace Ui {
 class MainWindow;
@@ -26,12 +20,17 @@ public:
     ~MainWindow();
 
 private:
-    void SetImage();
-    void ValidPreviousNext();
+    void validPreviousNext();
+    void updateStatusBar(const MyImage& i);
 
+    ImageWrapper 		img;
+    ImageTransformer 	transformer;
 
-    ImageLabel* lblImage;
-    Ui::MainWindow *ui;
+    QLabel* 			lblMyImageInfo;
+    QLabel*				lblMatInfo;
+    ImageLabel* 		lblImage;
+    Ui::MainWindow*		ui;
+
 
 private slots:
     void loadFileFromCamera();
@@ -58,6 +57,8 @@ private slots:
 
     void transformMedianne();
     void transformMoyenne();
+
+    void updateImage(MyImage img);
 };
 
 #endif // MAINWINDOW_H

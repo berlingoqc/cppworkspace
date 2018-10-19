@@ -1,57 +1,43 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "colorwidget.h"
 #include "imagelabel.h"
+#include "imagewrapper.h"
 #include "cvheaders.h"
 
 #include <QFileDialog>
+#include <QMessageBox>
+#include <QBoxLayout>
+#include <QObject>
+#include <sstream>
+
 using namespace cv;
 
-// Mode de backend utiliser pour faire les traitements
-BackendMode mode = OpencvBackend;
-int imageColorMode = 0;
-
-// List des couleurs des images du meme index de l'autre liste
-std::vector<ColorSpace> colors;
-std::vector<cv::Mat> images;
-int currentIndex = -1;
-
-
-void rgb_to_gs(cv::Vec3b* a,uchar* b,int size) {
-    for(int i(0);i<size;i++) {
-        float f = a[i][0] * 0.3 + a[i][1] * 0.59 + a[i][2] * 0.11;
-        b[i] = static_cast<uchar>(f);
-    }
-}
-
-
-void gs_to_bw(uchar* a,uchar* b,int size) {
-    for(int i(0);i<size;i++) {
-        if(a[i] > 125) {
-            a[i] = 255;
-        } else {
-            a[i] = 0;
-        }
-    }
-}
-
-
-
-
-// appendImage ajoute une nouvelle image a la fin de la liste et ajuste l'index pour allez a cette photo
-void appendImage(cv::Mat m) {
-    images.push_back(m);
-    currentIndex = images.size()-1;
-}
 
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    lblImage = new ImageLabel();
+    // INITILIAZE les trucs liés avec l'UI
     ui->setupUi(this);
+
+    // Ajout mon label d'image comme widget central
+    lblImage = new ImageLabel();
     setCentralWidget(lblImage);
 
+
+    // Crée mes labels et les ajoutes a ma statusbar
+    lblMatInfo = new QLabel(this);
+    lblMyImageInfo = new QLabel(this);
+
+
+    ui->statusBar->addPermanentWidget(lblMatInfo);
+    ui->statusBar->addPermanentWidget(lblMyImageInfo);
+
+
+
+    // Descative l'option de suivante et precedente
     ui->actionPrecedente->setEnabled(false);
     ui->actionSuivante->setEnabled(false);
 
@@ -79,73 +65,85 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionM_dianne,&QAction::triggered,this,&MainWindow::transformMedianne);
     connect(ui->actionMoyenne,&QAction::triggered,this,&MainWindow::transformMoyenne);
 
+    connect(&this->img,&ImageWrapper::imageChanged,this,&MainWindow::updateImage);
+
+    validPreviousNext();
+    selectOpencvBackend();
+
+    img.appendImageFromFile("C:\\Users\\wq\\test.jpg");
 
 }
 
-void MainWindow::ValidPreviousNext() {
-    bool next = false; bool previous = false;
-    if(currentIndex < images.size()-1) {
+void MainWindow::updateStatusBar(const MyImage& img) {
+    std::ostringstream m;
+    m << "ColorSpace : " << ToString(img.color) << "	Acquision From : " << ToString(img.origin) << " Size : " <<img.image.rows<<"x"<<img.image.cols;
+    lblMyImageInfo->setText(tr(m.str().c_str()));
+}
+
+void MainWindow::validPreviousNext() {
+    bool next = false, previous = false;
+    if(img.hasNext()) {
         next = true;
     }
-    if (currentIndex > 0) {
+    if (img.hasPrevious()) {
         previous = true;
     }
     ui->actionSuivante->setEnabled(next);
     ui->actionPrecedente->setEnabled(previous);
 }
 
-void MainWindow::SetImage() {
-    if(currentIndex < 0) return;
-    cv::Mat m = images.at(currentIndex);
-    lblImage->SetMat(m,imageColorMode);
-    ValidPreviousNext();
+void MainWindow::updateImage(MyImage img) {
+    lblImage->SetMat(img.image,img.color);
+    validPreviousNext();
+    updateStatusBar(img);
 }
 
 void MainWindow::loadFileFromCamera() {
-
+    if(!img.appendImageFromCamera(0)) {
+        // affiche un message d'erreur si on peut par loader l'image
+        QMessageBox msgBox;
+        msgBox.setText("Erreur dans la capture depuis la camera");
+        msgBox.exec();
+    }
 }
 
 void MainWindow::loadFileFromFile() {
-
     QString filePath = QFileDialog::getOpenFileName(this,"Selectionner une image a charger","","JPG (*.jpg);;All Files (*)");
-    if(filePath == "") return;
-    cv::Mat m = cv::imread(filePath.toStdString());
-    cv::cvtColor(m,m,CV_BGR2RGB);
-    // si l'image est empty on continue pas
-    if(m.empty()) {
-        // Affiche une message d'erreur        cv::cvtColor(*original,m,cv::COLOR_RGB2GRAY);
-
-        return;
+    if(!img.appendImageFromFile(filePath.toStdString())) {
+        // affiche un message d'erreur si on peut par loader l'image
+        QMessageBox msgBox;
+        msgBox.setText("Erreur dans l'ouverture du fichier");
+        msgBox.exec();
     }
-    appendImage(m);
-    SetImage();
 }
 
 void MainWindow::previousImage() {
-    if(currentIndex <= 0) return;
-    currentIndex--;
-    SetImage();
-    ValidPreviousNext();
+    img.previousImage();
 }
 
 void MainWindow::nextImage() {
-    if(currentIndex >= images.size()-1) return;
-    currentIndex++;
-    SetImage();
-    ValidPreviousNext();
+    img.nextImage();
 }
 
-void MainWindow::saveImage() {}
+void MainWindow::saveImage() {
+    QString filePath = QFileDialog::getSaveFileName(this,"Selectionner l'emplacement pour sauvegarder l'i","","JPG (*.jpg);;All Files (*)");
+    if(filePath.isEmpty())
+        return;
+    if(!img.saveCurrentImage(filePath.toStdString())) {
+        QMessageBox msgBox;
+        msgBox.setText("Erreur dans la sauvegarde du fichier");
+        msgBox.exec();
+    }
+}
 
 void MainWindow::resetOriginalImage() {
-    currentIndex = 0;
-    SetImage();
+    img.returnFirstImage();
+
 }
 
 void MainWindow::closeImage() {
-    currentIndex = -1;
-    images.clear();
-    ValidPreviousNext();
+    img.reset();
+    validPreviousNext();
     lblImage->clear();
 }
 
@@ -154,46 +152,71 @@ void MainWindow::quitApp() {
 }
 
 void MainWindow::selectCustomBackend() {
-    mode = CustomBackend;
+    transformer.setBackend(CustomBackend);
+    this->setWindowTitle("Lab4_Vision - Backend : Maison");
+
 }
+
+
 void MainWindow::selectOpencvBackend() {
-    mode = OpencvBackend;
+    transformer.setBackend(OpencvBackend);
+    this->setWindowTitle("Lab4_Vision - Backend : OpenCV");
 }
 
 void MainWindow::toHSV() {
-    if(mode == OpencvBackend) {
-        cv::Mat m = images.at(currentIndex).clone();
-        cv::cvtColor(images.at(currentIndex),m,cv::COLOR_RGB2HSV);
-        appendImage(m);
-        SetImage();
-    } else {
-
+    MyImage i;
+    if(!img.getCurrentImage(&i)) {
+        // fail to get image
+        return;
     }
+    cv::Mat m = i.image.clone();
+    transformer.toHSV(i.image,m);
+    img.appendImage(m,FromTransformation,HSV_CS);
 }
+
 void MainWindow::toBW() {
 
-    if(mode == OpencvBackend) {
-        cv::Mat m = images.at(currentIndex).clone();
-
-    }
 }
+
 void MainWindow::toGS() {
-    cv::Mat original = images.at(currentIndex);
-    cv::Mat m(original.rows,original.cols,CV_8U);
-    if(mode == OpencvBackend) {
-        m = original.clone();
-        cv::cvtColor(original,m,cv::COLOR_RGB2GRAY);
-    } if (mode == CustomBackend) {
-        cv::Vec3b* dataA = original.ptr<cv::Vec3b>(0);
-        uchar* dataR = m.ptr<uchar>(0);
-        rgb_to_gs(dataA,dataR,original.rows*original.cols);
+    MyImage i;
+    if(!img.getCurrentImage(&i)) {
+        // fail to get image
+        return;
     }
-    imageColorMode = 1;
-    appendImage(m);
-    SetImage();
+    cv::Mat m = i.image.clone();
+    transformer.toHSV(i.image,m);
+    img.appendImage(m,FromTransformation,GS_CS);
 }
 
-void MainWindow::showHistogramme() {}
+void MainWindow::showHistogramme() {
+
+    MyImage i;
+    if(!img.getCurrentImage(&i)) {
+        return;
+    }
+    if(i.color != RGB_CS) {
+        // Si pas RGB on peut pas faire d'histogramme
+        return;
+    }
+    ColorHistogramme histogramme;
+    if(!transformer.getColorHistogramme(i.image,&histogramme)) {
+
+    }
+    QDialog mainDialog;
+    ColorWidget* colorWidget = new ColorWidget(histogramme.Red,histogramme.Green,histogramme.Blue,&mainDialog);
+
+    mainDialog.setWindowModality(Qt::WindowModal);
+    mainDialog.setLayoutDirection(Qt::LayoutDirection::LeftToRight);
+
+    QBoxLayout mainDialogLayout(QBoxLayout::LeftToRight);
+    mainDialogLayout.addWidget(colorWidget);
+    mainDialogLayout.setMargin(0);
+
+    mainDialog.setLayout(&mainDialogLayout);
+    mainDialog.setWindowState(mainDialog.windowState() | Qt::WindowMaximized);
+    mainDialog.show();
+}
 void MainWindow::showDetailImage() {}
 
 void MainWindow::transformPasseBas() {}

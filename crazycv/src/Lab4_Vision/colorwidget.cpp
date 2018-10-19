@@ -36,10 +36,6 @@ ColorWidget::ColorWidget(int* nbrRed,int* nbrBlue,int* nbrGreen, QWidget *parent
     chartView->setRenderHint(QPainter::Antialiasing,true);
 
     setLayout(baseLayout);
-
-
-
-
 }
 
 QChart* ColorWidget::createAreaChart(const QString name,int* data) const {

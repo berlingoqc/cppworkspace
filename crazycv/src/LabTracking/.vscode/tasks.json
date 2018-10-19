@@ -6,7 +6,7 @@
         {
             "label": "build debug",
             "type": "shell",
-            "command": "make clean && make",
+            "command": "mingw32-make clean && mingw32-make",
             "group": "build"
         }
     ]

@@ -1,13 +1,12 @@
 {
     "configurations": [
         {
-            "name": "Linux",
+            "name": "Windows",
             "includePath": [
-                "${workspaceFolder}/**",
-                "/opt/cuda/include"
+                "${workspaceFolder}/**"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/gcc",
+            "compilerPath": "D:\\Qt\\Tools\\mingw530_32\\bin\\g++.exe",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64"
