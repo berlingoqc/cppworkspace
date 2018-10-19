@@ -3,8 +3,10 @@
 #include <GL/freeglut.h>
 
 // import les trucs de math
+#include <glm/glm.hpp>
 #include <glm/trigonometric.hpp>    // sin , cos , radians ...
 #include <glm/exponential.hpp>      // pow , log, exp2, sqrt, ...
+#include <glm/gtc/type_ptr.hpp>
 
 
 // Import des autres headers 

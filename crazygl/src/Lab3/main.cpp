@@ -12,6 +12,9 @@ enum MENU_OPTIONS { CLEAR_DRAWING, DRAWING_MODE, COLOR_MODE, BACKGROUND_RESET,SA
 enum DRAWING_OPTIONS { DRAW_POINTS, DRAW_LINES, DRAW_TRIANGLE, DRAW_QUADS, DRAW_CIRCLE, DRAW_FREE };
 enum COLORS_OPTIONS { RED_OPTION=0, GREEN_OPTION, BLUE_OPTION, WHITE_OPTION, RANDOM_OPTION };
 
+
+
+
 const RGBColor<float> colors[4] {
     { 1.0, 0.0, 0.0 }, // RED
     { 0.0, 1.0, 0.0 }, // GREEN
@@ -146,6 +149,13 @@ void setBackGroundColor() {
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
+void setUniformVariable() {
+    int id = glGetUniformLocation(ShaderID,"MaTrans");
+    if( id != -1) {
+        glUniformMatrix4fv(id,1,GL_FALSE,&MatriceTransformation[0][0]);
+    }
+}
+
 
 // Display mon quad dans une couleur qui change selon le keyboard
 void display() {
@@ -153,6 +163,8 @@ void display() {
     setBackGroundColor();
     // bind notre programme de shader
    	glUseProgram(ShaderID);
+
+    
 
     glPointSize(10.0);
     if(DrawingMode == DRAW_FREE) {
@@ -165,6 +177,7 @@ void display() {
     // Dessine les formes entrer
     createVBOVector();
     createVBOColor();
+
     if(DrawingMode == DRAW_CIRCLE) {
         int nbrCercle = ListPointDrawing.size()/393;
         for(int i=0;i<nbrCercle;i++){
