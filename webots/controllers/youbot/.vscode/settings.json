@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "laser.c": "cpp",
+        "arm.c": "cpp"
+    },
+    "c-cpp-flylint.cppcheck.executable": "C:\\Program Files\\Cppcheck\\cppcheck.exe"
+}
