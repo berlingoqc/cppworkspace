@@ -41,10 +41,8 @@ HEADERS += \
 FORMS += \
         mainwindow.ui
 
-INCLUDEPATH += $$(OPENCV_SDK_DIR)/include
 
-LIBS += -L$$(OPENCV_SDK_DIR)/x86/mingw/lib \
-        -lopencv_world343
+LIBS += -LC:/msys64/mingw64/bin -lopencv_core342 -lopencv_videoio342 -lopencv_imgproc342 -lopencv_highgui342 -lopencv_imgcodecs342
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -13,6 +13,8 @@
 
 namespace ENGINE
 {
+    #define PI 3.14159265
+
     typedef float Mat4x4[4][4];
 
     const Mat4x4 MatriceTransformation { 
@@ -32,13 +34,106 @@ namespace ENGINE
     const float Minndc = -1.0f;
 
 
+    struct Vecf {
+        float x,y;
+        Vecf(): x(0), y(0) {}
+        Vecf(float a, float b) : x(a), y(b) {}
+
+        Vecf operator+(const Vecf& p) {
+            return Vecf(x+p.x,y+p.y);
+        }
+        Vecf operator-(const Vecf& p) {
+            return Vecf(x-p.x,y-p.y);
+        }
+
+
+        void add(const Vecf& p) {
+            x += p.x;
+            y += p.y;
+        }
+        void sub(const Vecf& p) {
+            x -= p.x;
+            y -= p.y;
+        }
+        void scale(float n) {
+            x = x*n;
+            y = y*n;
+        }
+
+        float magnitude() {
+            return sqrt(x*x+y*y);
+        }
+
+        void normalize() {
+            float mag = magnitude();
+            if(mag != 0) {
+                scale(1/mag);
+            }
+        }
+
+        Vecf rotate(float degrees) {
+            double theta = (degrees * PI / 180.0f);
+            double cosVal = cos(theta);
+            double sinVal = sin(theta);
+            double newX = x*cosVal - y*sinVal;
+            double newY = x*sinVal + y*cosVal;
+            return Vecf(newX,newY);
+        }
+    };
+
+
     template<typename T>
     struct Position {
         T x;
         T y;
-        T z;
-        T w;
     };
+
+    template<typename T>
+    struct MyLine {
+        Position<T> p1;
+        Position<T> p2;
+        
+    };
+
+    struct VecLine {
+        Position<float> p;
+        Vecf v;
+    };
+
+    Position<float> getVecLineEndPoint(const VecLine& vl) {
+        return { vl.p.x + vl.v.x, vl.p.y+vl.v.y};
+    }
+
+
+
+    template<typename T>
+    struct TrigoInfo {
+        T A; // Longeur de coté adjacent
+        T H; // Longeur de l'hypothenuse
+        T O; // Longeur du coté opposé
+
+        T Angle; // Angle du triangle rectangle
+    };
+
+    float getLineLength(const Position<float>& p1,const Position<float>& p2) {
+        return glm::sqrt(glm::pow(p2.x - p1.x,2)+glm::pow(p2.y - p1.y,2));
+    }
+
+
+    float getLineLength(const MyLine<float>& l) {
+        return getLineLength(l.p1,l.p2);
+    }
+
+    // obtient les informations trigo d'un triangle rectangle formé avec l'angle données
+    TrigoInfo<float> getTriangleInfoFromHypo(const MyLine<float>& l, float angle, float h) {
+        TrigoInfo<float> t;
+        t.Angle = 180-angle;
+        t.H = h;
+        float angleRadian = glm::radians(t.Angle);
+        t.A = h * glm::sin(angleRadian);
+        t.O = h * glm::cos(angleRadian);
+        return t;
+    }
 
 
     void Translation(Position<float> *points,int size,float valueX,float valueY) {
@@ -68,6 +163,14 @@ namespace ENGINE
     
     float generateFloat() {
         return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    }
+
+    std::mt19937 gen(std::random_device{}());
+
+    float generateFloatInRange(float min, float max) {
+        assert(max > min);
+        std::uniform_real_distribution<float> dis(min,max);
+        return dis(gen);
     }
 
 
@@ -249,6 +352,7 @@ namespace ENGINE
     bool GlutEngine::Init(APPINFO info,int argc,char** argv) {
         glutInit(&argc, argv); // Initialize GLUT chez pas ce que les arguments de la cmd font
 
+        srand (static_cast <unsigned> (time(0)));
         // Crée une windows double buffer le gros
         glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
 

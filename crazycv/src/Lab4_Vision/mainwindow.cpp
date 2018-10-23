@@ -65,7 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionM_dianne,&QAction::triggered,this,&MainWindow::transformMedianne);
     connect(ui->actionMoyenne,&QAction::triggered,this,&MainWindow::transformMoyenne);
 
-    connect(&this->img,&ImageWrapper::imageChanged,this,&MainWindow::updateImage);
+    //connect(&this->img,&ImageWrapper::imageChanged,this,&MainWindow::updateImage);
 
     validPreviousNext();
     selectOpencvBackend();

@@ -96,8 +96,8 @@ void ImageWrapper::appendImage(cv::Mat m, AcquisionMode origin, ColorSpace color
 
 // Ajoute une nouveau image depuis une fichier
 bool ImageWrapper::appendImageFromFile(std::string filePath) {
-    //if(filePath.size() == 0) return false;
-    cv::Mat m = cv::imread(filePath);
+    if(filePath == "") return false;
+    cv::Mat m = cv::imread("C:\\Users\\wq\\test.jpg");
     cv::cvtColor(m,m,CV_BGR2RGB);
     // si l'image est empty on continue pas
     if(m.empty()) {
