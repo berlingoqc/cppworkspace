@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "youbotwebotsallinclude.h": "c",
+        "robot.h": "c",
+        "youbotdata.h": "c"
+    }
+}

@@ -12,8 +12,8 @@ WorldInfo {
   basicTimeStep 16
 }
 Viewpoint {
-  orientation 0.197946 0.969387 0.145279 4.82825
-  position -1.07206 0.51038 0.251172
+  orientation 0.1525 0.979842 0.129051 4.67923
+  position -2.85788 0.737426 -0.31471
   follow "robot"
 }
 Background {
@@ -52,21 +52,57 @@ DEF GROUND Solid {
   boundingObject USE GROUND_SHAPE
 }
 WoodBox {
-  translation 1.28886 0.2 -0.0561154
+  translation 8 0.2 0
   boxSize 0.6 0.4 0.6
 }
 KukaBox {
-  translation -0.113299 0.15876 -0.0090682
+  translation -0.0105068 0.165933 0.308725
+  rotation -2.36921e-05 1 -2.30629e-05 1.56343
 }
 KukaBox {
-  translation -0.0636397 0.15876 -0.06648
-  rotation 0 1 0 6.02139
+  translation -0.0680626 0.165934 0.258197
+  rotation -3.0805e-05 1 -2.29857e-05 1.30164
 }
 KukaBox {
-  translation -0.073299 0.15876 0.0709318
+  translation 0.0705041 0.165935 0.268961
+  rotation -2.36843e-05 1 -2.30553e-05 1.56343
 }
 YouBot {
-  translation 0 0.102838 0
+  hidden position_0_0 -43.561
+  hidden position_0_1 43.561
+  hidden position_0_2 -35.8177
+  hidden position_0_3 35.8177
+  hidden position_2_0 -9.75839e-07
+  hidden translation_3 4.88472e-09 1.01001e-10 0.0769108
+  hidden rotation_3 -0.0724278 0.997219 0.0175767 2.27253e-06
+  hidden position_3_0 1.57
+  hidden translation_4 0.033 7.26368e-11 0.0699486
+  hidden rotation_4 -0.999309 -0.0371557 -5.90564e-05 -2.14148e-07
+  hidden position_4_0 -2.63545
+  hidden translation_5 1.89887e-09 3.71075e-11 0.154966
+  hidden rotation_5 -0.997653 -0.0684719 -5.61282e-05 3.30634e-07
+  hidden position_5_0 1.78
+  hidden translation_6 1.06568e-09 2.6941e-11 0.134982
+  hidden rotation_6 0.0203847 -0.999791 -0.00166615 -7.39283e-11
+  hidden position_6_0 6.97185e-12
+  hidden translation_7 2.79563e-10 7.05145e-12 0.0809952
+  hidden rotation_7 -4.52988e-06 0.000174492 1 9.23173e-08
+  hidden position_7_0 8.83297e-13
+  hidden position_7_1 -3.28113e-13
+  hidden translation_8 2.70097e-11 1.06878e-10 0.0899996
+  hidden rotation_8 1 -5.05625e-13 -3.70889e-13 -1.5708
+  hidden translation_9 2.70888e-11 -1.05571e-10 0.0899996
+  hidden rotation_9 3.61826e-13 -0.707107 0.707107 3.14159
+  hidden translation_10 0.227939 -0.158 -0.0549602
+  hidden rotation_10 4.75693e-10 1 5.82187e-09 0.421291
+  hidden translation_11 0.228062 0.158 -0.0549601
+  hidden rotation_11 2.60552e-10 1 5.60937e-09 -0.421291
+  hidden translation_12 -0.228044 -0.158 -0.0549717
+  hidden rotation_12 -7.99483e-10 1 1.73712e-09 1.88144
+  hidden translation_13 -0.227956 0.158 -0.0549716
+  hidden rotation_13 9.04753e-10 1 1.56864e-09 -1.88144
+  translation -0.000517411 0.104936 0.194444
+  rotation 0.580194 -0.575937 -0.57591 -2.09018
   controller "youbot"
   bodySlot [
     Hokuyo_URG04LXUG01 {

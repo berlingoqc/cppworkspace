@@ -312,24 +312,25 @@ bool reelYB_ArmSetPosition(YouBotManipulator *myYouBotManipulator,double Positio
 
 void reelYB_MoveArmAndBaseByKeyboard(YouBotBase *myYoubotBase)
 {
-      double x=0.2,y=0.1,z=0;
-      double KinematicStep =0.01;
-      double ArmPosition[5];
-      double BasePosition[4];
-      double ArmPositionStep=0.01;
-      double BasePositionStep=1;
-      double BasePositionSpeed=2;
-      double BaseAngularStep = 5;
-      double BaseAngularSpeed=2;
-      struct timeval start, end;
-      long mtime, seconds, useconds; 
-      char LastInput='1';
-      int i,pc = 0;
-      wb_robot_keyboard_enable(TIME_STEP);
-      printf("Begin: MoveArmAndBaseByKeyboard \n\n");
-      while (true) 
-      {
-            step();
+
+double x=0.2,y=0.1,z=0;
+double KinematicStep =0.01;
+double ArmPosition[5];
+double BasePosition[4];
+double ArmPositionStep=0.01;
+double BasePositionStep=1;
+double BasePositionSpeed=2;
+double BaseAngularStep = 5;
+double BaseAngularSpeed=2;
+struct timeval start, end;
+long mtime, seconds, useconds; 
+char LastInput='1';
+int i,pc = 0;
+  wb_robot_keyboard_enable(TIME_STEP);
+printf("Begin: MoveArmAndBaseByKeyboard \n\n");
+  while (true) 
+  {
+    step();
 
     int c = wb_robot_keyboard_get_key();
 	
@@ -352,22 +353,22 @@ void reelYB_MoveArmAndBaseByKeyboard(YouBotBase *myYoubotBase)
         case 'X' :
             x+= KinematicStep;
            arm_ik( x, y, z);
-		      LastInput='x';
+		   LastInput='x';
            break; 
         case 'X' | WB_ROBOT_KEYBOARD_SHIFT:
             x-= KinematicStep;
            arm_ik( x, y, z);
-		    LastInput='X';
+		   LastInput='X';
            break;
         case 'Z' :
             z+= KinematicStep;
            arm_ik( x, y, z);
-		    LastInput='z';
+		   LastInput='z';
            break; 
         case 'Z' | WB_ROBOT_KEYBOARD_SHIFT:
             z-= KinematicStep;
-           arm_ik( x, y, z);
-		      LastInput='Z';
+           arm_ik( x, y, z);;
+		   LastInput='Z';
            break;
         case 'P':
             for(i=0;i<5;i++)
@@ -401,7 +402,7 @@ void reelYB_MoveArmAndBaseByKeyboard(YouBotBase *myYoubotBase)
 		  LastInput='4';
           break;  
         case '5':
-          ArmPosition[2]=ArmGetPositio12212n(2);
+          ArmPosition[2]=ArmGetPosition(2);
           ArmPosition[2]+=ArmPositionStep;
           arm_set_sub_arm_rotation(ARM3, ArmPosition[2]);
 		  LastInput='5';
