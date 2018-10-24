@@ -45,10 +45,12 @@ private slots:
     void selectCustomBackend();
     void selectOpencvBackend();
 
+
     void toHSV();
     void toBW();
     void toGS();
 
+    void showColorError(QString mustBe, QString is);
     void showHistogramme();
     void showDetailImage();
 

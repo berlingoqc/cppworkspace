@@ -1,6 +1,6 @@
 #include "imagelabel.h"
 
-QImage::Format ImageFormatQT[2] { QImage::Format_RGB888, QImage::Format_Grayscale8 };
+const QImage::Format ImageFormatQT[4] { QImage::Format_RGB888, QImage::Format_Grayscale8, QImage::Format_Grayscale8, QImage::Format_RGB888 };
 
 
 

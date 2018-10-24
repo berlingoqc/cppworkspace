@@ -59,50 +59,13 @@ void rgb_to_hsv(cv::Vec3b* ArrayA,cv::Vec3f* ArrayR,int size) {
     }
 }
 
+
 void gs_to_bw(uchar* a,uchar* b,int size) {
     for(int i(0);i<size;i++) {
         if(a[i] > 125) {
             b[i] = 255;
         } else {
             b[i] = 0;
-        }
-    }
-}
-
-void apply_filtre_moyenne(const Mat& myImage,const int size, Mat& out) {
-    // Assure que l'image soit en uchar
-    CV_Assert(myImage.depth() == CV_8U);
-    // Valide que le nombre de channel soit egal a 1
-    CV_Assert(MyImage.channels() == 1);
-
-    int nbrElement = size * size;
-    int offset = 1;
-    if(size == 5) 
-        offset = 2;
-    // crée notre nouvelle image out
-    out.create(MyImage.size(),MyImage.type());
-
-    for(int j=offset;j<MyImage.rows-offset; ++j) {
-        const uchar* previous2;
-        const uchar* previous = MyImage.ptr<uchar>(j-1);
-        const uchar* current = MyImage.ptr<uchar>(j);
-        const uchar* next = MyImage.ptr<uchar>(j+1);
-        const uchar* next2;
-        if(offset == 2) {
-            previous2 = MyImage.ptr<uchar>(j-2);
-            next2 = MyImage.ptr<uchar>(j+2);
-        }
-
-        uchar* output = out.ptr<uchar>(j);
-        uchar v;
-        for(int i=offset; i < MyImage.cols -offset;++i) {
-            // va chercher les valeurs de mon kernel de 3x3 et si besoin apres va chercher les autres points
-            v = previous[i] + previous[i-1] + previous[i+1] + current[i] + current[i+1] + current[i-1] + next[i] + next[i-1] + next[i+1];
-            if(size == 5) {
-                v = v + previous[i-2] + previous[i+2] + next[i+2] + next[i-2] + current[i-2] + current[i+2];
-                v = v + previous2[i] + previous2[i+1] + previous2[i+2] + previous2[i-1] + previous2[i-2] + next2[i] + next2[i+1] + next2[1+2] + next2[i-1] + next2[i-2]; 
-            }
-            *output++ = v;
         }
     }
 }
@@ -118,7 +81,7 @@ void ImageWrapper::callImageChanged() {
 }
 
 // Ajoute une nouveau image au bout de la queue
-void ImageWrapper::appendImage(cv::Mat m, AcquisionMode origin, ColorSpace color) {
+void ImageWrapper::appendImage(cv::Mat& m, AcquisionMode origin, ColorSpace color) {
     MyImage i;
     i.color = color;
     i.image = m;
@@ -129,12 +92,16 @@ void ImageWrapper::appendImage(cv::Mat m, AcquisionMode origin, ColorSpace color
     images.push_back(i);
     // mets l'indice vers l'element ajouter
     currentIndex = static_cast<int>(images.size()-1);
+    callImageChanged();
 }
 
 // Ajoute une nouveau image depuis une fichier
 bool ImageWrapper::appendImageFromFile(std::string filePath) {
     if(filePath == "") return false;
-    cv::Mat m = cv::imread("C:\\Users\\wq\\test.jpg");
+    cv::Mat m = cv::imread(filePath);
+    if(m.empty()) {
+        return false;
+    }
     cv::cvtColor(m,m,CV_BGR2RGB);
     // si l'image est empty on continue pas
     if(m.empty()) {
@@ -142,7 +109,6 @@ bool ImageWrapper::appendImageFromFile(std::string filePath) {
         return false;
     }
     appendImage(m,FromFile,RGB_CS);
-    callImageChanged();
     return true;
 }
 
@@ -162,7 +128,6 @@ bool ImageWrapper::appendImageFromCamera(int device) {
         if(cv::waitKey(0) == 'c') {
             cv::cvtColor(img,img,cv::COLOR_BGR2RGB);
             appendImage(img,FromCamera,RGB_CS);
-            callImageChanged();
             return true;
         }
     }
@@ -170,10 +135,8 @@ bool ImageWrapper::appendImageFromCamera(int device) {
 }
 
 // Obtient l'image a l'index courrant
-bool ImageWrapper::getCurrentImage(MyImage* dst) {
-    if(currentIndex < 0) return false;
-    dst = &images.at(static_cast<unsigned int>(currentIndex));
-    return true;
+MyImage ImageWrapper::getCurrentImage() {
+    return images.at(static_cast<unsigned int>(currentIndex));
 }
 
 // Change pour l'image précédente si possible        
@@ -220,16 +183,15 @@ int ImageWrapper::getCurrentIndex() { return currentIndex; }
 
 // Enregistre l'image courrante dans un fichier
 bool ImageWrapper::saveCurrentImage(const std::string filePath) {
-    MyImage i;
-    if(!getCurrentImage(&i)) return false;
+    MyImage i = getCurrentImage();
     return cv::imwrite(filePath,i.image);
 }
 
 
 // IMPLÉMENTATION IMAGETRANSFORMER        
 void ImageTransformer::toGS(cv::Mat& original,cv::Mat& m) {
+    m.create(original.rows,original.cols,CV_8U);
     if(mode == OpencvBackend) {
-        m = original.clone();
         cv::cvtColor(original,m,cv::COLOR_RGB2GRAY);
     } if (mode == CustomBackend) {
         cv::Vec3b* dataA = original.ptr<cv::Vec3b>(0);
@@ -271,9 +233,14 @@ void ImageTransformer::setTransformMatriceSize(int s) {
 
 }
 
-bool ImageTransformer::getColorHistogramme(cv::Mat& m, ColorHistogramme* h) {
+bool ImageTransformer::getColorHistogramme(cv::Mat& m,ColorHistogramme* h) {
     // Valide que l'image aye 3 channels et soit en rgb
     if(m.channels()!=3) return false;
+    for(int i=0;i<257;++i) {
+        h->Red[i] = 0;
+        h->Green[i] = 0;
+        h->Blue[i] = 0;
+    }
 
     int size = m.cols * m.rows;
     cv::Vec3b* vec = m.ptr<cv::Vec3b>(0);
@@ -283,9 +250,12 @@ bool ImageTransformer::getColorHistogramme(cv::Mat& m, ColorHistogramme* h) {
         uchar g = vec[i][1];
         uchar b = vec[i][2];
 
-        h->Red[r] = h->Red[r]++;
-        h->Green[g] = h->Green[g]++;
-        h->Blue[b] = h->Blue[b]++;
+        h->Red[r] = ++h->Red[r];
+        h->Green[g] = ++h->Green[g];
+        h->Blue[b] = ++h->Blue[b];
+    }
+    for(int i=0;i<257;i++) {
+        printf("R %d = %d G %d = %d B %d = %d\n",i,h->Red[i],i,h->Green[i],i,h->Blue[i]);
     }
     return true;
 }

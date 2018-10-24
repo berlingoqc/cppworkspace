@@ -6,6 +6,7 @@
 #include "cvheaders.h"
 
 #include <QFileDialog>
+#include <QStandardPaths>
 #include <QMessageBox>
 #include <QBoxLayout>
 #include <QObject>
@@ -65,12 +66,16 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionM_dianne,&QAction::triggered,this,&MainWindow::transformMedianne);
     connect(ui->actionMoyenne,&QAction::triggered,this,&MainWindow::transformMoyenne);
 
-    //connect(&this->img,&ImageWrapper::imageChanged,this,&MainWindow::updateImage);
+    connect(&this->img,&ImageWrapper::imageChanged,this,&MainWindow::updateImage);
 
     validPreviousNext();
     selectOpencvBackend();
 
-    img.appendImageFromFile("/home/wq/test.jpg");
+    QString fileName = QStandardPaths::locate(QStandardPaths::HomeLocation,"test.jpg");
+
+
+    img.appendImageFromFile(fileName.toStdString());
+
 }
 
 void MainWindow::updateStatusBar(const MyImage& img) {
@@ -163,11 +168,7 @@ void MainWindow::selectOpencvBackend() {
 }
 
 void MainWindow::toHSV() {
-    MyImage i;
-    if(!img.getCurrentImage(&i)) {
-        // fail to get image
-        return;
-    }
+    MyImage i = img.getCurrentImage();
     cv::Mat m = i.image.clone();
     transformer.toHSV(i.image,m);
     img.appendImage(m,FromTransformation,HSV_CS);
@@ -178,45 +179,39 @@ void MainWindow::toBW() {
 }
 
 void MainWindow::toGS() {
-    MyImage i;
-    if(!img.getCurrentImage(&i)) {
-        // fail to get image
-        return;
+    MyImage i = img.getCurrentImage();
+    if(i.image.empty()) {
+        std::cout << "Oups caliss " << std::endl;
     }
-    cv::Mat m = i.image.clone();
-    transformer.toHSV(i.image,m);
+    cv::Mat m;
+    transformer.toGS(i.image,m);
     img.appendImage(m,FromTransformation,GS_CS);
 }
 
 void MainWindow::showHistogramme() {
 
-    MyImage i;
-    if(!img.getCurrentImage(&i)) {
-        return;
-    }
+    MyImage i = img.getCurrentImage();
     if(i.color != RGB_CS) {
         // Si pas RGB on peut pas faire d'histogramme
+        showColorError("RGB ou GBR", ToString(i.color));
         return;
     }
     ColorHistogramme histogramme;
     if(!transformer.getColorHistogramme(i.image,&histogramme)) {
 
     }
-    QDialog mainDialog;
-    ColorWidget* colorWidget = new ColorWidget(histogramme.Red,histogramme.Green,histogramme.Blue,&mainDialog);
+    ColorWidget* colorWidget = new ColorWidget(histogramme.Red,histogramme.Green,histogramme.Blue);
+    colorWidget->resize(1400,500);
+    colorWidget->show();
 
-    mainDialog.setWindowModality(Qt::WindowModal);
-    mainDialog.setLayoutDirection(Qt::LayoutDirection::LeftToRight);
-
-    QBoxLayout mainDialogLayout(QBoxLayout::LeftToRight);
-    mainDialogLayout.addWidget(colorWidget);
-    mainDialogLayout.setMargin(0);
-
-    mainDialog.setLayout(&mainDialogLayout);
-    mainDialog.setWindowState(mainDialog.windowState() | Qt::WindowMaximized);
-    mainDialog.show();
 }
 void MainWindow::showDetailImage() {}
+
+void MainWindow::showColorError(QString mustBe,QString is) {
+    QMessageBox box;
+    box.critical(this,"Erreur",QString().sprintf("Erreur l'image est de couleur %s mais doit être %s pour effectuer cette tâche", is,mustBe));
+    box.show();
+}
 
 void MainWindow::transformPasseBas() {}
 void MainWindow::transformPasseHaut() {}

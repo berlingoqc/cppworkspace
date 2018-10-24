@@ -18,7 +18,7 @@ inline const char * ToString(BackendMode m) {
 }
 
 enum ColorSpace {
-    RGB_CS, HSV_CS, GS_CS, BW_CS
+    RGB_CS, GS_CS, BW_CS, HSV_CS
 };
 
 inline const char * ToString(ColorSpace m) {
@@ -50,6 +50,7 @@ struct ColorHistogramme {
 };
 
 
+
 struct MyImage {
     cv::Mat 		image;
     ColorSpace 		color;
@@ -78,14 +79,14 @@ class ImageWrapper : public QObject {
 
     public:
         // Ajoute une nouveau image au bout de la queue
-        void appendImage(cv::Mat m, AcquisionMode origin, ColorSpace color);
+        void appendImage(cv::Mat& m, AcquisionMode origin, ColorSpace color);
         // Ajoute une nouveau image depuis une fichier
         bool appendImageFromFile(std::string);
         // Ajout une image depuis une camera
         bool appendImageFromCamera(int device);
 
         // Obtient l'image a l'index courrant
-        bool getCurrentImage(MyImage* dst);
+        MyImage getCurrentImage();
 
         // Change pour l'image précédente si possible        
         bool previousImage();
