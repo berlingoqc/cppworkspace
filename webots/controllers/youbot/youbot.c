@@ -263,6 +263,8 @@ int robotLoop() {
 				// Va chercher la ligne formé par nos deux points
 				struct line l = getLineFromScan(scan[0]);
 
+				// Va chercher 
+
 				return;
 			}
 			break;
