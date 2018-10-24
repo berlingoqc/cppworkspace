@@ -70,8 +70,7 @@ MainWindow::MainWindow(QWidget *parent) :
     validPreviousNext();
     selectOpencvBackend();
 
-    img.appendImageFromFile("C:\\Users\\wq\\test.jpg");
-
+    img.appendImageFromFile("/home/wq/test.jpg");
 }
 
 void MainWindow::updateStatusBar(const MyImage& img) {

@@ -5,6 +5,7 @@
 // import les trucs de math
 #include <glm/glm.hpp>
 #include <glm/trigonometric.hpp>    // sin , cos , radians ...
+#include <glm/gtc/matrix_transform.hpp>
 #include <glm/exponential.hpp>      // pow , log, exp2, sqrt, ...
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/constants.hpp>

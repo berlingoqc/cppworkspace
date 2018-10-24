@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "Windows",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": "D:\\Qt\\Tools\\mingw530_32\\bin\\g++.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}

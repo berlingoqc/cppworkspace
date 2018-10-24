@@ -25,8 +25,8 @@ namespace ENGINE
      };
 
     // Constante de l'écran
-    const int DEFAULT_SCREEN_WIDTH  = 640;
-    const int DEFAULT_SCREEN_HEIGHT = 480;
+    const int DEFAULT_SCREEN_WIDTH  = 800;
+    const int DEFAULT_SCREEN_HEIGHT = 600;
     const int SCREEN_FPS    = 60;
 
 
@@ -87,6 +87,8 @@ namespace ENGINE
         T x;
         T y;
     };
+
+
 
     template<typename T>
     struct MyLine {
@@ -151,6 +153,9 @@ namespace ENGINE
                 points[i].x = -points[i].x;
         }
     }
+
+
+    
 
 
     template<typename T>
@@ -235,6 +240,7 @@ namespace ENGINE
         bool    isMax;
         int     windowId;
         int     wHeight, wWidth, sHeight, sWidth;
+        bool    mode3d;
 
 
         void(*render)(void) = NULL;
@@ -249,6 +255,10 @@ namespace ENGINE
             GlutEngine(int) {
                 isMax = false;
             }
+            GlutEngine(bool v) {
+                mode3d = v;
+
+            } 
             bool Init(APPINFO,int,char**);    
             void Run();
 
@@ -289,6 +299,10 @@ namespace ENGINE
 
         // Initialize la couleur pour clean l'ecran
         glClearColor(0.f,0.f,0.f,1.f);
+
+        if(mode3d) {
+            glEnable(GL_DEPTH_TEST);
+        }
 
         // Valide s'il y a des erreurs
         GLenum error = glGetError();
@@ -354,7 +368,12 @@ namespace ENGINE
 
         srand (static_cast <unsigned> (time(0)));
         // Crée une windows double buffer le gros
-        glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
+        if(mode3d) {
+            glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+
+        } else {
+            glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
+        }
 
         wHeight = info.windowHeight;
         wWidth = info.windowWidth;

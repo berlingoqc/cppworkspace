@@ -1,4 +1,4 @@
-#LDLIBS=-lopencv_core -lopencv_videoio -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs
+#LDLIBS=-lopencv_core -lopencv_videoio -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs 
 LDLIBS=-lopencv_world
 EXEC_NAME=tracking.exe
 

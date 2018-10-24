@@ -59,13 +59,50 @@ void rgb_to_hsv(cv::Vec3b* ArrayA,cv::Vec3f* ArrayR,int size) {
     }
 }
 
-
 void gs_to_bw(uchar* a,uchar* b,int size) {
     for(int i(0);i<size;i++) {
         if(a[i] > 125) {
             b[i] = 255;
         } else {
             b[i] = 0;
+        }
+    }
+}
+
+void apply_filtre_moyenne(const Mat& myImage,const int size, Mat& out) {
+    // Assure que l'image soit en uchar
+    CV_Assert(myImage.depth() == CV_8U);
+    // Valide que le nombre de channel soit egal a 1
+    CV_Assert(MyImage.channels() == 1);
+
+    int nbrElement = size * size;
+    int offset = 1;
+    if(size == 5) 
+        offset = 2;
+    // crée notre nouvelle image out
+    out.create(MyImage.size(),MyImage.type());
+
+    for(int j=offset;j<MyImage.rows-offset; ++j) {
+        const uchar* previous2;
+        const uchar* previous = MyImage.ptr<uchar>(j-1);
+        const uchar* current = MyImage.ptr<uchar>(j);
+        const uchar* next = MyImage.ptr<uchar>(j+1);
+        const uchar* next2;
+        if(offset == 2) {
+            previous2 = MyImage.ptr<uchar>(j-2);
+            next2 = MyImage.ptr<uchar>(j+2);
+        }
+
+        uchar* output = out.ptr<uchar>(j);
+        uchar v;
+        for(int i=offset; i < MyImage.cols -offset;++i) {
+            // va chercher les valeurs de mon kernel de 3x3 et si besoin apres va chercher les autres points
+            v = previous[i] + previous[i-1] + previous[i+1] + current[i] + current[i+1] + current[i-1] + next[i] + next[i-1] + next[i+1];
+            if(size == 5) {
+                v = v + previous[i-2] + previous[i+2] + next[i+2] + next[i-2] + current[i-2] + current[i+2];
+                v = v + previous2[i] + previous2[i+1] + previous2[i+2] + previous2[i-1] + previous2[i-2] + next2[i] + next2[i+1] + next2[1+2] + next2[i-1] + next2[i-2]; 
+            }
+            *output++ = v;
         }
     }
 }
