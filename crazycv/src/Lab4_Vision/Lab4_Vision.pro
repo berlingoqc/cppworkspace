@@ -31,17 +31,20 @@ SOURCES += \
         mainwindow.cpp \
     imagelabel.cpp \
     colorwidget.cpp \
-    imagewrapper.cpp
+    imagewrapper.cpp \
+    starttracking.cpp
 
 HEADERS += \
         mainwindow.h \
     cvheaders.h \
     imagelabel.h \
     colorwidget.h \
-    imagewrapper.h
+    imagewrapper.h \
+    starttracking.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    starttracking.ui
 
 win32 {
         LIBS += -LC:/msys64/mingw64/bin -lopencv_core342 -lopencv_videoio342 -lopencv_imgproc342 -lopencv_highgui342 -lopencv_imgcodecs342

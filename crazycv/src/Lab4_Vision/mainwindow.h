@@ -42,6 +42,9 @@ private slots:
     void closeImage();
     void quitApp();
 
+
+    void videoTracking();
+
     void selectCustomBackend();
     void selectOpencvBackend();
 

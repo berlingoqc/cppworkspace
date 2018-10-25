@@ -71,7 +71,9 @@ void createMyTrackBar() {
 
 
 bool parseKeyPress(int keyNum) {
-    return true;
+    if(keyNum > 0)
+        return true;
+    return false;
 }
 
 void drawObject(int x, int y, cv::Mat& frame) {
@@ -163,8 +165,7 @@ int main(int argv,char ** argc)
 
     int x=0, y=0;
 
-    /*
-	cv::VideoCapture cap(device);
+	cv::VideoCapture cap("C:\\Users\\wq\\lol.mpg");
     if(!cap.isOpened()) {
         std::cerr << "Impossible d'ouvrir la capture sur le device " << device << std::endl;
         return 1;
@@ -172,7 +173,6 @@ int main(int argv,char ** argc)
 
     cap.set(CAP_PROP_FRAME_HEIGHT,CAPTURE_HEIGHT);
     cap.set(CAP_PROP_FRAME_WIDTH,CAPTURE_WIDTH);
-    */
 
     cv::namedWindow(AppName);
 
@@ -180,25 +180,18 @@ int main(int argv,char ** argc)
 
     cv::Mat img, imgHsv, imgThresh, imgMorph;
 
-    img = imread("D:\\image.jpg");
-    if(img.empty()) {
-        std::cerr << "Image empty" << std::endl;
-        return 1;
-    }
     CAPTURE_HEIGHT = img.rows;
     CAPTURE_WIDTH = img.cols;
 
-
     while(1) {
-        /*
         if(!cap.read(img)) {
         	std::cerr << "Error capturing " << std::endl;
         	return 1;
         }
-        */
+
 
         // Fait notre traitement sur l'image 
-
+        cv::medianBlur(img,img,5);
         // change l'image en hsv
         cvtColor(img,imgHsv,COLOR_BGR2HSV);
         
@@ -220,11 +213,13 @@ int main(int argv,char ** argc)
 
 
                 
-        if(parseKeyPress(cv::waitKey(0))) {
+        if(parseKeyPress(cv::waitKey(30))) {
         	// Quitte la boucle
     		break;
 		}
 	}
+    cap.release();
+    cvDestroyAllWindows();
 
     return 0;
 }

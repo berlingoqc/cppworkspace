@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>550</width>
     <height>300</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>550</width>
      <height>21</height>
     </rect>
    </property>
@@ -95,11 +95,19 @@
     <addaction name="menuFiltre"/>
     <addaction name="menuOption"/>
    </widget>
+   <widget class="QMenu" name="menuVid_o">
+    <property name="title">
+     <string>Vidéo</string>
+    </property>
+    <addaction name="actionTracking"/>
+    <addaction name="actionEnregistrement"/>
+   </widget>
    <addaction name="menuFichier"/>
    <addaction name="menuBackend"/>
    <addaction name="menuCouleur"/>
    <addaction name="menuInformation"/>
    <addaction name="menuTransformation"/>
+   <addaction name="menuVid_o"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -213,6 +221,16 @@
   <action name="actionKernel_5x5">
    <property name="text">
     <string>Kernel 5x5</string>
+   </property>
+  </action>
+  <action name="actionTracking">
+   <property name="text">
+    <string>Tracking</string>
+   </property>
+  </action>
+  <action name="actionEnregistrement">
+   <property name="text">
+    <string>Enregistrement</string>
    </property>
   </action>
  </widget>

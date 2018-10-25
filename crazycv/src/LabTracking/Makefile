@@ -1,5 +1,5 @@
-#LDLIBS=-lopencv_core -lopencv_videoio -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs
-LDLIBS=-lopencv_world
+LDLIBS=-LC:/msys64/mingw64/bin -lopencv_core342 -lopencv_videoio342 -lopencv_imgproc342 -lopencv_highgui342 -lopencv_imgcodecs342
+#LDLIBS=-lopencv_world
 EXEC_NAME=tracking.exe
 
 all : $(EXEC_NAME)

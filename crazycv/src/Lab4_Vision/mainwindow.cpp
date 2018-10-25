@@ -4,6 +4,7 @@
 #include "imagelabel.h"
 #include "imagewrapper.h"
 #include "cvheaders.h"
+#include "starttracking.h"
 
 #include <QFileDialog>
 #include <QStandardPaths>
@@ -71,6 +72,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&this->img,&ImageWrapper::imageChanged,this,&MainWindow::updateImage);
 
+    connect(ui->actionTracking,&QAction::triggered,this,&MainWindow::videoTracking);
+
     validPreviousNext();
     selectOpencvBackend();
 
@@ -122,6 +125,11 @@ void MainWindow::loadFileFromFile() {
         msgBox.setText("Erreur dans l'ouverture du fichier");
         msgBox.exec();
     }
+}
+
+void MainWindow::videoTracking() {
+    StartTracking* t = new StartTracking(this);
+    t->show();
 }
 
 void MainWindow::previousImage() {
