@@ -50,7 +50,7 @@ private slots:
     void toBW();
     void toGS();
 
-    void showColorError(QString mustBe, QString is);
+    void showError(QString message);
     void showHistogramme();
     void showDetailImage();
 
@@ -59,6 +59,11 @@ private slots:
 
     void transformMedianne();
     void transformMoyenne();
+
+    void selectKernel3();
+    void selectKernel5();
+
+    bool validBeforeOperation();
 
     void updateImage(MyImage img);
 };

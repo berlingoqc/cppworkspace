@@ -66,6 +66,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionM_dianne,&QAction::triggered,this,&MainWindow::transformMedianne);
     connect(ui->actionMoyenne,&QAction::triggered,this,&MainWindow::transformMoyenne);
 
+    connect(ui->actionKernel_3x3,&QAction::triggered,this,&MainWindow::selectKernel3);
+    connect(ui->actionKernel_5x5,&QAction::triggered,this,&MainWindow::selectKernel5);
+
     connect(&this->img,&ImageWrapper::imageChanged,this,&MainWindow::updateImage);
 
     validPreviousNext();
@@ -157,7 +160,7 @@ void MainWindow::quitApp() {
 
 void MainWindow::selectCustomBackend() {
     transformer.setBackend(CustomBackend);
-    this->setWindowTitle("Lab4_Vision - Backend : Maison");
+    this->setWindowTitle("Lab4_Vision - Backend : Custom");
 
 }
 
@@ -167,21 +170,43 @@ void MainWindow::selectOpencvBackend() {
     this->setWindowTitle("Lab4_Vision - Backend : OpenCV");
 }
 
+bool MainWindow::validBeforeOperation() {
+    if(img.getCurrentIndex() < 0) {
+        showError("Aucune image de charger");
+    }
+    return true;
+
+}
+
 void MainWindow::toHSV() {
+    if(!validBeforeOperation()) return;
     MyImage i = img.getCurrentImage();
-    cv::Mat m = i.image.clone();
+    if(i.color != RGB_CS) {
+        showError("Erreur l'image doit être en RGB pour la changer en HSV");
+        return;
+    }
+    cv::Mat m;
     transformer.toHSV(i.image,m);
     img.appendImage(m,FromTransformation,HSV_CS);
 }
 
 void MainWindow::toBW() {
-
+    if(!validBeforeOperation()) return;
+    MyImage i = img.getCurrentImage();
+    if(i.color != GS_CS) {
+        showError("L'image doit être en GS pour la changer en BW");
+        return;
+    }
+    cv::Mat m;
+    transformer.toBW(i.image,m);
+    img.appendImage(m,FromTransformation,BW_CS);
 }
 
 void MainWindow::toGS() {
+    if(!validBeforeOperation()) return;
     MyImage i = img.getCurrentImage();
-    if(i.image.empty()) {
-        std::cout << "Oups caliss " << std::endl;
+    if(i.color != RGB_CS) {
+        showError("L'image doit être en RGB pour la changer en GS");
     }
     cv::Mat m;
     transformer.toGS(i.image,m);
@@ -193,31 +218,69 @@ void MainWindow::showHistogramme() {
     MyImage i = img.getCurrentImage();
     if(i.color != RGB_CS) {
         // Si pas RGB on peut pas faire d'histogramme
-        showColorError("RGB ou GBR", ToString(i.color));
+        showError("Erreur l'image doit être de format RGB pour afficher l'histogramme de couleur");
         return;
     }
     ColorHistogramme histogramme;
     if(!transformer.getColorHistogramme(i.image,&histogramme)) {
-
+        showError("Erreur dans l'obtention de l'histogramme depuis l'image");
+        return;
     }
     ColorWidget* colorWidget = new ColorWidget(histogramme.Red,histogramme.Green,histogramme.Blue);
     colorWidget->resize(1400,500);
     colorWidget->show();
 
 }
-void MainWindow::showDetailImage() {}
+void MainWindow::showDetailImage() {
 
-void MainWindow::showColorError(QString mustBe,QString is) {
+}
+
+void MainWindow::showError(QString message) {
     QMessageBox box;
-    box.critical(this,"Erreur",QString().sprintf("Erreur l'image est de couleur %s mais doit être %s pour effectuer cette tâche", is,mustBe));
+    box.critical(this,"Erreur",message);
     box.show();
 }
 
-void MainWindow::transformPasseBas() {}
-void MainWindow::transformPasseHaut() {}
+void MainWindow::transformPasseBas() {
+    if(!validBeforeOperation()) return;
+    MyImage i = img.getCurrentImage();
+    cv::Mat m;
+    transformer.transformPasseBas(i.image,m);
+    img.appendImage(m,FromTransformation,i.color);
+}
 
-void MainWindow::transformMedianne()  {}
-void MainWindow::transformMoyenne() {}
+void MainWindow::transformPasseHaut() {
+    if(!validBeforeOperation()) return;
+    MyImage i = img.getCurrentImage();
+    cv::Mat m;
+    transformer.transformPasseHaut(i.image,m);
+    img.appendImage(m,FromTransformation,i.color);
+}
+
+void MainWindow::transformMedianne()  {
+    if(!validBeforeOperation()) return;
+    MyImage i = img.getCurrentImage();
+    cv::Mat m;
+    transformer.transformMedianne(i.image,m);
+    img.appendImage(m,FromTransformation,GS_CS);
+}
+
+void MainWindow::transformMoyenne() {
+    if(!validBeforeOperation()) return;
+    MyImage i = img.getCurrentImage();
+    cv::Mat m;
+    transformer.transformMoyenne(i.image,m);
+    img.appendImage(m,FromTransformation,GS_CS);
+}
+
+
+void MainWindow::selectKernel3() {
+    transformer.setTransformMatriceSize(3);
+}
+
+void MainWindow::selectKernel5() {
+    transformer.setTransformMatriceSize(5);
+}
 
 
 MainWindow::~MainWindow()

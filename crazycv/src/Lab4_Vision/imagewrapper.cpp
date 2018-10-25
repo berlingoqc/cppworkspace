@@ -6,6 +6,11 @@
 
 // Fonction de conversion de mon backend
 
+const char kernelPassHaut3x3[3][3] { {0, -1 , 0}, {-1, 5, -1}, {0, -1, 0} };
+const char kernelPasseBas3x3[3][3] { {1, 1, 1},{ 1, 4, 1},{1, 1, 1}};
+const char kerneldefault3x3[3][3] { {1, 1, 1}, {1, 1, 1},{ 1, 1, 1}};
+const char kerneldefault5x5[5][5] {{1,1,1,1,1}, {1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1}};
+
 
 float max(float a,float b,float c) {
     if( a > b && a > c) return a;
@@ -28,9 +33,9 @@ void rgb_to_gs(cv::Vec3b* a,uchar* b,int size) {
 
 void rgb_to_hsv(cv::Vec3b* ArrayA,cv::Vec3f* ArrayR,int size) {
     for(int index=0;index<size;index++) {
-        float Bs = ArrayA[index][0]/255.0f;
+        float Bs = ArrayA[index][2]/255.0f;
         float Gs = ArrayA[index][1]/255.0f;
-        float Rs = ArrayA[index][2]/255.0f;
+        float Rs = ArrayA[index][0]/255.0f;
 
         float CMax = max(Bs,Gs,Rs);
         float CMin = min(Bs,Gs,Rs);
@@ -70,7 +75,99 @@ void gs_to_bw(uchar* a,uchar* b,int size) {
     }
 }
 
+void apply_filtre_median(cv::Mat& MyImage,cv::Mat& out,int size) {
+    uint nbrElement = static_cast<unsigned int>(size * size);
+    int offset = 1;
+    if(size == 5)
+        offset = 2;
 
+    std::vector<uchar> testValue(nbrElement+1);
+    for(int j=offset;j<MyImage.rows-offset; ++j) {
+        const uchar* previous2;
+        const uchar* previous = MyImage.ptr<uchar>(j-1);
+        const uchar* current = MyImage.ptr<uchar>(j);
+        const uchar* next = MyImage.ptr<uchar>(j+1);
+        const uchar* next2;
+
+        if(offset == 2) {
+            previous2 = MyImage.ptr<uchar>(j-2);
+            next2 = MyImage.ptr<uchar>(j+2);
+        }
+
+        uchar* output = out.ptr<uchar>(j);
+        for(int i=offset; i < MyImage.cols -offset;++i) {
+            // va chercher les valeurs de mon kernel de 3x3 et si besoin apres va chercher les autres points
+            for(int z=i-offset;z<=i+offset;z++) {
+                testValue.push_back(previous[i]);
+                testValue.push_back(current[i]);
+                testValue.push_back(next[i]);
+                if(offset == 2) {
+                    testValue.push_back(previous2[i]);
+                    testValue.push_back(next2[i]);
+                }
+            }
+            // Ajout une valeur aberante
+            testValue.push_back(255);
+            // Sort la list
+            std::sort(testValue.begin(),testValue.end());
+            // assigne la valeur central comme output
+            output[i] = testValue.at((nbrElement+1)/2);
+            testValue.clear();
+        }
+    }
+}
+
+// Passer le mode 0 pour effectuer une moyenne, size correspond a la grandeur de mon kernel
+template<size_t N>
+void apply_filtre_moyenne(cv::Mat& MyImage,cv::Mat& out, int size,int mode,const char (&kernel)[N][N]) {
+    uint nbrElement = 1;
+    if(mode == 0) {
+        nbrElement = static_cast<unsigned int>(size * size);
+    }
+    int offset = 1;
+    if(size == 5)
+        offset = 2;
+
+    for(int j=offset;j<MyImage.rows-offset; ++j) {
+        const uchar* previous2;
+        const uchar* previous = MyImage.ptr<uchar>(j-1);
+        const uchar* current = MyImage.ptr<uchar>(j);
+        const uchar* next = MyImage.ptr<uchar>(j+1);
+        const uchar* next2;
+
+        uchar klv = 0;
+        if(offset == 2) {
+            previous2 = MyImage.ptr<uchar>(j-2);
+            next2 = MyImage.ptr<uchar>(j+2);
+            klv = 1;
+        }
+
+        uchar* output = out.ptr<uchar>(j);
+
+        uchar v;
+        uchar k = 0;
+
+
+
+        for(int i=offset; i < MyImage.cols -offset;++i) {
+            // va chercher les valeurs de mon kernel de 3x3 et si besoin apres va chercher les autres points
+            v = 0;
+            k = 0;
+
+            for(int z=i-offset;z<=i+offset;z++) {
+                v += previous[i] * kernel[klv][k];
+                v += current[i] * kernel[klv+1][k];
+                v += next[i] * kernel[klv+2][k];
+                if(offset==2) {
+                    v += previous2[klv-1];
+                    v += next2[klv+3];
+                }
+                k += 1;
+            }
+            output[i] = cv::saturate_cast<uchar>( v / nbrElement );
+        }
+    }
+}
 
 // IMPLEMENTATION IMAGEWRAPPER
 
@@ -193,10 +290,21 @@ void ImageTransformer::toGS(cv::Mat& original,cv::Mat& m) {
     m.create(original.rows,original.cols,CV_8U);
     if(mode == OpencvBackend) {
         cv::cvtColor(original,m,cv::COLOR_RGB2GRAY);
-    } if (mode == CustomBackend) {
+    } else if (mode == CustomBackend) {
         cv::Vec3b* dataA = original.ptr<cv::Vec3b>(0);
         uchar* dataR = m.ptr<uchar>(0);
         rgb_to_gs(dataA,dataR,original.rows*original.cols);
+    }
+}
+
+void ImageTransformer::toBW(cv::Mat& i,cv::Mat& m) {
+    m.create(i.rows,i.cols,CV_8U);
+    if(mode == OpencvBackend) {
+        cv::threshold(i,m,100,255,cv::THRESH_BINARY);
+    } else if( mode == CustomBackend) {
+        uchar* dataA = i.ptr<uchar>(0);
+        uchar* dataR = m.ptr<uchar>(0);
+        gs_to_bw(dataA,dataR,i.rows*i.cols);
     }
 }
 
@@ -204,23 +312,57 @@ void ImageTransformer::toHSV(cv::Mat& i,cv::Mat& m) {
     if(mode == OpencvBackend) {
         cv::cvtColor(i,m,cv::COLOR_RGB2HSV);
     } else { // Custom backend
+        m.create(i.rows,i.cols,CV_32FC3);
         cv::Vec3b* dataA = i.ptr<cv::Vec3b>(0);
         cv::Vec3f* dataR = m.ptr<cv::Vec3f>(0);
         rgb_to_hsv(dataA,dataR,i.rows*i.cols);
     }
 }
         
-void ImageTransformer::transformPasseBas(cv::Mat&,cv::Mat&) {
+void ImageTransformer::transformPasseBas(cv::Mat& i,cv::Mat& o) {
+    o = i.clone();
+    if(mode == OpencvBackend) {
+        cv::blur(i,o,cv::Size(matriceSize,matriceSize),cv::Point(-1,-1));
+    } else {
+        if(matriceSize == 3) {
+            apply_filtre_moyenne<3>(i,o,matriceSize,0,kernelPasseBas3x3);
+        } else {
+            apply_filtre_moyenne<5>(i,o,matriceSize,0,kerneldefault5x5);
+        }
+    }
+}
+void ImageTransformer::transformPasseHaut(cv::Mat& i,cv::Mat& o) {
+    o = i.clone();
+    if(mode == OpencvBackend) {
+        cv::blur(i,o,cv::Size(matriceSize,matriceSize),cv::Point(-1,-1));
+    } else {
+        if(matriceSize == 3) {
+            apply_filtre_moyenne<3>(i,o,matriceSize,0,kernelPassHaut3x3);
+        } else {
+            apply_filtre_moyenne<5>(i,o,matriceSize,0,kerneldefault5x5);
+        }
+    }
+}
+void ImageTransformer::transformMedianne(cv::Mat& i,cv::Mat& o) {
+    o = i.clone();
+    if(mode == OpencvBackend) {
+        cv::medianBlur(i,o,matriceSize);
+    } else {
+        apply_filtre_median(i,o,matriceSize);
+    }
 
 }
-void ImageTransformer::transformPasseHaut(cv::Mat&,cv::Mat&) {
-
-}
-void ImageTransformer::transformMedianne(cv::Mat&,cv::Mat&) {
-
-}
-void ImageTransformer::transformMoyenne(cv::Mat&,cv::Mat&) {
-
+void ImageTransformer::transformMoyenne(cv::Mat& i,cv::Mat& o) {
+    o = i.clone();
+    if(mode == OpencvBackend) {
+        cv::blur(i,o,cv::Size(matriceSize,matriceSize),cv::Point(-1,-1));
+    } else {
+        if(matriceSize == 3) {
+            apply_filtre_moyenne<3>(i,o,matriceSize,0,kerneldefault3x3);
+        } else {
+            apply_filtre_moyenne<5>(i,o,matriceSize,0,kerneldefault5x5);
+        }
+    }
 }
         
 void ImageTransformer::setBackend(BackendMode mode) {

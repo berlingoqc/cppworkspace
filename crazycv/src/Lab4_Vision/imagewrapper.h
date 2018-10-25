@@ -127,6 +127,7 @@ class ImageTransformer {
         
         void toGS(cv::Mat&,cv::Mat&);
         void toHSV(cv::Mat&,cv::Mat&);
+        void toBW(cv::Mat&,cv::Mat&);
         
         void transformPasseBas(cv::Mat&,cv::Mat&);
         void transformPasseHaut(cv::Mat&,cv::Mat&);

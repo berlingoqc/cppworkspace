@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -84,8 +84,16 @@
      <addaction name="actionMoyenne"/>
      <addaction name="actionM_dianne"/>
     </widget>
+    <widget class="QMenu" name="menuOption">
+     <property name="title">
+      <string>Option</string>
+     </property>
+     <addaction name="actionKernel_3x3"/>
+     <addaction name="actionKernel_5x5"/>
+    </widget>
     <addaction name="menuEnlever_bruit"/>
     <addaction name="menuFiltre"/>
+    <addaction name="menuOption"/>
    </widget>
    <addaction name="menuFichier"/>
    <addaction name="menuBackend"/>
@@ -195,6 +203,16 @@
   <action name="actionFermer">
    <property name="text">
     <string>Fermer</string>
+   </property>
+  </action>
+  <action name="actionKernel_3x3">
+   <property name="text">
+    <string>Kernel 3x3</string>
+   </property>
+  </action>
+  <action name="actionKernel_5x5">
+   <property name="text">
+    <string>Kernel 5x5</string>
    </property>
   </action>
  </widget>
