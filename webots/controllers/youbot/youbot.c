@@ -20,21 +20,67 @@
 // Définit le nombre d'item maximum detecter par le lazer
 #define LAZER_ITEMS_DETECTION 1
 
+// Definit de la distance a laquelle le robot va commencer la face d'approche
 #define DISTANCE_DOCKING 1000.0f
 
+// Constance pour pi qui est deja definit dans math.h mais faut inclure les defines pis ca me tente pas
 #define M_PI 3.14159265358979323846f
 
-
 // Le nombre d'index que je saute dans le lazer au début et a la fin pour me crée un zone de 180 d au lieu de 240
-int OFFSETLAZER = 86;
+#define OFFSETLAZER 86
 // Le nombre de valeur que je skip dans le lazer quand je regarde s'il y a des objets
-int OFFSETVALIDATION = 3;
+#define OFFSETVALIDATION 3
 
 
-// Les différents états que le robot peut avoir 
-enum ROBOT_STATE { SEARCHING_OBJECT , REACHING_OBJECT, ALLIGNEMENT_OBJECT, TASK_OBJECT, END_SEQUENCE, MANUAL_SEQUENCE };
+// Définit des mes enum avec un instruction de preproccesseur pour generer l'équivalent en string pour afficher le debug
 
-enum CADRAN { RIGHT_CADRAN, LEFT_CADRAN };
+#define GENERATE_ENUM(ENUM) ENUM,
+#define GENERATE_STRINGS(STRING) #STRING,
+
+
+#define FOREACH_DIRECTION(DIRECTION) \
+		DIRECTION(INC) \
+		DIRECTION(DEC) \
+		DIRECTION(STABLE) \
+		DIRECTION(UNKNOW) \
+
+#define FOREACH_ROBOTSTATE(ROBOTSTATE) \
+		ROBOTSTATE(SEARCHING_OBJECT) \
+		ROBOTSTATE(REACHING_OBJECT) \
+		ROBOTSTATE(ALLIGNEMENT_OBJECT) \
+		ROBOTSTATE(TASK_OBJECT) \
+		ROBOTSTATE(END_SEQUENCE) \
+		ROBOTSTATE(MANUAL_SEQUENCE) \
+
+#define FOREACH_CADRAN(CADRAN) \
+		CADRAN(LEFT_CADRAN) \
+		CADRAN(RIGHT_CADRAN) \
+
+enum CADRAN_ENUM {
+	FOREACH_CADRAN(GENERATE_ENUM)
+};
+
+static const char* CADRAN_STRING[] = {
+	FOREACH_CADRAN(GENERATE_STRINGS)
+};
+
+enum DIRECTION_ENUM {
+	FOREACH_DIRECTION(GENERATE_ENUM)
+};
+
+static const char *DIRECTION_STRING[] = {
+	FOREACH_DIRECTION(GENERATE_STRINGS)
+};
+
+enum ROBOTSTATE_ENUM {
+	FOREACH_ROBOTSTATE(GENERATE_ENUM)
+};
+
+static const char *ROBOTSTATE_STRING[] = {
+	FOREACH_ROBOTSTATE(GENERATE_STRINGS)
+};
+
+
 
 typedef struct {
 	float 	x;
@@ -53,6 +99,19 @@ struct lscan {
 	float	distanceEnd;
 	int		indexEnd;
 };
+
+
+static const vec2f robotvector = {0,1};
+
+
+// Retourne le vecteur qui sépare deux points
+vec2f getVectorBetweenPoints(const vec2f* p1, const vec2f* p2) {
+	return (vec2f){ p2->x - p1->x, p2->y - p1->y};
+}
+
+float getAngleBetweenVector(const vec2f* p1, const vec2f* p2) {
+	return atan2(p2->x, p2->y) - atan2(p1->x, p1->y);
+}
 
 // retourne l'angle du point dans le demi cercle du lazer a partir de l'index de la valeur
 float getAngleFromIndex(int index) {
@@ -109,11 +168,11 @@ struct line getLineFromScan(struct lscan itemScan) {
 	struct line l;
 	l.p1 = getVectorToPointFromScan(itemScan.distanceStart,itemScan.indexStart);
 	l.p2 = getVectorToPointFromScan(itemScan.distanceEnd,itemScan.indexEnd);
-
 	return l;
 }
 
 
+// scanLaserForObject recoit le pointeur pour la structure lscan qui contient l'index et la distance du début et de la premiere face d'un object trouver
 int scanLaserForObject(struct lscan* items) {
 	float lazerscan[LASERSIZE];
 	if(!GetLaserData(lazerscan,0.0f,0.0f)) {
@@ -122,7 +181,7 @@ int scanLaserForObject(struct lscan* items) {
 
 	// les valeurs pour le début et la fin de l'object trouvé avec un nombre de valeur null de 2
 	struct lscan scan = { 0.0f, 0, 0.0f, 0 };
-		
+	int direction = UNKNOW;
 	int i;
 	// Cherche pour un segment de point en ligne qui formerait une ligne
 	for(i = OFFSETLAZER; i < (LASERSIZE - OFFSETLAZER);i += 3) {
@@ -130,11 +189,42 @@ int scanLaserForObject(struct lscan* items) {
 			if(scan.distanceStart == 0.0) { // si on na pas trouver le depart on le met comme étant
 				scan.distanceStart = lazerscan[i];
 				scan.indexStart = i;
+				continue;
+			} else if (scan.distanceEnd == 0.0) {
+				// premiere assignation de la variable de fin
+				// on regarde le sens entre la variable de debut et de fin
+				if(lazerscan[i] < scan.distanceStart) {
+					// la valeur diminue a chaque itération
+					direction = DEC;
+				} else if (scan.distanceStart < lazerscan[i]) {
+					direction = INC;
+				} else {
+					// Les valeurs sont égales donc on n'attend pour définir la direction
+					direction = STABLE;
+				}
+				scan.distanceEnd = lazerscan[i]; // met la fin a cette distance
+				scan.indexEnd = i;
+				continue;
 			}
+			if(direction == DEC && scan.distanceEnd < lazerscan[i]) {
+				// supposé descendre mais sa augmente donc on quiite la boucle
+				printf("Value sont supposé descendre mais %f > %f \n",lazerscan[i],scan.distanceEnd);
+				break;
+			} else if (direction == INC && lazerscan[i] < scan.distanceEnd) {
+				// supposé augmenter mais sa descend donc on quitte la boucle
+				printf("Value sont supposé descendre mais %f < %f \n",lazerscan[i],scan.distanceEnd);
+				break;
+			}
+		
 			scan.distanceEnd = lazerscan[i]; // met la fin a cette distance
 			scan.indexEnd = i;
+		} else {
+			// si on n'a deja trouver un point et que l'a on trouve plus rien on n'arrête la boucle
+			if(scan.distanceStart != 0.0) {
+				printf("Fin de la séquence de point a %d fin de la boucle lazer\n",i);
+				break;
+			}	
 		}
-
 	}
 
 	if(scan.distanceStart == 0.0f || scan.distanceEnd == 0.0f) {
@@ -226,6 +316,7 @@ int robotLoop() {
 			break;
 			case REACHING_OBJECT: // Séquence d'approche sommaire de l'object pour distance supérieur a un metre
 			{
+				
 				// regarde si la distance du point est plus d'un metre
 				if(scan[0].distanceStart <= 1.5f) {
 					// Object a courte distance on passe en mode allignement de l'object
@@ -259,14 +350,21 @@ int robotLoop() {
 			}
 			break;
 			case ALLIGNEMENT_OBJECT: // Séquence d'allignement avec le centre de l'object
-			{
+				printf("Entrer sequence allignement\n");
 				// Va chercher la ligne formé par nos deux points
 				struct line l = getLineFromScan(scan[0]);
+				printf("J'ai ma ligne je veut le vecteur\n");
+				// Va chercher le vectuer qui est former par cette ligne entre ses deux points
+				vec2f vLine = getVectorBetweenPoints(&l.p1,&l.p2);
+				printf("J'ai mon vecteur %f %f\n",vLine.x,vLine.y);
+				
+				// Calcul l'angle entre cette ligne et mon vecteur de deplacment de (0,1)
+				float angleBetween = getAngleBetweenVector(&robotvector,&vLine);
+				printf("Je mon angle %f\n",angleBetween);
 
-				// Va chercher 
-
-				return;
-			}
+				//printf("Phase d'approche ligne entre les points X1 : %f Y1 : %f X2 : %f Y2 : %f. Vecteur de X : %f Y : %f Angle entre %f",
+				//	l.p1.x,l.p1.y,l.p2.x,l.p2.y,vLine.x,vLine.y,angleBetween);
+				sleep(2000);
 			break;
 			case TASK_OBJECT: // Séquence de la tache a effectuer une fois rendu a l'object (mettre item sur la boite)
 
@@ -276,7 +374,11 @@ int robotLoop() {
 				CurrentState = SEARCHING_OBJECT;
 			break;
 		}
+		printf("CurrentState : %s",ROBOTSTATE_STRING[CurrentState]);
+
 	}
+
+	printf("Fin de la boucle de controle\n");
 	end_reelYB(base,manipulator);
 	return 0;
 }
