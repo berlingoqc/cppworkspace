@@ -48,7 +48,7 @@ void on_trackbar(int t, void*) {
 }
 
 void createMyTrackBar() {
-    cv::namedWindow(wTrack,0);
+    cv::namedWindow(wThres);
     char TrackbarName[50];
     sprintf( TrackbarName, "H_MIN", H_MIN);
     sprintf( TrackbarName, "H_MAX", H_MAX);
@@ -57,12 +57,12 @@ void createMyTrackBar() {
     sprintf( TrackbarName, "V_MIN", V_MIN);
     sprintf( TrackbarName, "V_MAX", V_MAX);
 
-    createTrackbar( "H_MIN", wTrack, &H_MIN, H_MAX, on_trackbar );
-    createTrackbar( "H_MAX", wTrack, &H_MAX, H_MAX, on_trackbar );
-    createTrackbar( "S_MIN", wTrack, &S_MIN, S_MAX, on_trackbar );
-    createTrackbar( "S_MAX", wTrack, &S_MAX, S_MAX, on_trackbar );
-    createTrackbar( "V_MIN", wTrack, &V_MIN, V_MAX, on_trackbar );
-    createTrackbar( "V_MAX", wTrack, &V_MAX, V_MAX, on_trackbar );
+    createTrackbar( "H_MIN", wThres, &H_MIN, H_MAX, on_trackbar );
+    createTrackbar( "H_MAX", wThres, &H_MAX, H_MAX, on_trackbar );
+    createTrackbar( "S_MIN", wThres, &S_MIN, S_MAX, on_trackbar );
+    createTrackbar( "S_MAX", wThres, &S_MAX, S_MAX, on_trackbar );
+    createTrackbar( "V_MIN", wThres, &V_MIN, V_MAX, on_trackbar );
+    createTrackbar( "V_MAX", wThres, &V_MAX, V_MAX, on_trackbar );
 
 }
 
@@ -171,9 +171,9 @@ StartTracking::StartTracking(QWidget *parent) :
     ui->cvShowTH->setChecked(true);
     ui->cvReduceNoise->setChecked(true);
 
-    showHSV = true;
-    showTS = true;
-    filtreNoise = true;
+    this->setWindowTitle("Tracking depuis un flux vidéo");
+
+    mode = -1;
 
 }
 
@@ -203,32 +203,98 @@ void StartTracking::onRadioBoxChecked() {
 
 }
 
+cv::VideoCapture StartTracking::getCap() {
+    std::string from;
+    if(mode == FILE_SOURCE) {
+       cv::VideoCapture c(inFile.toStdString());
+       from = "fichier "+inFile.toStdString();
+       CAPTURE_HEIGHT = static_cast<int>(c.get(CAP_PROP_FRAME_HEIGHT));
+       CAPTURE_WIDTH = static_cast<int>(c.get(CAP_PROP_FRAME_WIDTH));
+       return c;
+    } else {
+        cv::VideoCapture c(device);
+        from = "camera " + std::to_string(device);
+        c.set(CAP_PROP_FRAME_WIDTH,CAPTURE_WIDTH);
+        c.set(CAP_PROP_FRAME_HEIGHT,CAPTURE_HEIGHT);
+        return c;
+    }
+}
+
+void StartTracking::startOpencv() {
+
+    Ptr<Tracker> tracker;
+    switch (backend) {
+        case CSRT_TRACKING:
+            tracker = cv::TrackerCSRT::create();
+        break;
+        case  MEDIANFLOW_TRACKING:
+            tracker = cv::TrackerMedianFlow::create();
+        break;
+       case BOOSTRING_TRACKING:
+            tracker = cv::TrackerBoosting::create();
+        break;
+       case GOTURN_TRACKING:
+            tracker = cv::TrackerGOTURN::create();
+        break;
+       case KCF_TRACKING:
+            tracker = cv::TrackerKCF::create();
+        break;
+        case MIL_TRACKING:
+            tracker = cv::TrackerMIL::create();
+        break;
+       case MOSSE_TRACKING:
+            tracker = cv::TrackerMOSSE::create();
+        break;
+       case TLD_TRACKING:
+            tracker = cv::TrackerTLD::create();
+        break;
+    }
+    if(tracker.empty()) {
+        std::cerr << "Invalide opencv tracking backend" << std::endl;
+        return;
+    }
+    cv::VideoCapture cap = getCap();
+    if(!cap.isOpened()) {
+        return;
+    }
+    Rect2d bbox(287,23,86,250);
+    cv::Mat img;
+    cap.read(img);
+
+
+    rectangle(img,bbox,Scalar(255,0,0),2,1);
+    imshow(AppName,img);
+    tracker->init(img,bbox);
+
+    while(cap.read(img)) {
+        bool ok = tracker->update(img,bbox);
+        if(ok) {
+            rectangle(img,bbox,Scalar(255,0,0),2,1);
+        } else {
+            putText(img,"Tracking failure",Point(100,80), FONT_HERSHEY_SIMPLEX,0.75,Scalar(0,0,255),2);
+        }
+
+        imshow(AppName,img);
+
+
+        if(cv::waitKey(1) > 0) {
+            // Quitte la boucle
+            break;
+        }
+    }
+
+    // Clair les ressources a la fin du programme
+    cap.release();
+    tracker.release();
+    destroyAllWindows();
+}
 
 void StartTracking::start() {
     // Numero de la camera utilisé
-     int device = 0;
-
      bool morphOps = true;
 
-     cv::VideoCapture cap;
-     std::string from;
-     if(mode == FILE_SOURCE) {
-        cv::VideoCapture c(inFile.toStdString());
-        cap = c;
-        from = "fichier "+inFile.toStdString();
-        CAPTURE_HEIGHT = static_cast<int>(cap.get(CAP_PROP_FRAME_HEIGHT));
-        CAPTURE_WIDTH = static_cast<int>(cap.get(CAP_PROP_FRAME_WIDTH));
-     } else {
-         cv::VideoCapture c(device);
-         cap = c;
-         from = "camera " + std::to_string(device);
-         cap.set(CAP_PROP_FRAME_WIDTH,CAPTURE_WIDTH);
-         cap.set(CAP_PROP_FRAME_HEIGHT,CAPTURE_HEIGHT);
-     }
-     if(!cap.isOpened()) {
-         std::cerr << "Impossible d'ouvrir la capture depuis " << from << std::endl;
-         return;
-     }
+     cv::VideoCapture cap = getCap();
+
 
      cv::namedWindow(AppName);
 
@@ -284,13 +350,7 @@ void StartTracking::start() {
              }
              lastX = posX;
              lastY = posY;
-
-             std::cout << "X :" << posX << " Y :" << posY << std::endl;
          }
-
-        //if(trackObject) {
-        //     trackFilteredObject(x,y,imgThresh,img);
-        // }
 
          if(showTS)
             imshow(wThres,imgThresh);
@@ -316,7 +376,30 @@ StartTracking::~StartTracking()
 
 void StartTracking::on_btnExecuter_clicked()
 {
-    start();
+
+    backend = ui->cbBackend->currentIndex();
+
+    if(ui->rbFile->isChecked()) {
+        mode = FILE_SOURCE;
+        inFile = ui->txtSrcFile->text();
+    } else if(ui->rbCamera->isChecked()) {
+        mode = CAMERA_SOURCE;
+        device = ui->sbIndexCamera->value();
+    }
+    if(mode == -1) {
+        return;
+    }
+
+
+    showHSV = ui->cbShowHSV->isChecked();
+    showTS = ui->cvShowTH->isChecked();
+    filtreNoise = ui->cvReduceNoise->isChecked();
+
+    if(backend == CUSTOM_TRACKING) {
+        start();
+    } else {
+        startOpencv();
+    }
 }
 
 void StartTracking::on_btnQuitter_clicked()

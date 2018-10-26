@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui charts
+QT       += core gui charts sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -32,7 +32,8 @@ SOURCES += \
     imagelabel.cpp \
     colorwidget.cpp \
     imagewrapper.cpp \
-    starttracking.cpp
+    starttracking.cpp \
+    confmillefeuille.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -40,11 +41,13 @@ HEADERS += \
     imagelabel.h \
     colorwidget.h \
     imagewrapper.h \
-    starttracking.h
+    starttracking.h \
+    confmillefeuille.h
 
 FORMS += \
         mainwindow.ui \
-    starttracking.ui
+    starttracking.ui \
+    confmillefeuille.ui
 
 win32 {
         LIBS += -LC:/msys64/mingw64/bin -lopencv_core342 -lopencv_videoio342 -lopencv_imgproc342 -lopencv_highgui342 -lopencv_imgcodecs342

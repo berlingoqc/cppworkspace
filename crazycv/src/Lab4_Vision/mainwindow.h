@@ -31,6 +31,8 @@ private:
     ImageLabel* 		lblImage;
     Ui::MainWindow*		ui;
 
+private:
+    void openColorHistogramme(const cv::Mat& m);
 
 private slots:
     void loadFileFromCamera();
@@ -43,6 +45,9 @@ private slots:
     void quitApp();
 
 
+
+    void setDetectMilleFeuille();
+    void detectMilleFeuille();
     void videoTracking();
 
     void selectCustomBackend();

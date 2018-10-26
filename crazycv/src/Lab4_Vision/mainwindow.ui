@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>550</width>
+    <width>759</width>
     <height>300</height>
    </rect>
   </property>
@@ -19,8 +19,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>550</width>
-     <height>21</height>
+     <width>759</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -102,12 +102,19 @@
     <addaction name="actionTracking"/>
     <addaction name="actionEnregistrement"/>
    </widget>
+   <widget class="QMenu" name="menuIdentifier">
+    <property name="title">
+     <string>Identifier</string>
+    </property>
+    <addaction name="actionMille_Feuille"/>
+   </widget>
    <addaction name="menuFichier"/>
    <addaction name="menuBackend"/>
    <addaction name="menuCouleur"/>
    <addaction name="menuInformation"/>
    <addaction name="menuTransformation"/>
    <addaction name="menuVid_o"/>
+   <addaction name="menuIdentifier"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -231,6 +238,11 @@
   <action name="actionEnregistrement">
    <property name="text">
     <string>Enregistrement</string>
+   </property>
+  </action>
+  <action name="actionMille_Feuille">
+   <property name="text">
+    <string>Mille-Feuille</string>
    </property>
   </action>
  </widget>

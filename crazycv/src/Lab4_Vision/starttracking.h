@@ -1,10 +1,11 @@
 #ifndef STARTTRACKING_H
 #define STARTTRACKING_H
 
+#include "cvheaders.h"
 #include <QDialog>
 
 enum ModeSourceVideo  { FILE_SOURCE, CAMERA_SOURCE };
-
+enum BackendTracking { CUSTOM_TRACKING, BOOSTRING_TRACKING, MIL_TRACKING, KCF_TRACKING, TLD_TRACKING, MEDIANFLOW_TRACKING, GOTURN_TRACKING, MOSSE_TRACKING, CSRT_TRACKING };
 namespace Ui {
 
 
@@ -29,6 +30,8 @@ private:
     int		device;
     int		mode;
 
+    int		backend;
+
     bool	showHSV;
     bool	showTS;
 
@@ -37,6 +40,9 @@ private:
     bool	record;
 
     void start();
+    void startOpencv();
+
+    cv::VideoCapture getCap();
 
 private slots:
     void onAccept();

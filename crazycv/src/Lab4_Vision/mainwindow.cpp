@@ -5,6 +5,7 @@
 #include "imagewrapper.h"
 #include "cvheaders.h"
 #include "starttracking.h"
+#include "confmillefeuille.h"
 
 #include <QFileDialog>
 #include <QStandardPaths>
@@ -73,6 +74,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&this->img,&ImageWrapper::imageChanged,this,&MainWindow::updateImage);
 
     connect(ui->actionTracking,&QAction::triggered,this,&MainWindow::videoTracking);
+    connect(ui->actionMille_Feuille,&QAction::triggered,this,&MainWindow::setDetectMilleFeuille);
 
     validPreviousNext();
     selectOpencvBackend();
@@ -100,6 +102,12 @@ void MainWindow::validPreviousNext() {
     }
     ui->actionSuivante->setEnabled(next);
     ui->actionPrecedente->setEnabled(previous);
+}
+
+void MainWindow::setDetectMilleFeuille() {
+    ConfMIlleFeuille* m = new ConfMIlleFeuille(this);
+    m->show();
+
 }
 
 void MainWindow::updateImage(MyImage img) {
@@ -288,6 +296,18 @@ void MainWindow::selectKernel3() {
 
 void MainWindow::selectKernel5() {
     transformer.setTransformMatriceSize(5);
+}
+
+
+
+std::vector<millefeuille_image> imageSource;
+
+void MainWindow::detectMilleFeuille() {
+
+    // Va chercher une liste d'image original de mille-feuille avec leur angle de direction et leur etat
+    cv::Mat origin;
+    ColorHistogramme i;
+
 }
 
 
