@@ -113,6 +113,14 @@ float getAngleBetweenVector(const vec2f* p1, const vec2f* p2) {
 	return atan2(p2->x, p2->y) - atan2(p1->x, p1->y);
 }
 
+vec2f vectorByN(const vec2f* p, const float n) {
+	return (vec2f) { p->x * n , p->y * n };
+}
+
+vec2f addVec2f(const vec2f* p1, const vec2f* p2) {
+	return (vec2f) { p1->x + p2->x, p1->y + p2->y };
+}
+
 // retourne l'angle du point dans le demi cercle du lazer a partir de l'index de la valeur
 float getAngleFromIndex(int index) {
 	return (index * RES_ANG) - 30.0f;
@@ -131,6 +139,13 @@ float sinD(float angle) {
 // effectue le cos d'un angle en degree
 float cosD(float angle) {
 	return cos(toRad(angle));
+}
+
+float absF(const float d) {
+	if(d < 0 ) {
+		return d * -1.0f;
+	}
+	return d;
 }
 
 
@@ -181,8 +196,11 @@ int scanLaserForObject(struct lscan* items) {
 
 	// les valeurs pour le début et la fin de l'object trouvé avec un nombre de valeur null de 2
 	struct lscan scan = { 0.0f, 0, 0.0f, 0 };
+	
+	
 	int direction = UNKNOW;
 	int i;
+
 	// Cherche pour un segment de point en ligne qui formerait une ligne
 	for(i = OFFSETLAZER; i < (LASERSIZE - OFFSETLAZER);i += 3) {
 		if(lazerscan[i] >=0.0f && lazerscan[i] < ENDVALUELAZER) {
@@ -291,6 +309,11 @@ int robotLoop() {
 
 		if(make_scan) {
 			nbrItemScan = scanLaserForObject(scan);
+			if(nbrItemScan == 0 && CurrentState == ALLIGNEMENT_OBJECT) {
+				// Si on n'a pas de donnée et qu'on n'était dans la phase d'allignement ca veut dire qu'on n'est collé sur l'object
+				// si on retourne dans la boucle on va ravoir les mêmes données que la fois d'avant
+				CurrentState = TASK_OBJECT;
+			}
 		}
 
 		switch (CurrentState) {
@@ -360,14 +383,57 @@ int robotLoop() {
 				
 				// Calcul l'angle entre cette ligne et mon vecteur de deplacment de (0,1)
 				float angleBetween = getAngleBetweenVector(&robotvector,&vLine);
+				angleBetween = absF(angleBetween);
+				angleBetween = angleBetween * 180.0f / M_PI;
 				printf("Je mon angle %f\n",angleBetween);
+				
+				// Si l'angle est plus ou moins 90 degree je suis dans le bonne angle reste qu'a assurer de s'enligner
+				// sur l'axe des x et l'axe des y avec le point central de la ligne
+				if ( 88.0f < angleBetween && angleBetween < 92.0f ) {
+					printf("Je suis bien alligné avec la boite\n");
+					// Va chercher le point central de la ligne vector * 0.5
+					vec2f vLineHalf = vectorByN(&vLine, 0.5);
+					// Va cherche le point au bout du nouveau vecteur
+					vec2f middlePoint = addVec2f(&l.p1,&vLineHalf);
+					// Va chercher le déplacement nécessaire en x et en y 
+					printf("fin de la ligne est x : %f y : %f\n",middlePoint.x,middlePoint.y);
+					bool isXFine = false;bool isYFine = false;
+					if(0.1f < absF(middlePoint.x)) {
+						printf("Doit s'enligner sur l'axe des x\n");
+						reelYB_MoveBaseTransversal(base,middlePoint.x * 100.0f,2.0f,true,-1);
+					}  else {
+						isXFine = true;
+					}
+					if( 0.1f < l.p2.y) {
+						printf("Doit s'enligner sur l'axe des y\n");
+						reelYB_MoveBaseLongitudinal(base,20.0f,2.0,true, -1);
+						CurrentState = TASK_OBJECT;
+						printf("On n'est bien cadrée sur les deux axes change vers la séquence %s", ROBOTSTATE_STRING[CurrentState]);
+						continue;
+					} else {
+						isYFine = true;
+					}
+					if(isXFine && isYFine) {
 
-				//printf("Phase d'approche ligne entre les points X1 : %f Y1 : %f X2 : %f Y2 : %f. Vecteur de X : %f Y : %f Angle entre %f",
-				//	l.p1.x,l.p1.y,l.p2.x,l.p2.y,vLine.x,vLine.y,angleBetween);
-				sleep(2000);
+					}
+				} else {
+					// Effectue la rotation pour s'enligner avec le coté qu'on n'a cibler de la boite
+					float angleRotate;
+					// si l'angle est supérieur a 90 deg on tourne a gauche sinon a droite
+					if(angleBetween > 90.0f) {
+						angleRotate = angleBetween - 90.0f;
+					} else { 
+						// doit passer une angle négatif pour faire une rotation vers la gauche
+						angleRotate = angleBetween * -1.0f;
+					}
+					reelYB_MoveBaseAngular(base,angleRotate,2.0f,true,-1);
+				}
+			_sleep(1000);
 			break;
 			case TASK_OBJECT: // Séquence de la tache a effectuer une fois rendu a l'object (mettre item sur la boite)
-
+				printf("Entrer dans la séquence da la tâche une fois rendu a l'object \n");
+				goto exit_loop;
+				
 			break;
 			case MANUAL_SEQUENCE: // Séquence quand le robot passe en controle manuel pour le déplacer et enssuite recommencer la séquence
 				reelYB_MoveArmAndBaseByKeyboard(base);
@@ -377,6 +443,7 @@ int robotLoop() {
 		printf("CurrentState : %s",ROBOTSTATE_STRING[CurrentState]);
 
 	}
+	exit_loop: ;
 
 	printf("Fin de la boucle de controle\n");
 	end_reelYB(base,manipulator);
