@@ -33,7 +33,8 @@ SOURCES += \
     colorwidget.cpp \
     imagewrapper.cpp \
     starttracking.cpp \
-    confmillefeuille.cpp
+    confmillefeuille.cpp \
+    millefeuillebd.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -42,7 +43,9 @@ HEADERS += \
     colorwidget.h \
     imagewrapper.h \
     starttracking.h \
-    confmillefeuille.h
+    confmillefeuille.h \
+    millefeuillebd.h \
+    millefeuille.h
 
 FORMS += \
         mainwindow.ui \

@@ -1,0 +1,15 @@
+{
+  "version": "0.2.1",
+  "tasks": [
+    {
+      "taskName": "task-libmvlar",
+      "appliesTo": "libmvlar/",
+      "type": "launch"
+    },
+    {
+      "taskName": "task-mvlar",
+      "appliesTo": "mvlar/",
+      "type": "launch"
+    }
+  ]
+}

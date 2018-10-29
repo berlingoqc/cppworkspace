@@ -1,0 +1,12 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "mvlar.exe (mvlar\\mvlar.exe)",
+      "name": "mvlar.exe (mvlar\\mvlar.exe)"
+    }
+  ]
+}
