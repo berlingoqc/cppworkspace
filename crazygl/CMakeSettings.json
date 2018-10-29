@@ -1,0 +1,17 @@
+{
+  "configurations": [
+    {
+      "name": "x86-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [
+        "msvc_x86"
+      ],
+      "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
+      "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+      "cmakeCommandArgs": "-DSTB_INCLUDE_PATH=D:\\build-cpp-lib\\LibVS17\\stb -DGLM_INCLUDE_PATH=D:\\build-cpp-lib\\LibVS17\\glm\\include -DGLEW_INCLUDE_PATH=D:\\build-cpp-lib\\LibVS17\\glew\\include -DGLEW_LIBRARY=D:\\build-cpp-lib\\LibVS17\\glew\\lib -DFREEGLUT_INCLUDE_PATH=D:\\build-cpp-lib\\LibVS17\\freeglut\\include -DFREEGLUT_LIBRARY=D:\\build-cpp-lib\\LibVS17\\freeglut\\lib ",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": ""
+    }
+  ]
+}
