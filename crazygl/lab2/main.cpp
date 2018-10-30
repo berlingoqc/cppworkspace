@@ -1,153 +1,184 @@
-
 #include "engine.h"
-
 #include "shaders.h"
+
+
 
 using namespace ENGINE;
 
-// Variable globale pour mon engine (wrapper autour de glut)
+// DEFINITON VARIABLE GLOBALE
+
+
+enum BASIC_OPTION_MENU { SAVE_DRAWING, EXIT_APP };
+
+// Variable pour l'application glut
 GlutEngine* app;
 
-// Variable pour l'identifiant de mon program de shader compiler
+// Variable global pour mes handlers OpenGL
 unsigned int ShaderID;
-
-// Vector content la liste de point utilisé pour render les formes a l'écran
-std::vector<Position<float>> listPoint;
-
-enum OptionMenu { CLEAR_SCREEN, DRAW_POINTS, DRAW_LINES, DRAW_TRIANGLE, DRAW_QUADS, DRAW_CON_LINES, EXIT_APP };
-enum OptionColor { RED, GREEN, BLUE, YELLOW, RANDOM };
+unsigned int VueID;
+unsigned int ProjectionID;
+unsigned int TranslationID;
 
 
-void createDrawing() {
-	GLfloat vertices[86]{
-		-1.0, 1.0, // Triangle top left
-		-1.0, 0.5,
-		-0.5, 1.0,
+struct ballinfo {
+	glm::vec3 positions;
+	float echelleZ;
+	float echelleY;
+	bool updown;
+};
 
-		 0.0, 0.0, // Triangle milieu haut droit
-		 0.5, 0.0,
-		 0.0, 0.5,
+typedef std::vector<ballinfo>  listballinfo;
 
-		 0.0, 0.0, // Triangle milieu bas droit
-		 0.0f, -0.5f,
-		 0.5f, 0.0f,
 
-		 0.0, 0.0, // Triangle milieu bas gauche
-		 -0.5, 0.0f,
-		 0.0f, -0.5f,
 
-		 0.0f, 0.0f, // Triangle milieu haut gauche
-		 0.0f, 0.5f,
-		 -0.5f,0.0f,
+unsigned int vertexbuffer;
+unsigned int ibo;
 
-		 0.5f, 1.0f, // Triangle top right
-		 1.0f, 0.5f,
-		 1.0f, 1.0f,
+/* SECTION pour crée un carré avec un IBO */
+void createFaceIBO() {
 
-		 -1.0f,-1.0f, // Triangle bot left
-		 -0.5f,-1.0f,
-		 -1.0f, -0.5f,
+	glm::vec3 vert[4]{ glm::vec3(-0.7f,0.7f,0.0f), glm::vec3(0.7f,0.7f,0.0f), glm::vec3(0.7f,-0.7f,0.0f), glm::vec3(-0.7f,-0.7f,0.0f) };
 
-		 0.5f, -1.0f, // Triangle bot right
-		 1.0f, -1.0f,
-		 1.0f, -0.5f,
+	// Crée notre vertex buffer
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer); // GL_ARRAY_BUFFER Attributs de sommets (dont la position)
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vert), vert, GL_STATIC_DRAW);
 
-		 -0.25f,1.0f, // Triangle milieu top
-		 0.0f, 0.75f,
-		 0.25f, 1.0f,
+	// Crée notre Index Buffer object pour dessiner les deux triangles avec nos 4 points
+	unsigned int i[]{ 0,1,2,0,2,3 };
+	glGenBuffers(1, &ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo); // ELEMENT_ARRAY_BUFFER représente Indices d'un table de sommet
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(i), i, GL_STATIC_DRAW);
 
-		-0.25f,-1.0f, // Triangle milieu bot
-		0.25f, -1.0f,
-		0.0f, -0.75f,
+}
 
-		0.0f, -0.5f,
-		0.0f, -0.75f,
-		0.25f, -0.625f,
+/* Crée et dessine le sol */
+void createDrawFloor() {
+	unsigned int vbo;
 
-		0.0f, -0.5f,
-		0.0f, -0.75f,
-		-0.25f, -0.625f,
-
-		0.0f, 0.5f,
-		0.0f, 0.75f,
-		0.25f, 0.625f,
-
-		0.0f, 0.5f,
-		0.0f, 0.75f,
-		-0.25f, 0.625f,
+	glm::vec3 sol[8]{
+		glm::vec3(1.0f,-1.0f,-100.0f), glm::vec3(0.0,1.0,1.0),
+		glm::vec3(1.0,-1.0,1.0), glm::vec3(0.0,1.0,0.0),
+		glm::vec3(-1.0,-1.0,-100.0), glm::vec3(0.0,1.0,0.0),
+		glm::vec3(-1.0,-1.0,1.0), glm::vec3(0.0,1.0,0.0)
 	};
-	GLuint vbo;
-	genBuffer(&vbo, 0, sizeof(vertices), vertices);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-}
 
-void createDrawingLine() {
-	GLuint vboID;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(sol), sol, GL_STATIC_DRAW);
 
-	GLfloat sommets[8] = {
-		0.0f,0.0f,0.5f,0.5f,
-		0.0f,-0.5f,0.0f,0.5f,
-	};
-	genBuffer(&vboID, 0, sizeof(sommets), sommets);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0); // Définit le pointeur d'attributs des sommets
-}
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
-void createPointsClick() {
-	GLuint vboID;
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
 
-	genBuffer(&vboID, 0, listPoint.size() * sizeof(Position<float>), listPoint.data());
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 
-// Display mon quad dans une couleur qui change selon le keyboard
 void display() {
-	glClearColor(255.0f, 255.0f, 255.f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	// Crée nos matrice de transformation
+	glm::mat4x4 vue = glm::mat4(1.0);
+	glm::mat4x4 proj = glm::mat4(1.0);
+	glm::mat4x4 trans = glm::mat4(1.0);
 
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Matrice de vue qu'on utilise pour gerer l'angle de vue sur la scene
+	vue = glm::lookAt(glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, 0.0, -20.0), glm::vec3(0.0, 1.0, 0.0));
+	glUniformMatrix4fv(VueID, 1, GL_FALSE, &vue[0][0]);
+
+	// matrice de projection ( a definir )
+	proj = glm::perspective(glm::radians(45.0f), static_cast<float>(DEFAULT_SCREEN_WIDTH / DEFAULT_SCREEN_HEIGHT), 0.1f, 100.0f);
+	glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &proj[0][0]);
+
+	// Crée le sol une premiere fois pour le bas
+	glUniformMatrix4fv(TranslationID, 1, GL_FALSE, &trans[0][0]);
+	createDrawFloor();
+
+	// Change la matrice de translation pour le redessiner dans le haut plafond
+	trans = glm::translate(trans, glm::vec3(0.0, 2.0, 0.0));
+	glUniformMatrix4fv(TranslationID, 1, GL_FALSE, &trans[0][0]);
+	createDrawFloor();
+
+
+
+
+}
+
+
+void displayRect() {
+	// clear le background avec la couleur voulu
+	glClearColor(255, 255, 255, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// bind notre programme de shader
 	glUseProgram(ShaderID);
 
-	glPointSize(10.0);
 
-	createDrawing();
-	glDrawArrays(GL_TRIANGLES, 0, 42);
+	glEnableVertexAttribArray(0);;
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glDisableVertexAttribArray(0);
 
-	glFlush();
+	glutSwapBuffers();
+
 }
 
-void mousebinding(int button, int state, int x, int y) {
-	Position<float> p = ENGINE::ConvertToNDC(x, y);
-	if (button == 0 && state == 0) {
-		listPoint.push_back(p);
-	}
+
+void traitementMenuSettings(int value) {
 }
+
+void traitementMenuPrincipal(int value) {
+}
+
+void createMenu() {
+	int menuPrincipal;
+
+
+	menuPrincipal = glutCreateMenu(traitementMenuPrincipal);
+	glutAddMenuEntry("Sauvegarder", SAVE_DRAWING);
+	glutAddMenuEntry("Exit", EXIT_APP);
+
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
+
 
 void keybinding(unsigned char key, int x, int y) {
-
 }
+
 void specialkeybinding(int key, int x, int y) {
 
 }
 
+void mousebinding(int x, int y, int z, int a) {
+
+}
+
+void mouseMove(int x, int y) {
+
+}
 
 void mainLoop(int val) {
 	glutPostRedisplay();
-	// Roule la frame une autre fois
 	glutTimerFunc(1000 / SCREEN_FPS, mainLoop, val);
 }
 
 int main(int argc, char** argv) {
+
 	ENGINE::APPINFO info = ENGINE::BasicAppInfo();
-	GlutEngine g(0);
+	GlutEngine g(true);
 	app = &g;
 	app->SetMainFunc(mainLoop);
 	app->SetRenderFunc(display);
 	app->SetKeyFunc(keybinding);
 	app->SetFuncKeyFunc(specialkeybinding);
 	app->SetMouseFunc(mousebinding);
+	app->SetMouseMouveFunc(mouseMove);
 	app->Init(info, argc, argv);
 
 
@@ -158,7 +189,14 @@ int main(int argc, char** argv) {
 	}
 	ShaderID = MyShader.GetShaderID();
 
+	// Init du menu contextuel
+	createMenu();
+
+	createFaceIBO();
 
 	app->Run();
+
 	return 0;
 }
+
+

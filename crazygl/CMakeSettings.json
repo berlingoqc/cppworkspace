@@ -9,7 +9,7 @@
       ],
       "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
       "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
-      "cmakeCommandArgs": "-DSTB_INCLUDE_PATH=D:\\build-cpp-lib\\LibVS17\\stb -DGLM_INCLUDE_PATH=D:\\build-cpp-lib\\LibVS17\\glm\\include -DGLEW_INCLUDE_PATH=D:\\build-cpp-lib\\LibVS17\\glew\\include -DGLEW_LIBRARY=D:\\build-cpp-lib\\LibVS17\\glew\\lib -DFREEGLUT_INCLUDE_PATH=D:\\build-cpp-lib\\LibVS17\\freeglut\\include -DFREEGLUT_LIBRARY=D:\\build-cpp-lib\\LibVS17\\freeglut\\lib ",
+      "cmakeCommandArgs": "-DSTB_INCLUDE_PATH=D:\\VC17_LIB\\stb -DGLM_INCLUDE_PATH=D:\\VC17_LIB\\glm\\include -DGLEW_INCLUDE_PATH=D:\\VC17_LIB\\glew\\include -DGLEW_LIBRARY=D:\\VC17_LIB\\glew\\lib -DFREEGLUT_INCLUDE_PATH=D:\\VC17_LIB\\freeglut\\include -DFREEGLUT_LIBRARY=D:\\VC17_LIB\\freeglut\\lib ",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": ""
     }

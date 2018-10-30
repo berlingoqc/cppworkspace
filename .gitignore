@@ -6,6 +6,9 @@
 *.png
 *.bmp
 
+build/
+.vs/
+
 *Debug/
 pictures/
 

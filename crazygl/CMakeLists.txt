@@ -20,8 +20,6 @@ set(STB_INCLUDE_PATH "" CACHE PATH "The directory that contains stb.h")
 
 
 
-SET(HEADER_FILES "${STB_INCLUDE_PATH}/stb_image.h" engine.h header.h shaders.h)
-SET(SOURCE_FILES engine.cpp shaders.cpp)
 
 
 include_directories(
