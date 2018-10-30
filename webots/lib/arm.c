@@ -339,6 +339,16 @@ printf("Begin: MoveArmAndBaseByKeyboard \n\n");
 	  //printf("Keyboard press. \n");
       switch (c)
        {
+         /*
+         1 - gauche
+         2 - droite
+         3 - bas
+         4 - haut
+         5 - bas droit
+         6 - haut droit
+         7 - recule
+         8 - avance
+         */
        case 'Y':
            y+= KinematicStep;
            arm_ik( x, y, z);

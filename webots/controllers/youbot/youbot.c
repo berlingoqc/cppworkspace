@@ -186,6 +186,39 @@ struct line getLineFromScan(struct lscan itemScan) {
 	return l;
 }
 
+int scanLazerForObjectAlligne(struct lscan* items) {
+	float lazerscan[LASERSIZE];
+	if(!GetLaserData(lazerscan,0.0f,0.0f)) {
+		printf("Echec de lecture sur les données du lazer\n");
+	}
+
+	// les valeurs pour le début et la fin de l'object trouvé avec un nombre de valeur null de 2
+	struct lscan scan = { 0.0f, 0, 0.0f, 0 };
+	int i;
+	for(i = OFFSETLAZER; i < (LASERSIZE - OFFSETLAZER); i += 3) {
+
+		if(lazerscan[i] >=0.0f && lazerscan[i] < ENDVALUELAZER) {
+			if(scan.distanceStart == 0.0) { // si on na pas trouver le depart on le met comme étant
+				scan.distanceStart = lazerscan[i];
+				scan.indexStart = i;
+				continue;
+			}
+			scan.distanceEnd = lazerscan[i];
+			scan.indexEnd = i;
+		} else if (scan.distanceEnd != 0.0f) {
+			break;
+		}
+	}
+	if(scan.distanceStart == 0.0f || scan.distanceEnd == 0.0f) {
+		printf("Aucun item de detecter avec le lazer\n");
+		return 0;
+	}
+
+	printf("Object detecter entre %d %f et %d %f\n",scan.indexStart,scan.distanceStart,scan.indexEnd,scan.distanceEnd);
+
+	items[0] = scan;
+	return 1;
+}
 
 // scanLaserForObject recoit le pointeur pour la structure lscan qui contient l'index et la distance du début et de la premiere face d'un object trouver
 int scanLaserForObject(struct lscan* items) {
@@ -201,9 +234,10 @@ int scanLaserForObject(struct lscan* items) {
 	int direction = UNKNOW;
 	int i;
 
+
 	// Cherche pour un segment de point en ligne qui formerait une ligne
 	for(i = OFFSETLAZER; i < (LASERSIZE - OFFSETLAZER);i += 3) {
-		if(lazerscan[i] >=0.0f && lazerscan[i] < ENDVALUELAZER) {
+		if(lazerscan[i] >0.0f && lazerscan[i] < ENDVALUELAZER) {
 			if(scan.distanceStart == 0.0) { // si on na pas trouver le depart on le met comme étant
 				scan.distanceStart = lazerscan[i];
 				scan.indexStart = i;
@@ -234,6 +268,7 @@ int scanLaserForObject(struct lscan* items) {
 				break;
 			}
 		
+			//printf("Scan %d value %f\n",i, lazerscan[i]);
 			scan.distanceEnd = lazerscan[i]; // met la fin a cette distance
 			scan.indexEnd = i;
 		} else {
@@ -244,7 +279,6 @@ int scanLaserForObject(struct lscan* items) {
 			}	
 		}
 	}
-
 	if(scan.distanceStart == 0.0f || scan.distanceEnd == 0.0f) {
 		printf("Aucun item de detecter avec le lazer\n");
 		return 0;
@@ -284,7 +318,59 @@ void end_reelYB(YouBotBase* MyYouBotBase, YouBotManipulator* MyYouBotManipulator
   	reelYB_ExitArm(MyYouBotManipulator);
 }
 
+void PickAndPlace(YouBotManipulator *MyYouBotManipulator, int NumBlock)
+{
 
+	float Distance = -10.0;
+	float Speed = 2.0;
+
+	switch (NumBlock)
+	{
+		case 1:
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick1, true);
+			reelYB_GripperOpen(MyYouBotManipulator, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAnglePick1, true);
+			reelYB_GripperClose(MyYouBotManipulator,true);
+			_sleep(500);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick1, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproDrop1, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleDrop1, true);
+			reelYB_GripperOpen(MyYouBotManipulator, true);
+			break;
+		case 2:
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick2, true);
+			reelYB_GripperOpen(MyYouBotManipulator, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAnglePick2, true);
+			reelYB_GripperClose(MyYouBotManipulator, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick2, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproDrop2, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleDrop2, true);
+			reelYB_GripperOpen(MyYouBotManipulator, true);
+			break;
+		case 3:
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick3, true);
+			reelYB_GripperOpen(MyYouBotManipulator,true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAnglePick3, true);
+			reelYB_GripperClose(MyYouBotManipulator, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick3, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproDrop3, true);
+			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleDrop3, true);
+			reelYB_GripperOpen(MyYouBotManipulator, true);
+			break;
+	}
+
+
+
+	reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
+
+	
+}
 
 
 int robotLoop() {
@@ -296,14 +382,18 @@ int robotLoop() {
 		return -1;
 	}
 
+
 	printf("Démarrage de la boucle principal en mode REACHING_OBJECT\n");
 
+	bool only_forward = false;
 	bool make_scan = true;
 	int nbrItemScan;	
 	int CurrentState = SEARCHING_OBJECT; // Initialize la boucle a la premiere sequence du program
 	struct lscan scan[LAZER_ITEMS_DETECTION]; // Initialize un array pour les données de scan
 
 	int nbrTryFindBox = 0;
+
+	CurrentState = TASK_OBJECT;
 
 	while(CurrentState != END_SEQUENCE) { // Boucle jusqu'a t'en qu'on soit rendu a la sequence
 
@@ -374,12 +464,22 @@ int robotLoop() {
 			break;
 			case ALLIGNEMENT_OBJECT: // Séquence d'allignement avec le centre de l'object
 				printf("Entrer sequence allignement\n");
-				// Va chercher la ligne formé par nos deux points
+			// Va chercher la ligne formé par nos deux points
 				struct line l = getLineFromScan(scan[0]);
 				printf("J'ai ma ligne je veut le vecteur\n");
 				// Va chercher le vectuer qui est former par cette ligne entre ses deux points
 				vec2f vLine = getVectorBetweenPoints(&l.p1,&l.p2);
 				printf("J'ai mon vecteur %f %f\n",vLine.x,vLine.y);
+				if(only_forward) {
+					// Regarde la distance avec le point y pour confirmer qu'on n'est bien rendu
+					printf("Distance avec le p2 %f\n",l.p2.y);
+					if(l.p2.y > 0.5f) {
+						reelYB_MoveBaseLongitudinal(base,0.8f,1.0f,true, -1);
+					} else {
+						CurrentState = TASK_OBJECT;
+						printf("On n'est bien cadrée sur les deux axes change vers la séquence %s", ROBOTSTATE_STRING[CurrentState]);
+					}
+				}
 				
 				// Calcul l'angle entre cette ligne et mon vecteur de deplacment de (0,1)
 				float angleBetween = getAngleBetweenVector(&robotvector,&vLine);
@@ -389,32 +489,25 @@ int robotLoop() {
 				
 				// Si l'angle est plus ou moins 90 degree je suis dans le bonne angle reste qu'a assurer de s'enligner
 				// sur l'axe des x et l'axe des y avec le point central de la ligne
-				if ( 88.0f < angleBetween && angleBetween < 92.0f ) {
+				if ( 82.0f < angleBetween && angleBetween < 98.0f ) {
 					printf("Je suis bien alligné avec la boite\n");
 					// Va chercher le point central de la ligne vector * 0.5
-					vec2f vLineHalf = vectorByN(&vLine, 0.5);
+					//vec2f vLineHalf = vectorByN(&vLine, 0.5);
 					// Va cherche le point au bout du nouveau vecteur
-					vec2f middlePoint = addVec2f(&l.p1,&vLineHalf);
+					//vec2f middlePoint = addVec2f(&l.p1,&vLineHalf);
+					vec2f middlePoint = l.p2;
 					// Va chercher le déplacement nécessaire en x et en y 
 					printf("fin de la ligne est x : %f y : %f\n",middlePoint.x,middlePoint.y);
 					bool isXFine = false;bool isYFine = false;
 					if(0.1f < absF(middlePoint.x)) {
 						printf("Doit s'enligner sur l'axe des x\n");
 						reelYB_MoveBaseTransversal(base,middlePoint.x * 100.0f,2.0f,true,-1);
-					}  else {
-						isXFine = true;
 					}
 					if( 0.1f < l.p2.y) {
 						printf("Doit s'enligner sur l'axe des y\n");
-						reelYB_MoveBaseLongitudinal(base,20.0f,2.0,true, -1);
-						CurrentState = TASK_OBJECT;
-						printf("On n'est bien cadrée sur les deux axes change vers la séquence %s", ROBOTSTATE_STRING[CurrentState]);
+						reelYB_MoveBaseLongitudinal(base,15.0f,2.0,true, -1);
+						only_forward = true;
 						continue;
-					} else {
-						isYFine = true;
-					}
-					if(isXFine && isYFine) {
-
 					}
 				} else {
 					// Effectue la rotation pour s'enligner avec le coté qu'on n'a cibler de la boite
@@ -426,12 +519,16 @@ int robotLoop() {
 						// doit passer une angle négatif pour faire une rotation vers la gauche
 						angleRotate = angleBetween * -1.0f;
 					}
+					printf("Différence d'angle de %f\n",angleRotate);
 					reelYB_MoveBaseAngular(base,angleRotate,2.0f,true,-1);
 				}
-			_sleep(1000);
 			break;
 			case TASK_OBJECT: // Séquence de la tache a effectuer une fois rendu a l'object (mettre item sur la boite)
-				printf("Entrer dans la séquence da la tâche une fois rendu a l'object \n");
+				printf("Entrer dans la séquence da la tâche une fois rendu a l'object, controler manuel \n");
+				PickAndPlace(manipulator,1);
+				PickAndPlace(manipulator,2);
+				PickAndPlace(manipulator,3);
+				//reelYB_MoveArmAndBaseByKeyboard(base);
 				goto exit_loop;
 				
 			break;
@@ -449,62 +546,6 @@ int robotLoop() {
 	end_reelYB(base,manipulator);
 	return 0;
 }
-
-
-void PickAndPlace(YouBotManipulator *MyYouBotManipulator, int NumBlock)
-{
-
-	float Distance = -10.0;
-	float Speed = 2.0;
-
-	switch (NumBlock)
-	{
-		case 1:
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick1, true);
-			reelYB_GripperOpen(MyYouBotManipulator, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAnglePick1, true);
-			reelYB_GripperClose(MyYouBotManipulator,true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick1, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproDrop1, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleDrop1, true);
-			reelYB_GripperOpen(MyYouBotManipulator, true);
-			break;
-		case 2:
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick2, true);
-			reelYB_GripperOpen(MyYouBotManipulator, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAnglePick2, true);
-			reelYB_GripperClose(MyYouBotManipulator, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick2, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproDrop2, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleDrop2, true);
-			reelYB_GripperOpen(MyYouBotManipulator, true);
-			break;
-		case 3:
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick3, true);
-			reelYB_GripperOpen(MyYouBotManipulator,true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAnglePick3, true);
-			reelYB_GripperClose(MyYouBotManipulator, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick3, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproDrop3, true);
-			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleDrop3, true);
-			reelYB_GripperOpen(MyYouBotManipulator, true);
-			break;
-	}
-
-
-
-	reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
-
-	
-}
-
-
 
 
 int main(int argc, char **argv)
