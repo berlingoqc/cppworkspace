@@ -1,9 +1,52 @@
 
 #pragma once
+#include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/asio>
 #include <queue>
 #include <list>
 
+
+// Classe qui me permet de générer des nouvelles thread et l'ensemble des threads démarrer
+class worker_pool {
+
+	private:
+		boost::asio::io_service			_io_service;
+		boost::asio::io_service::work	_work_io_service;
+		boost::thread_group				_thread_group;
+		boost::mutex					_mx;
+		unsigned short					_thread_free;
+
+	public:
+		worker_pool(int pool_size = 0);
+		~worker_pool();
+
+		void stop_service();
+
+		template < typename Job >
+		void run_job(Job job);
+
+	private:
+		void wrap_job(boost::function<void()> job);
+};
+
+// class de base pour nos worker ( thread )
+class base_worker {
+
+
+protected:
+	boost::thread		_thread;
+
+protected:
+	
+
+};
+
+
+
+
+
+// locked_queue pour les messages a traité par nos thread
 template<typename _T> class locked_queue
 {
 private:
