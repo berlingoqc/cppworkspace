@@ -9,6 +9,7 @@ SET(SOURCE_FILES engine.cpp shaders.cpp)
 
 # Ajoutez une source à l'exécutable de ce projet.
 add_library (crazygl ${HEADER_FILES} ${SOURCE_FILES})
+
 target_link_libraries(crazygl
 	${OPENGL_LIBRARY}
 	${GLEW_LIBRARY}/glew32d.lib

@@ -152,6 +152,8 @@ namespace ENGINE
 	// genBuffer generer un buffer
 	void genBuffer(GLuint* id, int position, int size, const void * data);
 
+	void genIBOBuffer(uint* id, int position, int size, const void * data);
+
 	Position<float> ConvertToNDC(int x, int y);
 
 	void takeScreenShot();

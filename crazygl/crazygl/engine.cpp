@@ -76,6 +76,11 @@ namespace ENGINE {
 		glEnableVertexAttribArray(position); // Enable l'attribut qu'on veut activer
 	}
 
+	void genIBOBuffer(uint* id, int position, int size, const void * data) {
+		glGenBuffers(position, id);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *id);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+	}
 
 	Position<float> ConvertToNDC(int x, int y) {
 		Position<float> p;
@@ -87,7 +92,6 @@ namespace ENGINE {
 	}
 
 	void takeScreenShot() {
-		/*
 		int gW = glutGet(GLUT_WINDOW_WIDTH);
 		int gH = glutGet(GLUT_WINDOW_HEIGHT);
 
@@ -97,12 +101,14 @@ namespace ENGINE {
 		long int t = time(NULL);
 		sprintf(name, "screenshot_%ld.png", t);
 
-
+		#ifdef WITH_STB_IMAGE
 		unsigned char* last_row = buffer + (gW * 3 * (gH - 1));
 		if (!stbi_write_png(name, gW, gH, 3, last_row, -3 * gW)) {
 			std::cerr << "Error: could not write screenshot file " << name << std::endl;
 		}
-		*/
+		#else
+		std::cerr << "STB_IMAGE n'est pas définit impossible de capturer une image" << std::endl;
+		#endif
 	}
 
 }
