@@ -1,5 +1,6 @@
+#ifndef _THREAD_H_
+#define _THREAD_H_
 
-#pragma once
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/asio>
@@ -7,7 +8,7 @@
 #include <list>
 
 
-// Classe qui me permet de générer des nouvelles thread et l'ensemble des threads démarrer
+// Classe qui me permet de gï¿½nï¿½rer des nouvelles thread et l'ensemble des threads dï¿½marrer
 class worker_pool {
 
 	private:
@@ -42,11 +43,7 @@ protected:
 
 };
 
-
-
-
-
-// locked_queue pour les messages a traité par nos thread
+// locked_queue pour les messages a traitï¿½ par nos thread
 template<typename _T> class locked_queue
 {
 private:
@@ -73,3 +70,5 @@ public:
         return queue.empty();
     }
 };
+
+#endif // _THREAD_H_

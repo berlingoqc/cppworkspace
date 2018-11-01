@@ -13,8 +13,7 @@ include_directories ("${PROJECT_SOURCE_DIR}/libmvlar")
 add_executable (mvlar "mvlar.cpp" "mvlar.h")
 
 # Ajoute le lien a ma librairie
-target_link_libraries (mvlar libmvlar ${Boost_LIBRARIES} Boost::log_setup Boost::log ${MINGW_LIBRARIES})
-target_include_directories(mvlar PUBLIC ${BOOST_INCLUDEDIR})
+target_link_libraries (mvlar libmvlar Boost::boost ${Boost_SYSTEM_LIBRARY} ${Boost_LIBRARIES} Boost::log_setup Boost::log ${MINGW_LIBRARIES})
 
 set (CMAKE_CXX_FLAGS "-g -Wall -DBOOST_LOG_DYN_LINK")
 

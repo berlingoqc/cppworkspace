@@ -109,7 +109,7 @@ enum def_ardrone_state_mask_t {
 };
 
 
-static INLINE uint32_t ardrone_set_state_with_mask( uint32_t state, uint32_t mask, bool_t value )
+static uint32_t ardrone_set_state_with_mask( uint32_t state, uint32_t mask, bool_t value )
 {
   state &= ~mask;
   if( value )
@@ -125,7 +125,7 @@ static INLINE uint32_t ardrone_set_state_with_mask( uint32_t state, uint32_t mas
  * @param mask a mask that tells the bit to test
  * @return TRUE if bit is set, FALSE otherwise
  */
-static INLINE bool_t ardrone_get_mask_from_state( uint32_t state, uint32_t mask )
+static uint32_t ardrone_get_mask_from_state( uint32_t state, uint32_t mask )
 {
   return state & mask ? TRUE : FALSE;
 }
