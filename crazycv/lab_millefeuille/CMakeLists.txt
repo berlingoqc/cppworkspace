@@ -22,8 +22,8 @@ find_package( OpenCV REQUIRED)
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 
-set ( SRC_FILE confmillefeuille.cpp main.cpp millefeuillebd.cpp)
-set ( HED_FILE confmillefeuille.h millefeuille.h millefeuillebd.h) 
+set ( SRC_FILE main.cpp )
+set ( HED_FILE millefeuille.h ) 
 
 # Add source to this project's executable.
 add_executable (lab_millefeuille ${SRC_FILE} ${HED_FILE} cvheaders.h imagewrapper.h imagewrapper.cpp)

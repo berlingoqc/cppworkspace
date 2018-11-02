@@ -1,4 +1,4 @@
-#include "confmillefeuille.h"
+#include "millefeuille.h"
 #include "cvheaders.h"
 
 #include <opencv2/features2d.hpp>
@@ -66,7 +66,49 @@ void createMyTrackBar() {
     createTrackbar ( "T_MAX",wCanny,&T_MAX,T_MAX,on_trackbar);
 }
 
+int validCroute(const valid_croute& v, const vector<Moments>& mu) {
+    // Doit avoir deux croutes de detecter
+    if(mu.size() != 2) {
+        return TOO_MUTCH_CROUTE_ERROR;
+    } 
+    // Valide la distance entre les deux centre de mass sur l'axe des y 
+    Point2f p1 = Point2f( mu[0].m10/mu[0].m00 , mu[0].m01/mu[0].m00 );
+    Point2f p2 = Point2f( mu[1].m10/mu[1].m00 , mu[1].m01/mu[1].m00 );
+    float distance = p2.y - p1.y;
+    printf(" P1.y = %.2f    P2.y = %.2f   Distance = %.2f \n", p1.y, p2.y, distance);
+    if(distance >= v.minYDistanceMassCenter && distance < v.maxYDistanceMassCenter) {
+        return NO_ERROR;
+    }
+    return INVALID_DISTANCE_CROUTE_ERROR;
+}
+
+int validCrouteMoment(const valid_croute& v, const vector<Moments>& moments) {
+
+    vector<Moments>     crouteMoments;
+    double area;
+    // Si il y a trop de moment on retour une erreur disant qu'il a trop de buit dans l'image pour faire un bon filtrage
+    if(moments.size() > v.maxBruit) return TOO_MUTCH_INTERFERENCE_IMG_ERROR;
+    for ( auto m : moments) {
+        area = m.m00;
+        if(area >= v.minArea && area <= v.maxArea) {
+            // Trouver une zone de bonen grosseur
+            printf("Trouver une croute grosseur : %.2f \n",area);
+            crouteMoments.push_back(m);
+        }
+    }
+    return validCroute(v, crouteMoments);
+}
+
 void findThreshOld(const millefeuille_image& mfl) {
+
+    valid_croute vc;
+    vc.maxArea = 29000;
+    vc.minArea = 26000;
+    vc.maxBruit = 30;
+    vc.maxYDistanceMassCenter = 0;
+    vc.minYDistanceMassCenter = 0;
+
+
     std::stringstream ss;
     ss << "Image Path " << mfl.filename << " Vue " << mfl.view << " Etat " << mfl.view;
     createMyTrackBar();
@@ -113,7 +155,6 @@ void findThreshOld(const millefeuille_image& mfl) {
 
         // Connect les composantes avec 8 way connectivité
         int v = connectedComponents(kp,kp,8,4);
-        printf("There is %d label \n",v);
         /// Get the moments
         vector<Moments> mu(contours.size() );
         for( int i = 0; i < contours.size(); i++ )
@@ -141,14 +182,22 @@ void findThreshOld(const millefeuille_image& mfl) {
         imshow("f",t);
         imshow(wThres,thresh);
         imshow(wCanny, kp);
-        int k = cv::waitKey(0);
-        if(k == 'b') {
-            printf("\t Info: Area and Contour Length \n");
-            for( int i = 0; i< contours.size(); i++ )
-                printf(" * Contour[%d] - Area (M_00) = %.2f - Area OpenCV: %.2f - Lenght: %.2f \n", i , mu[i].m00, contourArea(contours[i]), arcLength(contours[i], true));
-        } else if(k != 'c') {
-            std::cout << "ThreshHold : H_MIN " << H_MIN << " H_MAX " << H_MAX << " S_MIN "<< S_MIN << " S_MAX " << S_MAX << " V_MIN " << V_MIN << "V_MAX" << V_MAX << std::endl;
-            return;
+        switch(cv::waitKey(30)) {
+            case 'q':
+                {
+                    int ii = validCrouteMoment(vc,mu);
+                    printf("Code d'erreur : %d \n",ii);
+                }
+            break;
+            case 'b':
+                printf("\t Info: Area and Contour Length \n");
+                for( int i = 0; i< contours.size(); i++ )
+                    printf(" * Contour[%d] - Area (M_00) = %.2f - Area OpenCV: %.2f - Lenght: %.2f \n", i , mu[i].m00, contourArea(contours[i]), arcLength(contours[i], true));
+            break;
+            case 'c':
+                std::cout << "ThreshHold : H_MIN " << H_MIN << " H_MAX " << H_MAX << " S_MIN "<< S_MIN << " S_MAX " << S_MAX << " V_MIN " << V_MIN << "V_MAX" << V_MAX << std::endl;
+                return;
+            break;
         }
     }
 }

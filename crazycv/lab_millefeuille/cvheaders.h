@@ -19,4 +19,18 @@
 #include <string>
 
 
+
+struct thresh_range {
+	int H_MIN;
+	int H_MAX;
+	int S_MIN;
+	int S_MAX;
+	int V_MIN;
+	int V_MAX;
+
+	int T_MIN;
+	int T_MAX;
+};
+
+
 #endif // CVHEADERS_H
