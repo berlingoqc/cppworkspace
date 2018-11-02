@@ -20,7 +20,7 @@ find_package(Qt5Sql)
 find_package( OpenCV REQUIRED)
 
 
-include_directories( ${OpenCV_INCLUDE_DIRS} ${QT_INCLUDES})
+include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 
 set ( SRC_FILE src/colorwidget.cpp src/confmillefeuille.cpp src/home.cpp src/imagelabel.cpp src/imagewrapper.cpp src/main.cpp src/mainwindow.cpp src/millefeuillebd.cpp src/starttracking.cpp)

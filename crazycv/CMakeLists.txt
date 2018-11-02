@@ -6,5 +6,5 @@ cmake_minimum_required (VERSION 3.8)
 project ("crazycv")
 
 # Include sub-projects.
-add_subdirectory ("crazycv")
-add_subdirectory ("lab_image")
+#add_subdirectory ("crazycv")
+add_subdirectory ("lab_millefeuille")

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ConfMIlleFeuille</class>
+ <widget class="QDialog" name="ConfMIlleFeuille">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>592</width>
+    <height>449</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QPushButton" name="btnSupprimer">
+   <property name="geometry">
+    <rect>
+     <x>430</x>
+     <y>50</y>
+     <width>91</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>-</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="formLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>32</x>
+     <y>20</y>
+     <width>241</width>
+     <height>120</height>
+    </rect>
+   </property>
+   <layout class="QFormLayout" name="formLayout">
+    <item row="0" column="0">
+     <widget class="QLabel" name="imageLabel">
+      <property name="text">
+       <string>Image</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLineEdit" name="txtImagePath"/>
+    </item>
+    <item row="1" column="1">
+     <widget class="QPushButton" name="txtBtnParcourir">
+      <property name="text">
+       <string>Parcourir</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="angleLabel">
+      <property name="text">
+       <string>Angle</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QComboBox" name="cbAngle">
+      <item>
+       <property name="text">
+        <string>Coté</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Dessus</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="erreurLabel">
+      <property name="text">
+       <string>Erreur</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QComboBox" name="cbError">
+      <item>
+       <property name="text">
+        <string>Aucune</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Pas Crustad</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Pas Creme</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Pas Top</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QPushButton" name="btnSauvegarder">
+   <property name="geometry">
+    <rect>
+     <x>348</x>
+     <y>360</y>
+     <width>101</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Sauvegarder</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnQuitter">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>360</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Quitter</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnAjouter">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>50</y>
+     <width>91</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>+</string>
+   </property>
+  </widget>
+  <widget class="QTableView" name="table">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>150</y>
+     <width>521</width>
+     <height>192</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

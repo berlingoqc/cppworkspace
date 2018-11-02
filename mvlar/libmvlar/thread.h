@@ -3,7 +3,7 @@
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/asio>
+#include <boost/asio.hpp>
 #include <queue>
 #include <list>
 

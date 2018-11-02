@@ -14,8 +14,9 @@ worker_pool::~worker_pool() {
 	_io_service.stop();
 	try {
 		_thread_group.join_all();
-	}
+	} catch(const boost::system::system_error& ex) {
 
+	}
 }
 
 // FONCTION PUBLIC
