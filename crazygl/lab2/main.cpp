@@ -1,12 +1,11 @@
 #include "engine.h"
 #include "shaders.h"
-
-
+#include "house_maker.h"
 
 using namespace ENGINE;
 
 // DEFINITON VARIABLE GLOBALE
-
+typedef unsigned int uint;
 
 enum BASIC_OPTION_MENU { SAVE_DRAWING, EXIT_APP };
 
@@ -19,6 +18,98 @@ unsigned int VueID;
 unsigned int ProjectionID;
 unsigned int TranslationID;
 
+//  Handler globaux pour ma maison
+uint vaoBaseID;
+uint vaoToitID;
+uint vaoSolID;
+uint rotationID;
+uint echelleID;
+
+// Variables globales pour la maison
+float	houseScale = 1.0f;
+float	houseRotX = 0.0f;
+float   houseRotY = 0.0f;
+int		firstPass = 0;
+
+
+
+void renderHouseScene() {
+
+	glm::mat4x4 rot = glm::mat4(1.0);
+	glm::mat4x4 ech = glm::mat4(1.0);
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	rot = glm::rotate(rot, glm::radians(houseRotX), glm::vec3(1.0, 0.0, 0.0));
+	rot = glm::rotate(rot, glm::radians(houseRotY), glm::vec3(0.0, 1.0, 0.0));
+
+	ech = glm::scale(ech, glm::vec3(houseScale, houseScale, houseScale));
+
+	glUniformMatrix4fv(rotationID, 1, GL_FALSE, &rot[0][0]);
+	glUniformMatrix4fv(echelleID, 1, GL_FALSE, &ech[0][0]);
+
+	glBindVertexArray(vaoBaseID);
+	glDrawElements(GL_TRIANGLES, 14 * 3, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+
+	glBindVertexArray(vaoToitID);
+	glDrawElements(GL_TRIANGLES, 6 * 3, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+
+	glBindVertexArray(vaoSolID);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+
+
+	glutSwapBuffers();
+}
+
+bool initShaderHouse() {
+	// Initialize no MyShaders
+	ENGINE::MyShader MyShader;
+	if (!MyShader.OpenMyShader("vertex.glsl", "fragment.glsl")) {
+		std::cerr << "Erreur dans l'ouverture des shaders" << std::endl;
+		return false;
+	}
+	ShaderID = MyShader.GetShaderID();
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	glUseProgram(ShaderID);
+	// Get les handlers des variables globales 
+	rotationID = glGetUniformLocation(ShaderID, "gRot");
+	assert(rotationID != 0xFFFFFFFF);
+
+	echelleID = glGetUniformLocation(ShaderID, "gScale");
+	assert(echelleID != 0xFFFFFFFF);
+
+	glGenVertexArrays(1, &vaoBaseID);
+	glGenVertexArrays(1, &vaoToitID);
+	glGenVertexArrays(1, &vaoSolID);
+
+
+	return true;
+}
+
+
+void initHouse() {
+	House::House_Maker house;
+
+	glBindVertexArray(vaoBaseID);
+	house.createBase(0.5f, 0.5f, 0.5f, glm::vec3(1.0f, 0.0f, 0.0f));
+	glBindVertexArray(0);
+
+	glBindVertexArray(vaoToitID);
+	house.createCeiling(0.75f, 0.5f, 0.75f, glm::vec3(0.0f, 0.0f, 1.0f));
+	glBindVertexArray(0);
+
+	glBindVertexArray(vaoSolID);
+	house.createFloor(10.0f, 20.0f, glm::vec3(0.4, 0.7, 0.3));
+	glBindVertexArray(0);
+
+}
+
+
+
 
 struct ballinfo {
 	glm::vec3 positions;
@@ -28,8 +119,6 @@ struct ballinfo {
 };
 
 typedef std::vector<ballinfo>  listballinfo;
-
-
 
 unsigned int vertexbuffer;
 unsigned int ibo;
@@ -178,7 +267,7 @@ int main(int argc, char** argv) {
 	GlutEngine g(true);
 	app = &g;
 	app->SetMainFunc(mainLoop);
-	app->SetRenderFunc(display);
+	app->SetRenderFunc(renderHouseScene);
 	app->SetKeyFunc(keybinding);
 	app->SetFuncKeyFunc(specialkeybinding);
 	app->SetMouseFunc(mousebinding);
@@ -186,18 +275,17 @@ int main(int argc, char** argv) {
 	app->Init(info, argc, argv);
 
 
-	// Initialize no MyShaders
-	ENGINE::MyShader MyShader;
-	if (!MyShader.OpenMyShader("vertex.glsl", "fragment.glsl")) {
-		std::cerr << "Erreur dans l'ouverture des shaders" << std::endl;
-		return -1;
-	}
-	ShaderID = MyShader.GetShaderID();
 
 	// Init du menu contextuel
 	createMenu();
 
-	createFaceIBO();
+	if (!initShaderHouse()) {
+		std::cerr << "Echer de l'initialisation des shaders" << std::endl;
+		return -1;
+	}
+
+	initHouse();
+
 
 	app->Run();
 

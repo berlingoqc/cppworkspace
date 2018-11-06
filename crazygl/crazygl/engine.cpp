@@ -73,7 +73,6 @@ namespace ENGINE {
 		glGenBuffers(1, id); // Generer le VBO
 		glBindBuffer(GL_ARRAY_BUFFER, *id);  // Lier le VBO
 		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW); // Définir la taille, les données et le type du VBO
-		glEnableVertexAttribArray(position); // Enable l'attribut qu'on veut activer
 	}
 
 	void genIBOBuffer(uint* id, int position, int size, const void * data) {
