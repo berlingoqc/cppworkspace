@@ -18,8 +18,8 @@ set(FREEGLUT_LIBRARY "" CACHE PATH "The directory that contains freeglut.lib" )
 
 set(STB_INCLUDE_PATH "" CACHE PATH "The directory that contains stb.h")
 
-
-
+set(ASSIMP_INCLUDE_PATH "" CACHE PATH "The directory that contains GL/freeglut.h" )
+set(ASSIMP_LIBRARY "" CACHE PATH "The directory that contains freeglut.lib" )
 
 
 include_directories(
@@ -27,6 +27,7 @@ include_directories(
 	${STB_INCLUDE_PATH}
 	${FREEGLUT_INCLUDE_PATH}
 	${GLM_INCLUDE_PATH}
+	${ASSIMP_INCLUDE_PATH}
 )
 
 

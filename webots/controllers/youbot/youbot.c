@@ -331,12 +331,13 @@ void PickAndPlace(YouBotManipulator *MyYouBotManipulator, int NumBlock)
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick1, true);
 			reelYB_GripperOpen(MyYouBotManipulator, true);
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAnglePick1, true);
+			passive_wait(0.5);
 			reelYB_GripperClose(MyYouBotManipulator,true);
-			_sleep(500);
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick1, true);
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproDrop1, true);
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleDrop1, true);
+			passive_wait(2.0);
 			reelYB_GripperOpen(MyYouBotManipulator, true);
 			break;
 		case 2:
@@ -345,10 +346,12 @@ void PickAndPlace(YouBotManipulator *MyYouBotManipulator, int NumBlock)
 			reelYB_GripperOpen(MyYouBotManipulator, true);
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAnglePick2, true);
 			reelYB_GripperClose(MyYouBotManipulator, true);
+			passive_wait(1.0);
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick2, true);
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproDrop2, true);
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleDrop2, true);
+			passive_wait(2.0);
 			reelYB_GripperOpen(MyYouBotManipulator, true);
 			break;
 		case 3:
@@ -356,11 +359,13 @@ void PickAndPlace(YouBotManipulator *MyYouBotManipulator, int NumBlock)
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick3, true);
 			reelYB_GripperOpen(MyYouBotManipulator,true);
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAnglePick3, true);
+			passive_wait(1.0);
 			reelYB_GripperClose(MyYouBotManipulator, true);
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproPick3, true);
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleReadyPosition, true);
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleAproDrop3, true);
 			reelYB_ArmSetAngle(MyYouBotManipulator, ArmAngleDrop3, true);
+			passive_wait(2.0f);
 			reelYB_GripperOpen(MyYouBotManipulator, true);
 			break;
 	}
@@ -393,7 +398,7 @@ int robotLoop() {
 
 	int nbrTryFindBox = 0;
 
-	CurrentState = TASK_OBJECT;
+	//CurrentState = TASK_OBJECT;
 
 	while(CurrentState != END_SEQUENCE) { // Boucle jusqu'a t'en qu'on soit rendu a la sequence
 
@@ -492,10 +497,10 @@ int robotLoop() {
 				if ( 82.0f < angleBetween && angleBetween < 98.0f ) {
 					printf("Je suis bien alligné avec la boite\n");
 					// Va chercher le point central de la ligne vector * 0.5
-					//vec2f vLineHalf = vectorByN(&vLine, 0.5);
+					vec2f vLineHalf = vectorByN(&vLine, 0.5);
 					// Va cherche le point au bout du nouveau vecteur
-					//vec2f middlePoint = addVec2f(&l.p1,&vLineHalf);
-					vec2f middlePoint = l.p2;
+					vec2f middlePoint = addVec2f(&l.p1,&vLineHalf);
+					//vec2f middlePoint = l.p2;
 					// Va chercher le déplacement nécessaire en x et en y 
 					printf("fin de la ligne est x : %f y : %f\n",middlePoint.x,middlePoint.y);
 					bool isXFine = false;bool isYFine = false;
@@ -505,7 +510,7 @@ int robotLoop() {
 					}
 					if( 0.1f < l.p2.y) {
 						printf("Doit s'enligner sur l'axe des y\n");
-						reelYB_MoveBaseLongitudinal(base,15.0f,2.0,true, -1);
+						reelYB_MoveBaseLongitudinal(base,10.0f,2.0,true, -1);
 						only_forward = true;
 						continue;
 					}
@@ -528,6 +533,7 @@ int robotLoop() {
 				PickAndPlace(manipulator,1);
 				PickAndPlace(manipulator,2);
 				PickAndPlace(manipulator,3);
+				passive_wait(5.0);
 				//reelYB_MoveArmAndBaseByKeyboard(base);
 				goto exit_loop;
 				

@@ -12,19 +12,21 @@ namespace House {
 			House_Maker(void);
 			~House_Maker(void);
 
-			void createBase(float largeur, float hauteur, float profondeur, glm::vec3 couleur);
-			void createCeiling(float largeur, float hauteur, float profondeur, glm::vec3 couleur);
-			void createFloor(float largeur, float profondeur, glm::vec3 couleur);
+			void creeBase(GLfloat largeur, GLfloat hauteur, GLfloat profondeur, glm::vec3 couleur);
+
+			void creeToit(GLfloat largeur, GLfloat hauteur, GLfloat profondeur, glm::vec3 couleur);
+
+			void creeSol(GLfloat largeur, GLfloat profondeur, glm::vec3 couleur);
 
 		private:
 
-			void creeSommetsBase(float largeur, float hauteur, float profondeur);
+			void creeSommetsBase(GLfloat largeur, GLfloat hauteur, GLfloat profondeur);
 			void creeCouleursBase(glm::vec3 couleur);
 
-			void creeSommetsToit(float largeur, float hauteur, float profondeur);
+			void creeSommetsToit(GLfloat largeur, GLfloat hauteur, GLfloat profondeur);
 			void creeCouleursToit(glm::vec3 couleur);
 
-			void creeSommetsSol(float largeur, float profondeur);
+			void creeSommetsSol(GLfloat largeur, GLfloat profondeur);
 			void creeCouleursSol(glm::vec3 couleur);
 
 		private:

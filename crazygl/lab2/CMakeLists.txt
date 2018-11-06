@@ -19,6 +19,7 @@ target_link_libraries(lab2
 	${OPENGL_LIBRARY}
 	${GLEW_LIBRARY}
 	${FREEGLUT_LIBRARY}
+	${ASSIMP_LIBRARY}
 )
 
 

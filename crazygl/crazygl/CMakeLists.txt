@@ -3,8 +3,8 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-SET(HEADER_FILES "${STB_INCLUDE_PATH}/stb_image.h" engine.h header.h shaders.h)
-SET(SOURCE_FILES engine.cpp shaders.cpp)
+SET(HEADER_FILES "${STB_INCLUDE_PATH}/stb_image.h" engine.h header.h shaders.h mesh.h)
+SET(SOURCE_FILES engine.cpp shaders.cpp mesh.cpp)
 
 
 # Ajoutez une source à l'exécutable de ce projet.
