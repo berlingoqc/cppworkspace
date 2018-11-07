@@ -3,22 +3,20 @@
 
 #include <vector>
 
-namespace PathFinding {
-class Point {
+class Ptn {
     float   x;
     float   y;
 
 public:
-    Point();
-    Point(float x,float y);
+    Ptn();
+    Ptn(float x,float y);
 };
 
-Point pointMoveByVector(const Point& p, const Point& v, float n);
+Ptn PtnMoveByVector(const Ptn& p, const Ptn& v, float n);
 
-bool areIntersecting(const Point& l1p1, const Point& l1p2, const Point& l2p1, const Point& l2p2);
-Point getIntersectionPoint(const Point& l1p1, const Point& l1p2, const Point& l2p1, const Point& l2p2);
-float distanceBetweenPoints(const Point& p1, const Point& p2);
+bool areIntersecting(const Ptn& l1p1, const Ptn& l1p2, const Ptn& l2p1, const Ptn& l2p2);
+Ptn getIntersectionPtn(const Ptn& l1p1, const Ptn& l1p2, const Ptn& l2p1, const Ptn& l2p2);
+float distanceBetweenPtns(const Ptn& p1, const Ptn& p2);
 
-}
 
 #endif

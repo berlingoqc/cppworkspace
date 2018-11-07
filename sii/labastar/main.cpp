@@ -1,5 +1,3 @@
-#include "AxisCommunication.h"
-
 /*
     Laboratoire A-Star
 
@@ -23,11 +21,13 @@
             1. Un numéro d’identification unique 
             2. Le score F,G et H
             3. Le nœud parent.
-        ii. Être identifié par un point bleu si elle fait partie de la liste ouverte.
-        iii.Être identifié par un point rouge si elle fait partie de la liste fermée.
-        iv. Être identifié par un point vert si elle fait partie du chemin trouvé (si chemin il y a).
+        ii. Être identifié par un Ptn bleu si elle fait partie de la liste ouverte.
+        iii.Être identifié par un Ptn rouge si elle fait partie de la liste fermée.
+        iv. Être identifié par un Ptn vert si elle fait partie du chemin trouvé (si chemin il y a).
 */
-#include "AxisCommunication.h"
+#ifdef _WITH_AXIS_COM
+    #include "AxisCommunication.h"
+#endif
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -51,19 +51,28 @@ using namespace cv;
 #define AXIS_CAM_USER "etudiant"
 #define AXIS_CAM_PW "gty970"
 
-// VARIABLE GLOBALE
 
+struct pathfind_info {
+    Point   startingLocation;
+    Point   endLocation;
+    Size    objectSize;
+};
+
+
+// Variable qui indique si on utilse cuda ou sinon juste des fonctions opencv
+bool useCUDA = false;
+// Peut contenir le liens d'une image si oui utilise cette image au lieu
+// d'obtenir l'image depuis AxisCommunication
+std::string imageFromFilePath;
+// Contient l'image du fichier précédent
+cv::Mat imgNoAxis;
+
+#ifdef _WITH_AXIS_COM
+cv::VideoCapture vc;
 CamData cam;
 Axis axis(AXIS_CAM_IP, AXIS_CAM_USER, AXIS_CAM_PW);
 
-float PanStep = 5.0f, TiltStep = 5.0f;
-int ZoomStep = 10, FocusStep = 500, BrightnessStep = 500;
-
-cv::Mat phil(int rad);
-cv::VideoCapture vc;
-
-
-cv::Mat getImageAxisCam() {
+cv::Mat getImage() {
     cv::Mat img1, img2;
     bool failed = true;
     while(failed) {
@@ -114,23 +123,37 @@ cv::Mat getImageAxisCam() {
     return imgConcat;
 }
 
-void findContourImage(const cv::Mat& img, cv::Mat& out) {
+#else 
+// Si on n'a pas axis cam on va loader une image depuis un fichier qui est passer en configuration
+// ungly workaround
+cv::Mat getImage() {
+    return imgNoAxis;
+}
+#endif
+
+// Utilise le backend opencv pour faire le traitement de l'image et get les contours
+void processImageCV(const cv::Mat& img, cv::Mat& out) {
     cv::GaussianBlur(img,img, cv::Size(5,5), 2);
     cv::cvtColor(img,img, CV_BGR2HSV);
     inRange(img, cv::Scalar(50,0,0), cv::Scalar(83,255,128), out);
     //cv::morphologyEx(bin,bin, cv::MORPH_OPEN, cv::Mat::ones(7,7, CV_8UC1));
 }
 
-void findContourImageCuda(const cv::Mat& origin, cv::Mat& out) {
+
+// Utilise mon backend cuda pour faire le traitement de l'image et get les contours
+void processImageCUDA(const cv::Mat& origin, cv::Mat& out) {
+
 
 }
 
-void main() {
 
+
+void startMainLoop() {
 	float vehicleWidth = YOUBOT_WIDTH_PX;
-
-    // Ouvre la video capture depuis la camera
-	vc.open("http://etudiant:gty970@10.128.3.4/axis-cgi/mjpg/video.cgi");
+    #ifdef _WITH_AXIS_COM
+        // Ouvre la video capture depuis la camera
+	    vc.open("http://etudiant:gty970@10.128.3.4/axis-cgi/mjpg/video.cgi");
+    #endif 
 
     std::vector<std::vector<cv::Point>> contours0;
     std::vector<std::vector<cv::Point>> contours;
@@ -138,15 +161,34 @@ void main() {
 
     cv::Mat bin;
     cv::Mat img;
-	cv::Mat imgOrig = getImageAxisCam();
+	cv::Mat imgOrig = getImage();
+
+    // Depuis l'image d'origin va chercher le robot cuca pour obtenir
+    // sa largeur et sa longeur pour determiner la grosseur du grillage
+
+    Size cucaSize(0,0);
+    Point startingLocation(0,0);
+
+    // Affiche le grillage sur l'image avec les résultats obtenue
+    // et permet de cliquer pour choisir la zone de destination
+    // si elle n'est pas deja fournit
+
+
 
     while (false) {
         // Passe notre image vers notre fonction cuda pour la traiter
         img = imgOrig.clone();
 
-        findContourImage(img,bin);
     }
     
-    vc.release();
-    return;
+
+    #ifdef _WITH_AXIS_COM
+        vc.release();
+    #endif
+}
+
+
+int main() {
+
+   return 0;
 }

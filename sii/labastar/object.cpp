@@ -1,16 +1,12 @@
 #include "object.h"
 
 
- Object::Object(std::vector<Point*> pts) {
-     pts = cleanupPointLists(pts);
+ Object::Object(std::vector<Ptn*> pts) {
+     pts = cleanupPtnLists(pts);
      if(pts.size() <= 2) {
          for(int i = 0; i < pts.size(); i++) {
-             nodeList.push_back(new Node(pts[i], new Point(0.0f,0.0f)));
          }
          return;
-     }
-     for(int i = 0; i< pts.size(); i++) {
-         Point* temp = getAngleVectorFromPoints(pts[i], pts[(i+1) % pts.size()]);
      }
  }
 
@@ -19,11 +15,11 @@
  }
 
         
-std::vector<Point*> Object::cleanupPointLists(std::vector<Point*> pnodelist) {
+std::vector<Ptn*> Object::cleanupPtnLists(std::vector<Ptn*> pnodelist) {
 
 }
 
-std::vector<Point*> Object::removeNodes(std::vector<Point*> pnodeList, Point* newPoint, int startIndex, int endIndex) {
+std::vector<Ptn*> Object::removeNodes(std::vector<Ptn*> pnodeList, Ptn* newPtn, int startIndex, int endIndex) {
 
 }
 
@@ -35,10 +31,10 @@ void Object::deleteNode() {
 
 }
 
-void Object::deletePoint() {
+void Object::deletePtn() {
 
 }
 
-Point* Object::getAngleVectorFromPoints(Point* previous, Point* current, Point* next) {
+Ptn* Object::getAngleVectorFromPtns(Ptn* previous, Ptn* current, Ptn* next) {
 
 }

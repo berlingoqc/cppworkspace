@@ -3,14 +3,12 @@
 
 #include "2dhelp.h"
 
-class NodeMap {
-
-};
+class NodeMap;
 
 class Node {
     public:
         Node();
-        Node(Point* p1, Point* p2);
+        Node(Ptn* p1, Ptn* p2);
         ~Node();
 
     private:

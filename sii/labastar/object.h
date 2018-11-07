@@ -4,27 +4,26 @@
 #include <stdarg.h>
 #include <vector>
 #include "node.h"
-
-using namespace PathFinding;
+#include "2dhelp.h"
 
 class Object {
     private:
         std::vector<Node*> nodeList;
     public:
-        Object(std::vector<Point*> pts);
+        Object(std::vector<Ptn*> pts);
         ~Object();
 
         
 
-        static std::vector<Point*> cleanupPointLists(std::vector<Point*> pnodelist);
-        static std::vector<Point*> removeNodes(std::vector<Point*> pnodeList, Point* newPoint, int startIndex, int endIndex);
+        static std::vector<Ptn*> cleanupPtnLists(std::vector<Ptn*> pnodelist);
+        static std::vector<Ptn*> removeNodes(std::vector<Ptn*> pnodeList, Ptn* newPtn, int startIndex, int endIndex);
 
         void deletePolygon();
         void deleteNode();
-        void deletePoint();
+        void deletePtn();
     
     private:
-        Point* getAngleVectorFromPoints(Point* previous, Point* current, Point* next);
+        Ptn* getAngleVectorFromPtns(Ptn* previous, Ptn* current, Ptn* next);
 };
 
 #endif
