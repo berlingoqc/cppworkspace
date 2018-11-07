@@ -1,5 +1,5 @@
 #include "helpme.h"
-
+#include <math.h>
 #define BLOCK_SIZE  50
 
 
@@ -112,8 +112,8 @@ extern "C" cudaError_t StartKernel_Object_Detection(uchar3 *pArrayA, uchar* pArr
 
     Kernel_Sobel_Operator<<<BLOCK_COUNT,BLOCK_SIZE>>>((uchar*)pArrayFilterBG,(uchar*)pArraySobel,(int)cols,(int)rows);
 
-
-    HANDLE_ERROR(cudaDeviceSynchronize());
+	
+	HANDLE_ERROR(cudaDeviceSynchronize());
 
     // Copie notre image final vers le cpu
     HANDLE_ERROR(cudaMemcpy(pArrayR,pArraySobel,memSizeU, cudaMemcpyDeviceToHost));

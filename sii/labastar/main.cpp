@@ -28,7 +28,6 @@
         iv. Être identifié par un point vert si elle fait partie du chemin trouvé (si chemin il y a).
 */
 #include "AxisCommunication.h"
-#include "2dhelp.h"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -146,21 +145,6 @@ void main() {
         img = imgOrig.clone();
 
         findContourImage(img,bin);
-
-        // Trouve les contours avec la fonction de opencv
-        cv::findContours(bin, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_TC89_KCOS);
-        
-        for(size_t k = 0; k < contours0.size(); k++) {
-            cv::approxPolyDP(cv::Mat(contours0[k]), contours[k], 6, false);
-            std::vector<PathFinding::Point*> points;
-            for(int i = contours[k].size() - 1; i >= 0;i--) {
-                points.push_back(new PathFinding::Point(contours[k][i].x, contours[k][i].y));
-            }
-
-        }
-
-
-
     }
     
     vc.release();

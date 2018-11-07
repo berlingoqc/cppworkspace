@@ -1,6 +1,7 @@
 #ifndef __HELPME_H__
 #define __HELPME_H__
 #include <stdio.h>
+#include <stdlib.h>
 #include "cuda_runtime.h"
 
 

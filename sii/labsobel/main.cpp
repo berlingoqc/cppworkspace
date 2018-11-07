@@ -7,40 +7,23 @@
 #include <string>
 #include <math.h>
 
+#include <tclap/CmdLine.h>
+
 using namespace std;
 using namespace cv;
 
 
-extern "C" cudaError_t StartKernel_Object_Detection(uchar3 *pArrayA, uchar* pArrayR,int cols,int rows);
 
 std::string outputName = "";
 
-void HsvToRgb(Mat img) {
-	cv::Mat out;
-	GPUSobel(img,out);
-
-	imshow("Image resultante", imgRetour);
-
-	if(outputName != "") {
-		std::cout << "Enregistrement du résultat dans " << outputName << std::endl;
-		imwrite(outputName,imgRetour);
-	}
-	imshow("Image d'origine",img);
-
-	// Attend un key pour fermer le programme 
-	if(waitKey() > 0) {;
-		return;
-	}
-}
-
 int main(int argv, char ** argc) {
-	std::string fileName;
+	std::string fileName = "D:\\l\\test.jpg";
 
-	bool		useAxis;
+	bool		useAxis = false;
 	std::string ipCamera;
 	std::string userCamera;
 	std::string pwCamera;
-	/*
+	
 	try {
 		TCLAP::CmdLine cmd("Laboratoire 1 Système Industriel Intélligent",' ',"1.0");
 
@@ -74,7 +57,6 @@ int main(int argv, char ** argc) {
 		std::cerr << "Error: " << e.error() << " for arg " << e.argId() << std::endl;
 		return 1;
 	}
-	*/
 
 	Mat img;
 
@@ -110,7 +92,18 @@ int main(int argv, char ** argc) {
 	// Affiche la grandeur de l'image
 	std::cout << "Width : " << img.cols << " Height : " << img.rows << std::endl;
 
-	HsvToRgb(img);
+	cv::Mat out(img.rows,img.cols,CV_8U);
+	GPUSobel(img, out);
 
+	imshow("Image resultante", out);
+
+	if (outputName != "") {
+		std::cout << "Enregistrement du résultat dans " << outputName << std::endl;
+		imwrite(outputName, out);
+	}
+	imshow("Image d'origine", img);
+
+	// Attend un key pour fermer le programme 
+	waitKey(0);
 	return 0;
 }
