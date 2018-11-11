@@ -134,7 +134,7 @@ cv::Mat getImage() {
 // Utilise le backend opencv pour faire le traitement de l'image et get les contours
 void processImageCV(const cv::Mat& img, cv::Mat& out) {
     cv::GaussianBlur(img,img, cv::Size(5,5), 2);
-    cv::cvtColor(img,img, CV_BGR2HSV);
+    cv::cvtColor(img,img, COLOR_BGR2HSV);
     inRange(img, cv::Scalar(50,0,0), cv::Scalar(83,255,128), out);
     //cv::morphologyEx(bin,bin, cv::MORPH_OPEN, cv::Mat::ones(7,7, CV_8UC1));
 }
@@ -189,6 +189,6 @@ void startMainLoop() {
 
 
 int main() {
-
+    startMainLoop();
    return 0;
 }
