@@ -9,7 +9,7 @@
       ],
       "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
       "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
-      "cmakeCommandArgs": "-DOpenCV_DIR=D:\\VC17_LIB\\opencv -DTCLAP_INCLUDE_DIR=D:\\VC17_LIB\\tclap-1.2.2\\include",
+      "cmakeCommandArgs": " -DTCLAP_INCLUDE_DIR=D:\\VC17_LIB\\tclap\\include",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": ""
     }

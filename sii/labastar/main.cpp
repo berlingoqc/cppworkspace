@@ -28,6 +28,9 @@
 #ifdef _WITH_AXIS_COM
     #include "AxisCommunication.h"
 #endif
+#ifdef _WITH_CUDA
+	#include "gpusobel.h"
+#endif
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -36,11 +39,14 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include <thread>
+#include <future>
 #include <chrono>
 
 #include <iostream>
 
 using namespace cv;
+using namespace std;
+using namespace std::chrono;
 
 // DÉFINITION 
 
@@ -130,29 +136,42 @@ cv::Mat getImage() {
     return imgNoAxis;
 }
 #endif
-
+#ifndef _WITH_CUDA
 // Utilise le backend opencv pour faire le traitement de l'image et get les contours
-void processImageCV(const cv::Mat& img, cv::Mat& out) {
-    cv::GaussianBlur(img,img, cv::Size(5,5), 2);
+void processImage(cv::Mat& img, cv::Mat& out) {
+    //cv::GaussianBlur(img,img, cv::Size(5,5), 2);
     cv::cvtColor(img,img, COLOR_BGR2HSV);
     inRange(img, cv::Scalar(50,0,0), cv::Scalar(83,255,128), out);
     //cv::morphologyEx(bin,bin, cv::MORPH_OPEN, cv::Mat::ones(7,7, CV_8UC1));
 }
 
-
+#else
 // Utilise mon backend cuda pour faire le traitement de l'image et get les contours
-void processImageCUDA(const cv::Mat& origin, cv::Mat& out) {
-
-
+void processImage(cv::Mat& origin, cv::Mat& out) {
+	GPUSobel(origin, out);
 }
 
+#endif
+
+std::promise<Point> exitSignal;
+std::future<Point>  futureObj = exitSignal.get_future();
+
+
+
+void mouse_callback(int even, int x, int y, int flags, void* user_data) {
+	if (even == CV_EVENT_LBUTTONDOWN) {
+		std::cout << "Left click at " << x << " " << y << std::endl;
+		exitSignal.set_value(Point(x,y));
+		return;
+	}
+}
 
 
 void startMainLoop() {
 	float vehicleWidth = YOUBOT_WIDTH_PX;
     #ifdef _WITH_AXIS_COM
         // Ouvre la video capture depuis la camera
-	    vc.open("http://etudiant:gty970@10.128.3.4/axis-cgi/mjpg/video.cgi");
+		//vc.open("http://etudiant:gty970@10.128.3.4/axis-cgi/mjpg/video.cgi");
     #endif 
 
     std::vector<std::vector<cv::Point>> contours0;
@@ -161,24 +180,90 @@ void startMainLoop() {
 
     cv::Mat bin;
     cv::Mat img;
-	cv::Mat imgOrig = getImage();
 
-    // Depuis l'image d'origin va chercher le robot cuca pour obtenir
-    // sa largeur et sa longeur pour determiner la grosseur du grillage
+	const char* wImage = "Image";
+	const char* wContour = "Image binaire";
 
-    Size cucaSize(0,0);
-    Point startingLocation(0,0);
+	namedWindow(wImage, 1);
+	setMouseCallback(wImage, mouse_callback);
 
-    // Affiche le grillage sur l'image avec les résultats obtenue
-    // et permet de cliquer pour choisir la zone de destination
-    // si elle n'est pas deja fournit
+	// utilise test.jpg si elle existe
+	cv::Mat imgOrig = cv::imread("test.jpg");
+	if (imgOrig.empty()) {
+		imgOrig = getImage();
+		cv::imwrite("test.jpg", imgOrig);
+		if (imgOrig.empty()) {
+			std::cerr << "Empty image return from camera" << std::endl;
+			return;
+		}
+	}
+
+	cv::resize(imgOrig, imgOrig, Size(imgOrig.rows / 2, imgOrig.cols / 2));
+
+	Size cucaSize(200, 200);
+
+	Point startingLocation(0, 0);
+	Point endPoint(0, 0);
+
+
+	img = imgOrig.clone();
+
+	// ajoute les lignes de séparation des cases a l'image
+	int rows = imgOrig.rows;
+	int cols = imgOrig.cols;
+
+	int gapWidth = cols / (cols / cucaSize.width);
+	int gapHeight = rows / (rows / cucaSize.height);
+
+	for (int i = gapWidth; i < cols; i += gapWidth) {
+		cv::line(img, Point(i, 0), Point(i, rows), (0, 0, 0));
+	}
+
+	for (int i = gapHeight; i < rows; i += gapHeight) {
+		cv::line(img, Point(0, i), Point(cols, i), (0, 0, 0));
+	}
+
+	imshow(wImage, img);
+
+	for (int i = 0; i < 2;i++) {
+		// attend avec notre variable conditionel
+		while (futureObj.wait_for(30ms) == std::future_status::timeout) {
+			imshow(wImage, img);
+			int v = cv::waitKey(1);
+			if (v == 27) {
+				return;
+			}
+		}
+
+		if (i == 0) {
+			startingLocation = futureObj.get();
+			std::cout << "Got point start " << startingLocation << std::endl;
+			cv::circle(img, startingLocation, 5, (0, 0, 255), -1);
+		}
+		else if (i == 1) {
+			endPoint = futureObj.get();
+			std::cout << "Got point end " << endPoint << std::endl;
+		}
+		
+		exitSignal = std::promise<Point>();
+		futureObj = exitSignal.get_future();
+	}
+
+	std::cout << "Tout les points sont fournit " << std::endl;
+
+	
 
 
 
-    while (false) {
+	bool run = true;
+	processImage(imgOrig, bin);
+    while (run) {
         // Passe notre image vers notre fonction cuda pour la traiter
-        img = imgOrig.clone();
-
+		imshow(wContour, bin);
+		int v = cv::waitKey(1);
+		if (v == 27) {
+			break;
+		}
     }
     
 

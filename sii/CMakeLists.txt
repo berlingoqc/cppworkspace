@@ -12,7 +12,7 @@ endif()
 # Repertoire du tclap obligatoire
 set( TCLAP_INCLUDE_DIR "" CACHE PATH "The diretory containing tclap/CmdLine.h" ) # Cache path c'est pour les variables qui arrivent du mode cmd
 
-option ( WITH_CUDA "Add cuda support and build application that required cuda" ON)
+option ( WITH_CUDA "Add cuda support and build application that required cuda" OFF)
 
 if(WIN32)
     option( WITH_AXIS_COM "Add Axis Communication library" ON)
@@ -34,14 +34,16 @@ find_package( OpenCV REQUIRED )
 include_directories(
     ${OpenCV_INCLUDE_DIRS}
     ${AXIS_COM_INCLUDE_DIR}
+	${TCLAP_INCLUDE_DIR}
 )
 
-if (WITH_CUDA)
-    enable_language(CUDA)
-    include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
-    add_subdirectory (libcuda)
-    add_subdirectory (labsobel)
-endif()
+#if (WITH_CUDA)
+#    enable_language(CUDA)
+#    include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+#	add_definitions(-D_WITH_CUDA)
+#    add_subdirectory (libcuda)
+#    add_subdirectory (labsobel)
+#endif()
 
 add_subdirectory (labastar)
 

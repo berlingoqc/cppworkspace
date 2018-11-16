@@ -4,19 +4,29 @@
 #include <vector>
 
 class Ptn {
-    float   x;
-    float   y;
 
 public:
     Ptn();
     Ptn(float x,float y);
+
+	float   x;
+	float   y;
+
 };
 
-Ptn PtnMoveByVector(const Ptn& p, const Ptn& v, float n);
+Ptn PtnMoveByVector(const Ptn* p, const Ptn* v, float n);
 
-bool areIntersecting(const Ptn& l1p1, const Ptn& l1p2, const Ptn& l2p1, const Ptn& l2p2);
-Ptn getIntersectionPtn(const Ptn& l1p1, const Ptn& l1p2, const Ptn& l2p1, const Ptn& l2p2);
-float distanceBetweenPtns(const Ptn& p1, const Ptn& p2);
+bool areIntersecting(const Ptn* l1p1, const Ptn* l1p2, const Ptn* l2p1, const Ptn* l2p2);
+Ptn getIntersectionPtn(const Ptn* l1p1, const Ptn* l1p2, const Ptn* l2p1, const Ptn* l2p2);
+float distanceBetweenPtns(const Ptn* p1, const Ptn* p2);
+
+class Object {
+	std::vector<Ptn*> points;
+
+public:
+	Object(std::vector<Ptn*> pts);
+
+};
 
 
 #endif
