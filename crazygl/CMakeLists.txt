@@ -16,18 +16,15 @@ set(GLM_INCLUDE_PATH "" CACHE PATH "The directory that contains glm/glm.hpp" )
 set(FREEGLUT_INCLUDE_PATH "" CACHE PATH "The directory that contains GL/freeglut.h" )
 set(FREEGLUT_LIBRARY "" CACHE PATH "The directory that contains freeglut.lib" )
 
-set(STB_INCLUDE_PATH "" CACHE PATH "The directory that contains stb.h")
-
-set(ASSIMP_INCLUDE_PATH "" CACHE PATH "The directory that contains GL/freeglut.h" )
-set(ASSIMP_LIBRARY "" CACHE PATH "The directory that contains freeglut.lib" )
+set(SOIL_INCLUDE_PATH "" CACHE PATH "The directory that contains SOIL.h" )
+set(SOIL_LIBRARY "" CACHE PATH "The directory that contains SOIL.lib" )
 
 
 include_directories(
 	${GLEW_INCLUDE_PATH}
-	${STB_INCLUDE_PATH}
 	${FREEGLUT_INCLUDE_PATH}
 	${GLM_INCLUDE_PATH}
-	${ASSIMP_INCLUDE_PATH}
+	${SOIL_INCLUDE_PATH}
 )
 
 

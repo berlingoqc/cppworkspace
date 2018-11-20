@@ -11,6 +11,6 @@ if(WITH_AXIS_COM)
 endif()
 
 target_link_libraries(labastar
-	#libcuda
+	${LIBCUDA_LIBS}
     ${OpenCV_LIBS}
 )

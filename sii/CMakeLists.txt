@@ -15,7 +15,7 @@ set( TCLAP_INCLUDE_DIR "" CACHE PATH "The diretory containing tclap/CmdLine.h" )
 option ( WITH_CUDA "Add cuda support and build application that required cuda" OFF)
 
 if(WIN32)
-    option( WITH_AXIS_COM "Add Axis Communication library" ON)
+    option( WITH_AXIS_COM "Add Axis Communication library" OFF)
 endif(WIN32)
 
 # Repertoire de axis communication optionel
@@ -37,13 +37,14 @@ include_directories(
 	${TCLAP_INCLUDE_DIR}
 )
 
-#if (WITH_CUDA)
-#    enable_language(CUDA)
-#    include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
-#	add_definitions(-D_WITH_CUDA)
-#    add_subdirectory (libcuda)
-#    add_subdirectory (labsobel)
-#endif()
+if (WITH_CUDA)
+    enable_language(CUDA)
+    include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+	add_definitions(-D_WITH_CUDA)
+	set( LIBCUDA_LIBS libcuda)
+    add_subdirectory (libcuda)
+    add_subdirectory (labsobel)
+endif()
 
 add_subdirectory (labastar)
 

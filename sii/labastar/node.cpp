@@ -94,4 +94,5 @@ NodeMap::NodeMap(std::vector<Object> items, Ptn robot_size, float width, float h
 std::vector<Node*> getComputerNodeList(Ptn robotsize, Ptn* startpoint, Ptn* endpoint) {
 	// Démarre a notre point de départ , on crée les node
 	Node* startNode = new Node(startpoint,&robotsize);
+	return  {};
 }

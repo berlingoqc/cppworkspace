@@ -65,6 +65,9 @@ struct pathfind_info {
 };
 
 
+typedef std::vector<std::vector<cv::Point>> Contours;
+typedef std::vector<cv::Vec4i> Hierarchy;
+
 // Variable qui indique si on utilse cuda ou sinon juste des fonctions opencv
 bool useCUDA = false;
 // Peut contenir le liens d'une image si oui utilise cette image au lieu
@@ -153,6 +156,14 @@ void processImage(cv::Mat& origin, cv::Mat& out) {
 
 #endif
 
+void getObjectInImage(cv::Mat&origin)
+{
+	cv::Mat bin(origin.rows, origin.cols, CV_8UC3);
+	processImage(origin, bin);
+
+	
+}
+
 std::promise<Point> exitSignal;
 std::future<Point>  futureObj = exitSignal.get_future();
 
@@ -178,7 +189,6 @@ void startMainLoop() {
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
 
-    cv::Mat bin;
     cv::Mat img;
 
 	const char* wImage = "Image";
@@ -198,7 +208,8 @@ void startMainLoop() {
 		}
 	}
 
-	cv::resize(imgOrig, imgOrig, Size(imgOrig.rows / 2, imgOrig.cols / 2));
+    cv::Mat bin(imgOrig.rows, imgOrig.cols, CV_8U);
+	//cv::resize(imgOrig, imgOrig, Size(imgOrig.rows / 2, imgOrig.cols / 2));
 
 	Size cucaSize(200, 200);
 
