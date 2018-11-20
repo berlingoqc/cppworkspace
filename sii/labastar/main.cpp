@@ -43,9 +43,9 @@
 #include <chrono>
 
 #include <iostream>
+//#include "node.h"
+//#include "2dhelp.h"
 
-using namespace cv;
-using namespace std;
 using namespace std::chrono;
 
 // DÉFINITION 
@@ -57,12 +57,6 @@ using namespace std::chrono;
 #define AXIS_CAM_USER "etudiant"
 #define AXIS_CAM_PW "gty970"
 
-
-struct pathfind_info {
-    Point   startingLocation;
-    Point   endLocation;
-    Size    objectSize;
-};
 
 
 typedef std::vector<std::vector<cv::Point>> Contours;
@@ -95,6 +89,7 @@ cv::Mat getImage() {
         vc.read(img1);
         vc.read(img1);
         vc.read(img1);
+	cv::Sobel(out, out, 0, 1, 0, ksize = 5);
 		if (!vc.read(img1))
 		{
 			// Unable to retrieve frame from video stream
@@ -117,6 +112,7 @@ cv::Mat getImage() {
 		{
 			// Unable to retrieve frame from video stream
 			std::cout << "Cannhot [sic] read image on Axis cam..." << std::endl << "Hit a key to try again." << std::endl;
+	cv::Sobel(out, out, 0, 1, 0, ksize = 5);
 			cv::waitKey(0);
 			failed = true;
 			vc.open("http://etudiant:gty970@10.128.3.4/axis-cgi/mjpg/video.cgi");
@@ -136,15 +132,20 @@ cv::Mat getImage() {
 // Si on n'a pas axis cam on va loader une image depuis un fichier qui est passer en configuration
 // ungly workaround
 cv::Mat getImage() {
-    return imgNoAxis;
+	cv::Mat m = cv::imread(imageFromFilePath);
+	if (!m.empty()) {
+		std::cerr << "Impossible de charger l'image de remplacement " << std::endl;
+	}
+	return m;
 }
 #endif
 #ifndef _WITH_CUDA
 // Utilise le backend opencv pour faire le traitement de l'image et get les contours
 void processImage(cv::Mat& img, cv::Mat& out) {
     //cv::GaussianBlur(img,img, cv::Size(5,5), 2);
-    cv::cvtColor(img,img, COLOR_BGR2HSV);
+    cv::cvtColor(img,img, cv::COLOR_BGR2HSV);
     inRange(img, cv::Scalar(50,0,0), cv::Scalar(83,255,128), out);
+
     //cv::morphologyEx(bin,bin, cv::MORPH_OPEN, cv::Mat::ones(7,7, CV_8UC1));
 }
 
@@ -164,18 +165,206 @@ void getObjectInImage(cv::Mat&origin)
 	
 }
 
-std::promise<Point> exitSignal;
-std::future<Point>  futureObj = exitSignal.get_future();
+std::promise<cv::Point> exitSignal;
+std::future<cv::Point>  futureObj = exitSignal.get_future();
 
 
 
 void mouse_callback(int even, int x, int y, int flags, void* user_data) {
 	if (even == CV_EVENT_LBUTTONDOWN) {
 		std::cout << "Left click at " << x << " " << y << std::endl;
-		exitSignal.set_value(Point(x,y));
+		exitSignal.set_value(cv::Point(x,y));
 		return;
 	}
 }
+
+
+int distanceBetweenPoint(cv::Point p1, cv::Point p2) {
+	int deltaX = p1.x - p2.x;
+	int deltaY = p1.y - p2.y;
+	return sqrt((deltaX*deltaX + deltaY * deltaY));
+}
+
+class Node {
+	cv::Point	central_point;
+	cv::Point	size;
+	
+	int	fcost, hcost, gcost;
+
+	bool visited;
+	
+	Node*		parent;
+
+
+public:
+	Node(cv::Point central_point, cv::Point size, Node* parent = nullptr) {
+		this->central_point = central_point;
+		this->size = size;
+		this->parent = parent;
+		if(parent == nullptr) {
+			fcost = 0;
+			hcost = 0;
+			gcost = 0;
+		}
+	}
+
+	cv::Point getTopLeftCorner() {
+		int pX;
+		int pY;
+		return {pX,pY};
+	}
+
+	cv::Point getCentralPoint(){
+		return central_point;
+	}
+
+	int calculateCost(const Node* end, Node* potentiel_parent) {
+		float g, h, f;
+		h = distanceBetweenPoint(central_point, end->central_point);
+		if (parent == nullptr) {
+			g = 0;
+		}
+		else {
+			g = potentiel_parent->getGCost() + distanceBetweenPoint(potentiel_parent->central_point, central_point);
+		}
+
+		f = g + h;
+		if (parent == nullptr || (f < fcost)) {
+			parent = potentiel_parent;
+			hcost = h;
+			fcost = f;
+			gcost = g;
+		}
+
+		return fcost;
+	}
+
+
+	Node* getParent() {
+		return parent;
+	}
+
+	int getHCost() {
+		return hcost;
+	}
+	
+	int getFCost() {
+		return fcost;
+	}
+
+	int getGCost() {
+		return gcost;
+	}
+
+	int getVisited() {
+		return visited;
+	}
+
+	void setVisisted(bool v) {
+		visited = v;
+	}
+
+};
+
+enum map_iterator_state {
+	CAN_NEXT,
+	CANT_NEXT,
+	FOUND_END
+};
+
+class Map {
+	int					width_node_nbr;
+	int					width_node_size;
+	int					height_node_nbr;
+	int					height_node_size;
+	
+	std::vector<Node*>	liste_ouverte;
+	std::vector<Node*>  liste_fermer;
+
+	Node*				start;
+	Node*				end;
+
+	Contours			contours;
+	Hierarchy			hierarchy;
+
+	
+public:
+	Map(int wnn, int wns, int hnn, int hns) {
+		width_node_nbr = wnn;
+		width_node_size = wns;
+		height_node_nbr = hnn;
+		height_node_size = hns;
+	}
+
+	void setObstacle(Contours contours, Hierarchy hierarchy) {
+		this->contours = contours;
+		this->hierarchy = hierarchy;
+	}
+
+	cv::Mat add_info_image(const cv::Mat in) { 
+		cv::Mat ret = in.clone();
+		for (auto item : liste_ouverte) {
+
+		}
+
+		for (auto item : liste_fermer) {
+		
+		}
+	}
+
+	void draw_node(cv::Mat& m, Node* node, bool from_open) {
+		char text[50];
+		cv::Point p;
+		if (node->getParent() == nullptr) {
+			p = cv::Point(-1, -1);
+		}
+		else {
+			p = node->getParent()->getCentralPoint();
+		}
+		// Get le coin superieur gauche du node
+		int nbr = sprintf(text, "%d,%d -> %d,%d", node->getCentralPoint().x, node->getCentralPoint().y, p.x, p.y);
+		cv::putText(m,text,cv::Point())
+		
+	}
+
+	void setTarget(Node* start, Node* end) {
+		this->start = start;
+		
+
+		liste_ouverte.push_back(start);
+		this->end = end;
+	}
+
+	Node* getSmallestCostOpenList() {
+		Node* n = nullptr;
+		for (auto i : liste_ouverte) {
+			if (n == nullptr) {
+				n = i;
+				continue;
+			}
+			if (n->getFCost() > i->getFCost()) {
+				n = i;
+			}
+		}
+		return n;
+	}
+
+	Node* getNodeFromPoint(cv::Point p) {
+		int iX = p.x / width_node_size;
+		int iY = p.y / height_node_size;
+
+		return new Node({ iX*width_node_size + width_node_size / 2,iY*height_node_size + height_node_size / 2 }, { width_node_size,height_node_size });
+	}
+
+	bool isThereObstacleInNode(const Node* node) {
+		return false;
+	}
+
+	map_iterator_state iterate_next() {
+		Node* smallest_open = getSmallestCostOpenList();
+	}
+		 
+};
 
 
 void startMainLoop() {
@@ -194,27 +383,16 @@ void startMainLoop() {
 	const char* wImage = "Image";
 	const char* wContour = "Image binaire";
 
-	namedWindow(wImage, 1);
-	setMouseCallback(wImage, mouse_callback);
+	cv::namedWindow(wImage, 1);
+	cv::setMouseCallback(wImage, mouse_callback);
 
-	// utilise test.jpg si elle existe
-	cv::Mat imgOrig = cv::imread("test.jpg");
-	if (imgOrig.empty()) {
-		imgOrig = getImage();
-		cv::imwrite("test.jpg", imgOrig);
-		if (imgOrig.empty()) {
-			std::cerr << "Empty image return from camera" << std::endl;
-			return;
-		}
-	}
+	imageFromFilePath = "test.jpg";
+
+	cv::Mat imgOrig = getImage();
 
     cv::Mat bin(imgOrig.rows, imgOrig.cols, CV_8U);
-	//cv::resize(imgOrig, imgOrig, Size(imgOrig.rows / 2, imgOrig.cols / 2));
 
-	Size cucaSize(200, 200);
-
-	Point startingLocation(0, 0);
-	Point endPoint(0, 0);
+	cv::Size cucaSize(200, 200);
 
 
 	img = imgOrig.clone();
@@ -226,14 +404,24 @@ void startMainLoop() {
 	int gapWidth = cols / (cols / cucaSize.width);
 	int gapHeight = rows / (rows / cucaSize.height);
 
+	int nbrX = 0;
+	int nbrY = 0;
+
 	for (int i = gapWidth; i < cols; i += gapWidth) {
-		cv::line(img, Point(i, 0), Point(i, rows), (0, 0, 0));
+		nbrX++;
+		cv::line(img, cv::Point(i, 0), cv::Point(i, rows), (0, 0, 0));
 	}
 
 	for (int i = gapHeight; i < rows; i += gapHeight) {
-		cv::line(img, Point(0, i), Point(cols, i), (0, 0, 0));
+		nbrY++;
+		cv::line(img, cv::Point(0, i), cv::Point(cols, i), (0, 0, 0));
 	}
 
+	Map m(nbrX,gapWidth,nbrY,gapHeight);
+	// Va chercher les informations de node des deux points entrer
+	Node* startingNode;
+	Node* endNode;
+	
 	imshow(wImage, img);
 
 	for (int i = 0; i < 2;i++) {
@@ -247,30 +435,48 @@ void startMainLoop() {
 		}
 
 		if (i == 0) {
-			startingLocation = futureObj.get();
-			std::cout << "Got point start " << startingLocation << std::endl;
-			cv::circle(img, startingLocation, 5, (0, 0, 255), -1);
+			startingNode = m.getNodeFromPoint(futureObj.get());
+			cv::circle(img, startingNode->getCentralPoint(), 5, (0, 0, 255), -1);
 		}
 		else if (i == 1) {
-			endPoint = futureObj.get();
-			std::cout << "Got point end " << endPoint << std::endl;
+			endNode = m.getNodeFromPoint(futureObj.get());
+			cv::circle(img, endNode->getCentralPoint(), 5, (0, 0, 255), -1);
 		}
 		
-		exitSignal = std::promise<Point>();
+		exitSignal = std::promise<cv::Point>();
 		futureObj = exitSignal.get_future();
 	}
-
+	imshow(wImage, img);
 	std::cout << "Tout les points sont fournit " << std::endl;
 
-	
-
-
+	m.setTarget(startingNode, endNode);
 
 	bool run = true;
+	
 	processImage(imgOrig, bin);
-    while (run) {
+	// Devrait ajouter les contours de l'image a ma map
+
+	while (run) {
         // Passe notre image vers notre fonction cuda pour la traiter
-		imshow(wContour, bin);
+		map_iterator_state state = m.iterate_next();
+		switch (state) {
+		case CANT_NEXT:
+			// A explorer toutes les possiblités et on ne peux attendre le node
+			break;
+		case FOUND_END:
+			// Est arriver au node de fin avec le meilleur chemin
+			break;
+		case CAN_NEXT:
+			// On n'est pas arriver et on peut continuer vers une autre iteration
+		default:
+
+			break;
+		}
+		// Affiche les informations de la liste_ouverte
+
+		// Affiche les informations de la liste_fermer
+
+
 		int v = cv::waitKey(1);
 		if (v == 27) {
 			break;

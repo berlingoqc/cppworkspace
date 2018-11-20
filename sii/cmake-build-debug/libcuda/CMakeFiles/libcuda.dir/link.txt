@@ -1,2 +1,0 @@
-/usr/bin/ar qc liblibcuda.a  CMakeFiles/libcuda.dir/gpusobel.cpp.o CMakeFiles/libcuda.dir/hsvtorgbkernel.cu.o
-/usr/bin/ranlib liblibcuda.a

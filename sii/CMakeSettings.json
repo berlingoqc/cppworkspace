@@ -9,7 +9,7 @@
       ],
       "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
       "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
-      "cmakeCommandArgs": "-DWITH_AXIS_COM=OFF -DWITH_CUDA=ON -DOpenCV_DIR=C:\\VC17_LIB\\opencv -DTCLAP_INCLUDE_DIR=D:\\VC17_LIB\\tclap\\include",
+      "cmakeCommandArgs": "-DWITH_AXIS_COM=OFF -DWITH_CUDA=OFF -DOpenCV_DIR=C:\\VC17_LIB\\opencv -DTCLAP_INCLUDE_DIR=D:\\VC17_LIB\\tclap\\include",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": ""
     }
