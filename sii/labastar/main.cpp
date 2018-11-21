@@ -44,7 +44,7 @@
 
 #include <iostream>
 
-#include "2dhelper.h"
+
 #include "node.h"
 #include "map.h"
 
@@ -87,11 +87,11 @@ cv::Mat getImage() {
         vc.read(img1);
         vc.read(img1);
         vc.read(img1);
-	cv::Sobel(out, out, 0, 1, 0, ksize = 5);
+
 		if (!vc.read(img1))
 		{
 			// Unable to retrieve frame from video stream
-			std::cout << "Cannhot [sic] read image on Axis cam..." << std::endl << "Hit a key to try again." << std::endl;
+			std::cout << "Impossible de lire une image..." << std::endl << "Presser une touche pour recommencer." << std::endl;
 			cv::waitKey(0);
 			failed = true;
 			vc.open("http://etudiant:gty970@10.128.3.4/axis-cgi/mjpg/video.cgi");
@@ -109,8 +109,7 @@ cv::Mat getImage() {
 		if (!vc.read(img2))
 		{
 			// Unable to retrieve frame from video stream
-			std::cout << "Cannhot [sic] read image on Axis cam..." << std::endl << "Hit a key to try again." << std::endl;
-	cv::Sobel(out, out, 0, 1, 0, ksize = 5);
+			std::cout << "Impossible de lire une image..." << std::endl << "Presser une touche pour recommencer." << std::endl;
 			cv::waitKey(0);
 			failed = true;
 			vc.open("http://etudiant:gty970@10.128.3.4/axis-cgi/mjpg/video.cgi");
@@ -120,9 +119,9 @@ cv::Mat getImage() {
     cv::Mat imgConcat;
     cv::flip(img2,img2,-1);
     cv::vconcat(img1, img2, imgConcat);
-    cv::namedWindow("cat", CV_WINDOW_NORMAL);
-	cv::imshow("cat", imgConcat);
-    cv::waitKey(100);
+    //cv::namedWindow("cat", CV_WINDOW_NORMAL);
+	//cv::imshow("cat", imgConcat);
+    //cv::waitKey(100);
     return imgConcat;
 }
 
@@ -158,150 +157,37 @@ void processImage(cv::Mat& origin, cv::Mat& out) {
 std::promise<cv::Point> exitSignal;
 std::future<cv::Point>  futureObj = exitSignal.get_future();
 
-std::vector<cv::Point> objects;
-
-
 void mouse_callback(int even, int x, int y, int flags, void* user_data) {
 	if (even == CV_EVENT_LBUTTONDOWN) {
 		std::cout << "Left click at " << x << " " << y << std::endl;
 		exitSignal.set_value(cv::Point(x,y));
 	}
-
-	if(even == CV_EVENT_RBUTTONDOWN)
-	{
-		std::cout << "Richt click at " << x << " " << y << std::endl;
-		objects.push_back(cv::Point(x, y));
-	}
 }
+
 void mouse_callback_2(int even, int x, int y, int flags, void* user_data) {
+
 }
 
-cv::Mat resizeKeepAspectRatio(const cv::Mat &input, const cv::Size &dstSize, const cv::Scalar &bgcolor)
-{
-	cv::Mat output;
+void find_contours(const cv::Mat& imgOrig,Map& m) {
+	std::vector<std::vector<cv::Point>> contours0;
+	std::vector<std::vector<cv::Point>> contours;
+	std::vector<cv::Vec4i> hierarchy;
 
-	double h1 = dstSize.width * (input.rows / (double)input.cols);
-	double w2 = dstSize.height * (input.cols / (double)input.rows);
-	if (h1 <= dstSize.height) {
-		cv::resize(input, output, cv::Size(dstSize.width, h1));
-	}
-	else {
-		cv::resize(input, output, cv::Size(w2, dstSize.height));
-	}
-
-	int top = (dstSize.height - output.rows) / 2;
-	int down = (dstSize.height - output.rows + 1) / 2;
-	int left = (dstSize.width - output.cols) / 2;
-	int right = (dstSize.width - output.cols + 1) / 2;
-
-	cv::copyMakeBorder(output, output, top, down, left, right, cv::BORDER_CONSTANT, bgcolor);
-
-	return output;
-}
-
-cv::Mat phil(int rad) {
-	cv::Mat phil(rad * 2 + 1, rad * 2 + 1, CV_8UC1);
-	for (int x = -rad; x <= rad; x++) {
-		for (int y = -rad; y <= rad; y++) {
-			phil.data[(y + rad) * phil.cols + (x + rad)] = (-abs(x) + rad) + (-abs(y) + rad) < rad * 9 / 2; // (x * x + y * y) < (rad * rad);
-		}
-}
-	return phil;
-}
-
-void startMainLoop() {
-	float vehicleWidth = YOUBOT_WIDTH_PX;
-    #ifdef _WITH_AXIS_COM
-        // Ouvre la video capture depuis la camera
-		//vc.open("http://etudiant:gty970@10.128.3.4/axis-cgi/mjpg/video.cgi");
-    #endif 
-
-    std::vector<std::vector<cv::Point>> contours0;
-    std::vector<std::vector<cv::Point>> contours;
-    std::vector<cv::Vec4i> hierarchy;
-
-    cv::Mat img;
-
-	const char* wImage = "Image";
-	const char* wContour = "Image binaire";
-
-	cv::namedWindow(wImage, 1);
-	cv::setMouseCallback(wImage, mouse_callback);
-
-	imageFromFilePath = "test.jpg";
-
-	cv::Mat imgOrig = getImage();
-	//imgOrig = resizeKeepAspectRatio(imgOrig, { 1920,1080 }, { 0,0,0 });
-
-    cv::Mat bin(imgOrig.rows, imgOrig.cols, CV_8U);
-
-
-	cv::Size cucaSize(200, 200);
-
-	Node* startingNode;
-	Node* endNode;
-
-	Map m(cucaSize, imgOrig);
-
-
-
-
-	for (int i = 0; i < 2;i++) {
-		img = m.get_image_info();
-		imshow(wImage, img);
-		// attend avec notre variable conditionel
-		while (futureObj.wait_for(30ms) == std::future_status::timeout) {
-			imshow(wImage, img);
-			int v = cv::waitKey(1);
-			if (v == 27) {
-				return;
-			}
-		}
-
-		if (i == 0) {
-			startingNode = m.getNodeFromPoint(futureObj.get());
-			m.setStart(startingNode);
-			//cv::circle(img, startingNode->getCentralPoint(), 5, (0, 0, 255), -1);
-		}
-		else if (i == 1) {
-			endNode = m.getNodeFromPoint(futureObj.get());
-			m.setTarget(endNode);
-			//cv::circle(img, endNode->getCentralPoint(), 5, (0, 0, 255), -1);
-		}
-		
-		exitSignal = std::promise<cv::Point>();
-		futureObj = exitSignal.get_future();
-	}
-	cv::setMouseCallback(wImage, mouse_callback_2);
-	imshow(wImage, m.get_image_info());
-	std::cout << "Tout les points sont fournit " << std::endl;
-
-	for(auto p : objects)
-	{
-		Node* n = m.getNodeFromPoint(p);
-		n->setHaveObstacle(true);
-	}
-	
-	bool run = true;
-
-	img = imgOrig.clone();
+	cv::Mat bin(imgOrig.rows, imgOrig.cols, CV_8U);
+	cv::Mat img = imgOrig.clone();
 	cv::GaussianBlur(imgOrig, img, cv::Size(7, 7), 2);
-	
-	processImage(img, bin);
 
-	//morphologyEx(bin, bin, cv::MORPH_OPEN, cv::Mat::ones(3, 3, CV_8UC1));
-	//morphologyEx(bin, bin, cv::MORPH_CLOSE, cv::Mat::ones(3, 3, CV_8UC1));
-	//cv::dilate(bin, bin, phil(125));
+	processImage(img, bin);
 
 	cv::findContours(bin, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	contours0.resize(contours.size());
-	for(int k = 0; k < contours.size();k++)
+	for (int k = 0; k < contours.size(); k++)
 	{
 		cv::approxPolyDP(cv::Mat(contours[k]), contours0[k], 6, false);
 
 	}
 
-	for(int k = 0;k<contours0.size();k++)
+	for (int k = 0; k < contours0.size(); k++)
 	{
 		if (contours0[k].size() > 2 && contours0[k].size() < 10)
 		{
@@ -316,12 +202,85 @@ void startMainLoop() {
 		}
 	}
 
-	cv::imshow(wImage, m.get_image_info());
-
 	cv::Mat newimg = imgOrig.clone();
 	drawContours(newimg, contours0, -1, cv::Scalar(128, 255, 255), 3, cv::LINE_AA, hierarchy, 3);
-	imshow("llol", newimg);
-	imshow(wContour, bin);
+	imshow("Line preview", newimg);
+	imshow("Sobel output", bin);
+}
+
+void startMainLoop() {
+	float vehicleWidth = YOUBOT_WIDTH_PX;
+    #ifdef _WITH_AXIS_COM
+        // Ouvre la video capture depuis la camera
+		vc.open("http://etudiant:gty970@10.128.3.4/axis-cgi/mjpg/video.cgi");
+    #endif 
+
+    cv::Mat img;
+
+	const char* wImage = "Image";
+	const char* wContour = "Image binaire";
+
+
+	imageFromFilePath = "test.jpg";
+
+#ifdef _WITH_AXIS_COM
+	std::cout << "Chargement de l'image depuis AxisCom" << std::endl;
+#else
+	std::cout << "Chargement de l'image depuis " << imageFromFilePath << std::endl;
+#endif
+
+	cv::Mat imgOrig = getImage();
+	cv::resize(imgOrig, imgOrig, cv::Size(imgOrig.cols / 2, imgOrig.rows / 2));
+
+
+#ifdef _WITH_AXIS_COM
+	vc.release();
+#endif
+
+
+	cv::namedWindow(wImage, 1);
+	cv::setMouseCallback(wImage, mouse_callback);
+
+	cv::Size cucaSize(100, 100);
+
+
+
+	Map m(cucaSize, imgOrig);
+
+	find_contours(imgOrig,m);
+
+	for (int i = 0; i < 2;i++) {
+		// attend avec notre variable conditionel
+		while (futureObj.wait_for(30ms) == std::future_status::timeout) {
+			imshow(wImage, m.get_image_info());
+			int v = cv::waitKey(1);
+			if (v == 27) {
+				return;
+			}
+		}
+
+		if (i == 0) {
+			Node* startingNode = m.getNodeFromPoint(futureObj.get());
+			m.setStart(startingNode);
+			//cv::circle(img, startingNode->getCentralPoint(), 5, (0, 0, 255), -1);
+		}
+		else if (i == 1) {
+			Node* endNode = m.getNodeFromPoint(futureObj.get());
+			m.setTarget(endNode);
+			//cv::circle(img, endNode->getCentralPoint(), 5, (0, 0, 255), -1);
+		}
+		
+		exitSignal = std::promise<cv::Point>();
+		futureObj = exitSignal.get_future();
+	}
+
+	cv::setMouseCallback(wImage, mouse_callback_2);
+	imshow(wImage, m.get_image_info());
+	std::cout << "Tout les points sont fournit " << std::endl;
+
+
+	bool run = true;
+
 	// Devrait ajouter les contours de l'image a ma map
 	cv::waitKey(0);
 
@@ -343,9 +302,7 @@ void startMainLoop() {
 
 			break;
 		}
-		// Affiche les informations de la liste_ouverte
 
-		// Affiche les informations de la liste_fermer
 
 		cv::imshow(wImage, m.get_image_info());
 		int v = cv::waitKey(0);
@@ -355,9 +312,6 @@ void startMainLoop() {
     }
     
 
-    #ifdef _WITH_AXIS_COM
-        vc.release();
-    #endif
 }
 
 

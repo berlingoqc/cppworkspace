@@ -20,8 +20,8 @@ endif(WIN32)
 
 # Repertoire de axis communication optionel
 if(WITH_AXIS_COM)
-    set( AXIS_COM_INCLUDE_DIR "" CACHE PATH "The directory containing AxisCommunication.h ")
-    set( AXIS_COM_LIBRARY_DIR "" CACHE PATH "The directory containing AxisCommunication.lib")
+    #set( AXIS_COM_INCLUDE_DIR "" CACHE PATH "The directory containing AxisCommunication.h ")
+    #set( AXIS_COM_LIBRARY_DIR "" CACHE PATH "The directory containing AxisCommunication.lib")
 endif(WITH_AXIS_COM)
 
 

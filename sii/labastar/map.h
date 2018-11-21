@@ -15,6 +15,7 @@ enum color_point
 {
 	RED,
 	GREEN,
+	YELLOW,
 	BLACK
 };
 
@@ -25,7 +26,7 @@ enum state_node
 	OBJECT
 };
 
-cv::Scalar	colors_point[3]{ {0,0,255}, {0,255,0}, {0,0,0} };
+cv::Scalar	colors_point[4]{ {0,0,255}, {0,255,0},{255,255,0} ,{0,0,0} };
 
 class Map {
 	int					width_node_size;
@@ -39,6 +40,7 @@ class Map {
 
 	Node*				start;
 	Node*				end;
+	Node*				current;
 
 	Node**				node_map;
 
@@ -94,7 +96,7 @@ public:
 		}
 		// si on n'a la fin on le dessine
 		if (end != nullptr) {
-			cv::circle(ret, end->getCentralPoint(), 5, colors_point[BLACK],-1);
+			cv::circle(ret, end->getCentralPoint(), 5, colors_point[YELLOW],-1);
 		}
 
 		for (int y = 0; y < rows; y++)
@@ -125,13 +127,13 @@ public:
 		cv::Point tl = node->getTopLeft();
 		// Get le coin superieur gauche du node
 		sprintf_s(text, "%d,%d -> %d,%d", node->getCentralPoint().x, node->getCentralPoint().y, p.x, p.y);
-		cv::putText(m, text, cv::Point(tl.x + 5, tl.y + 15), cv::FONT_HERSHEY_COMPLEX, 0.5, { 0,0,255 }, 1);
+		cv::putText(m, text, cv::Point(tl.x + 5, tl.y + 15), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.35, { 0,0,255 }, 1);
 		sprintf_s(text, "F -> %d", node->getFCost());
-		cv::putText(m, text, cv::Point(tl.x + 5, tl.y + 30), cv::FONT_HERSHEY_COMPLEX, 0.5, { 0,0,255 }, 1);
+		cv::putText(m, text, cv::Point(tl.x + 5, tl.y + 30), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.35, { 0,0,255 }, 1);
 		sprintf_s(text, "H -> %d", node->getHCost());
-		cv::putText(m, text, cv::Point(tl.x + 5, tl.y + 45), cv::FONT_HERSHEY_COMPLEX, 0.5, { 0,0,255 }, 1);
+		cv::putText(m, text, cv::Point(tl.x + 5, tl.y + 45), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.35, { 0,0,255 }, 1);
 		sprintf_s(text, "G -> %d", node->getGCost());
-		cv::putText(m, text, cv::Point(tl.x + 5, tl.y + 60), cv::FONT_HERSHEY_COMPLEX, 0.5, { 0,0,255 }, 1);
+		cv::putText(m, text, cv::Point(tl.x + 5, tl.y + 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.35, { 0,0,255 }, 1);
 
 		cv::circle(m, node->getCentralPoint(), 5, colors_point[color], -1);
 
@@ -157,7 +159,34 @@ public:
 				continue;
 			}
 			if (n->getFCost() > i->getFCost()) {
-				// regarde s'il s'agit d'un mouvement en diagonal
+				cv::Point pE = i->getCentralPoint();
+				if (current == nullptr) {
+					n = i;
+					continue;
+				}
+				cv::Point pN = current->getCentralPoint();
+				// si pas une dialogal c'est correcte
+				if (pN.x == pE.x || pN.y == pE.y) {
+					n = i;
+					continue;
+				}
+				// si oui va cherche les points traverser pour si rendre et regarde s'ils sont occupé
+				cv::Point p1;
+				cv::Point p2;
+				if (pN.y > pE.y)
+					p1 = { pN.x,pN.y - n->getSize().y };
+				else
+					p1 = { pN.x, pN.y + n->getSize().y };
+				if (pN.x > pE.x)
+					p2 = { pN.x - n->getSize().x, pN.y };
+				else
+					p2 = { pN.x + n->getSize().x, pN.y };
+				Node* n1 = getNodeFromPoint(p1);
+				if (n1 == nullptr || n1->getHaveObstacle())
+					continue;
+				n1 = getNodeFromPoint(p2);
+				if (n1 == nullptr || n1->getHaveObstacle())
+					continue;
 				n = i;
 			}
 		}
@@ -180,6 +209,7 @@ public:
 
 	map_iterator_state iterate_next() {
 		Node* n = getSmallestCostOpenList();
+		current = n;
 		if(n == end)
 		{
 			n->setIsOpenList(false);
@@ -200,12 +230,15 @@ public:
 			for (int x = 0; x < 3;x++)
 			{
 				e = getNodeFromPoint({ start_x + x * n->getSize().x, start_y + y * n->getSize().y });
-				if(e != nullptr && !e->getVisited() && !e->getIsCloseList() && !e->getHaveObstacle())
+				if(e != nullptr && !e->getVisited() && !e->getHaveObstacle() && !e->getIsCloseList())
 				{
 					e->setIsOpenList(true);
 					e->setParent(n);
 					e->calculateCost(end, n);
 					liste_ouverte.push_back(e);
+				}
+				else if (e != nullptr && !e->getIsCloseList()) {
+					std::cout << "revalue point" << std::endl;
 				}
 				
 			}
