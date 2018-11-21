@@ -17,9 +17,7 @@ add_executable (lab2 main.cpp house_maker.cpp house_maker.h )
 target_link_libraries(lab2
 	crazygl
 	${OPENGL_LIBRARY}
-	${GLEW_LIBRARY}
-	${FREEGLUT_LIBRARY}
-	${ASSIMP_LIBRARY}
+	${GL_LIBS}
 )
 
 
