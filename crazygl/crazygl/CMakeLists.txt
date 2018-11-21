@@ -3,8 +3,8 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-SET(HEADER_FILES engine.h header.h shaders.h)
-SET(SOURCE_FILES engine.cpp shaders.cpp )
+SET(HEADER_FILES engine.h header.h shaders.h textures.h)
+SET(SOURCE_FILES engine.cpp shaders.cpp textures.cpp)
 
 
 # Ajoutez une source à l'exécutable de ce projet.
