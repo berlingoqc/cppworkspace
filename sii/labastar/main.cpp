@@ -43,8 +43,10 @@
 #include <chrono>
 
 #include <iostream>
-//#include "node.h"
-//#include "2dhelp.h"
+
+#include "2dhelper.h"
+#include "node.h"
+#include "map.h"
 
 using namespace std::chrono;
 
@@ -56,11 +58,7 @@ using namespace std::chrono;
 #define AXIS_CAM_IP "10.128.3.4"
 #define AXIS_CAM_USER "etudiant"
 #define AXIS_CAM_PW "gty970"
-
-
-
-typedef std::vector<std::vector<cv::Point>> Contours;
-typedef std::vector<cv::Vec4i> Hierarchy;
+;
 
 // Variable qui indique si on utilse cuda ou sinon juste des fonctions opencv
 bool useCUDA = false;
@@ -157,215 +155,59 @@ void processImage(cv::Mat& origin, cv::Mat& out) {
 
 #endif
 
-void getObjectInImage(cv::Mat&origin)
-{
-	cv::Mat bin(origin.rows, origin.cols, CV_8UC3);
-	processImage(origin, bin);
-
-	
-}
-
 std::promise<cv::Point> exitSignal;
 std::future<cv::Point>  futureObj = exitSignal.get_future();
 
+std::vector<cv::Point> objects;
 
 
 void mouse_callback(int even, int x, int y, int flags, void* user_data) {
 	if (even == CV_EVENT_LBUTTONDOWN) {
 		std::cout << "Left click at " << x << " " << y << std::endl;
 		exitSignal.set_value(cv::Point(x,y));
-		return;
+	}
+
+	if(even == CV_EVENT_RBUTTONDOWN)
+	{
+		std::cout << "Richt click at " << x << " " << y << std::endl;
+		objects.push_back(cv::Point(x, y));
 	}
 }
-
-
-int distanceBetweenPoint(cv::Point p1, cv::Point p2) {
-	int deltaX = p1.x - p2.x;
-	int deltaY = p1.y - p2.y;
-	return sqrt((deltaX*deltaX + deltaY * deltaY));
+void mouse_callback_2(int even, int x, int y, int flags, void* user_data) {
 }
 
-class Node {
-	cv::Point	central_point;
-	cv::Point	size;
-	
-	int	fcost, hcost, gcost;
+cv::Mat resizeKeepAspectRatio(const cv::Mat &input, const cv::Size &dstSize, const cv::Scalar &bgcolor)
+{
+	cv::Mat output;
 
-	bool visited;
-	
-	Node*		parent;
+	double h1 = dstSize.width * (input.rows / (double)input.cols);
+	double w2 = dstSize.height * (input.cols / (double)input.rows);
+	if (h1 <= dstSize.height) {
+		cv::resize(input, output, cv::Size(dstSize.width, h1));
+	}
+	else {
+		cv::resize(input, output, cv::Size(w2, dstSize.height));
+	}
 
+	int top = (dstSize.height - output.rows) / 2;
+	int down = (dstSize.height - output.rows + 1) / 2;
+	int left = (dstSize.width - output.cols) / 2;
+	int right = (dstSize.width - output.cols + 1) / 2;
 
-public:
-	Node(cv::Point central_point, cv::Point size, Node* parent = nullptr) {
-		this->central_point = central_point;
-		this->size = size;
-		this->parent = parent;
-		if(parent == nullptr) {
-			fcost = 0;
-			hcost = 0;
-			gcost = 0;
+	cv::copyMakeBorder(output, output, top, down, left, right, cv::BORDER_CONSTANT, bgcolor);
+
+	return output;
+}
+
+cv::Mat phil(int rad) {
+	cv::Mat phil(rad * 2 + 1, rad * 2 + 1, CV_8UC1);
+	for (int x = -rad; x <= rad; x++) {
+		for (int y = -rad; y <= rad; y++) {
+			phil.data[(y + rad) * phil.cols + (x + rad)] = (-abs(x) + rad) + (-abs(y) + rad) < rad * 9 / 2; // (x * x + y * y) < (rad * rad);
 		}
-	}
-
-	cv::Point getTopLeftCorner() {
-		int pX;
-		int pY;
-		return {pX,pY};
-	}
-
-	cv::Point getCentralPoint(){
-		return central_point;
-	}
-
-	int calculateCost(const Node* end, Node* potentiel_parent) {
-		float g, h, f;
-		h = distanceBetweenPoint(central_point, end->central_point);
-		if (parent == nullptr) {
-			g = 0;
-		}
-		else {
-			g = potentiel_parent->getGCost() + distanceBetweenPoint(potentiel_parent->central_point, central_point);
-		}
-
-		f = g + h;
-		if (parent == nullptr || (f < fcost)) {
-			parent = potentiel_parent;
-			hcost = h;
-			fcost = f;
-			gcost = g;
-		}
-
-		return fcost;
-	}
-
-
-	Node* getParent() {
-		return parent;
-	}
-
-	int getHCost() {
-		return hcost;
-	}
-	
-	int getFCost() {
-		return fcost;
-	}
-
-	int getGCost() {
-		return gcost;
-	}
-
-	int getVisited() {
-		return visited;
-	}
-
-	void setVisisted(bool v) {
-		visited = v;
-	}
-
-};
-
-enum map_iterator_state {
-	CAN_NEXT,
-	CANT_NEXT,
-	FOUND_END
-};
-
-class Map {
-	int					width_node_nbr;
-	int					width_node_size;
-	int					height_node_nbr;
-	int					height_node_size;
-	
-	std::vector<Node*>	liste_ouverte;
-	std::vector<Node*>  liste_fermer;
-
-	Node*				start;
-	Node*				end;
-
-	Contours			contours;
-	Hierarchy			hierarchy;
-
-	
-public:
-	Map(int wnn, int wns, int hnn, int hns) {
-		width_node_nbr = wnn;
-		width_node_size = wns;
-		height_node_nbr = hnn;
-		height_node_size = hns;
-	}
-
-	void setObstacle(Contours contours, Hierarchy hierarchy) {
-		this->contours = contours;
-		this->hierarchy = hierarchy;
-	}
-
-	cv::Mat add_info_image(const cv::Mat in) { 
-		cv::Mat ret = in.clone();
-		for (auto item : liste_ouverte) {
-
-		}
-
-		for (auto item : liste_fermer) {
-		
-		}
-	}
-
-	void draw_node(cv::Mat& m, Node* node, bool from_open) {
-		char text[50];
-		cv::Point p;
-		if (node->getParent() == nullptr) {
-			p = cv::Point(-1, -1);
-		}
-		else {
-			p = node->getParent()->getCentralPoint();
-		}
-		// Get le coin superieur gauche du node
-		int nbr = sprintf(text, "%d,%d -> %d,%d", node->getCentralPoint().x, node->getCentralPoint().y, p.x, p.y);
-		cv::putText(m,text,cv::Point())
-		
-	}
-
-	void setTarget(Node* start, Node* end) {
-		this->start = start;
-		
-
-		liste_ouverte.push_back(start);
-		this->end = end;
-	}
-
-	Node* getSmallestCostOpenList() {
-		Node* n = nullptr;
-		for (auto i : liste_ouverte) {
-			if (n == nullptr) {
-				n = i;
-				continue;
-			}
-			if (n->getFCost() > i->getFCost()) {
-				n = i;
-			}
-		}
-		return n;
-	}
-
-	Node* getNodeFromPoint(cv::Point p) {
-		int iX = p.x / width_node_size;
-		int iY = p.y / height_node_size;
-
-		return new Node({ iX*width_node_size + width_node_size / 2,iY*height_node_size + height_node_size / 2 }, { width_node_size,height_node_size });
-	}
-
-	bool isThereObstacleInNode(const Node* node) {
-		return false;
-	}
-
-	map_iterator_state iterate_next() {
-		Node* smallest_open = getSmallestCostOpenList();
-	}
-		 
-};
-
+}
+	return phil;
+}
 
 void startMainLoop() {
 	float vehicleWidth = YOUBOT_WIDTH_PX;
@@ -389,42 +231,24 @@ void startMainLoop() {
 	imageFromFilePath = "test.jpg";
 
 	cv::Mat imgOrig = getImage();
+	//imgOrig = resizeKeepAspectRatio(imgOrig, { 1920,1080 }, { 0,0,0 });
 
     cv::Mat bin(imgOrig.rows, imgOrig.cols, CV_8U);
 
+
 	cv::Size cucaSize(200, 200);
 
-
-	img = imgOrig.clone();
-
-	// ajoute les lignes de séparation des cases a l'image
-	int rows = imgOrig.rows;
-	int cols = imgOrig.cols;
-
-	int gapWidth = cols / (cols / cucaSize.width);
-	int gapHeight = rows / (rows / cucaSize.height);
-
-	int nbrX = 0;
-	int nbrY = 0;
-
-	for (int i = gapWidth; i < cols; i += gapWidth) {
-		nbrX++;
-		cv::line(img, cv::Point(i, 0), cv::Point(i, rows), (0, 0, 0));
-	}
-
-	for (int i = gapHeight; i < rows; i += gapHeight) {
-		nbrY++;
-		cv::line(img, cv::Point(0, i), cv::Point(cols, i), (0, 0, 0));
-	}
-
-	Map m(nbrX,gapWidth,nbrY,gapHeight);
-	// Va chercher les informations de node des deux points entrer
 	Node* startingNode;
 	Node* endNode;
-	
-	imshow(wImage, img);
+
+	Map m(cucaSize, imgOrig);
+
+
+
 
 	for (int i = 0; i < 2;i++) {
+		img = m.get_image_info();
+		imshow(wImage, img);
 		// attend avec notre variable conditionel
 		while (futureObj.wait_for(30ms) == std::future_status::timeout) {
 			imshow(wImage, img);
@@ -436,25 +260,70 @@ void startMainLoop() {
 
 		if (i == 0) {
 			startingNode = m.getNodeFromPoint(futureObj.get());
-			cv::circle(img, startingNode->getCentralPoint(), 5, (0, 0, 255), -1);
+			m.setStart(startingNode);
+			//cv::circle(img, startingNode->getCentralPoint(), 5, (0, 0, 255), -1);
 		}
 		else if (i == 1) {
 			endNode = m.getNodeFromPoint(futureObj.get());
-			cv::circle(img, endNode->getCentralPoint(), 5, (0, 0, 255), -1);
+			m.setTarget(endNode);
+			//cv::circle(img, endNode->getCentralPoint(), 5, (0, 0, 255), -1);
 		}
 		
 		exitSignal = std::promise<cv::Point>();
 		futureObj = exitSignal.get_future();
 	}
-	imshow(wImage, img);
+	cv::setMouseCallback(wImage, mouse_callback_2);
+	imshow(wImage, m.get_image_info());
 	std::cout << "Tout les points sont fournit " << std::endl;
 
-	m.setTarget(startingNode, endNode);
-
-	bool run = true;
+	for(auto p : objects)
+	{
+		Node* n = m.getNodeFromPoint(p);
+		n->setHaveObstacle(true);
+	}
 	
-	processImage(imgOrig, bin);
+	bool run = true;
+
+	img = imgOrig.clone();
+	cv::GaussianBlur(imgOrig, img, cv::Size(7, 7), 2);
+	
+	processImage(img, bin);
+
+	//morphologyEx(bin, bin, cv::MORPH_OPEN, cv::Mat::ones(3, 3, CV_8UC1));
+	//morphologyEx(bin, bin, cv::MORPH_CLOSE, cv::Mat::ones(3, 3, CV_8UC1));
+	//cv::dilate(bin, bin, phil(125));
+
+	cv::findContours(bin, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	contours0.resize(contours.size());
+	for(int k = 0; k < contours.size();k++)
+	{
+		cv::approxPolyDP(cv::Mat(contours[k]), contours0[k], 6, false);
+
+	}
+
+	for(int k = 0;k<contours0.size();k++)
+	{
+		if (contours0[k].size() > 2 && contours0[k].size() < 10)
+		{
+			for (cv::Point i : contours0[k])
+			{
+				Node* n = m.getNodeFromPoint(i);
+				if (n != nullptr)
+				{
+					n->setHaveObstacle(true);
+				}
+			}
+		}
+	}
+
+	cv::imshow(wImage, m.get_image_info());
+
+	cv::Mat newimg = imgOrig.clone();
+	drawContours(newimg, contours0, -1, cv::Scalar(128, 255, 255), 3, cv::LINE_AA, hierarchy, 3);
+	imshow("llol", newimg);
+	imshow(wContour, bin);
 	// Devrait ajouter les contours de l'image a ma map
+	cv::waitKey(0);
 
 	while (run) {
         // Passe notre image vers notre fonction cuda pour la traiter
@@ -465,6 +334,8 @@ void startMainLoop() {
 			break;
 		case FOUND_END:
 			// Est arriver au node de fin avec le meilleur chemin
+			std::cout << "Chemin trouver" << std::endl;
+			run = false;
 			break;
 		case CAN_NEXT:
 			// On n'est pas arriver et on peut continuer vers une autre iteration
@@ -476,8 +347,8 @@ void startMainLoop() {
 
 		// Affiche les informations de la liste_fermer
 
-
-		int v = cv::waitKey(1);
+		cv::imshow(wImage, m.get_image_info());
+		int v = cv::waitKey(0);
 		if (v == 27) {
 			break;
 		}

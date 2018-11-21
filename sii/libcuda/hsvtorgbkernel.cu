@@ -93,7 +93,7 @@ extern "C" cudaError_t StartKernel_Object_Detection(uchar3 *pArrayA, uchar* pArr
     HANDLE_ERROR(cudaMalloc((void**)&pArrayFilterBG,memSizeU));
 
 
-    float3 lower = make_float3(85,0.0,0.5);
+    float3 lower = make_float3(80,0.0,0.5);
     float3 higher = make_float3(143,1.0,1.0);
 
     HANDLE_ERROR(cudaMemcpyToSymbol(lowerValue,&lower,sizeof(float3)));
