@@ -24,7 +24,11 @@ private:
 	bool	wrap_mouse = true;
 	bool	first_mouse = 0;
 
-	bool	btns[6] { false,false,false,false,false};
+	bool	btns[11] { false,false,false,false,false,false,false,false,false,false,false};
+
+	float	tx = 1.0f;
+	float	ty = 1.0f;
+	float	tz = 1.0f;
 
 public:
 	FPSCamera();
@@ -37,6 +41,21 @@ public:
 	void mouse_move(int x, int y);
 	void keyboard_press(unsigned char btn, int x, int y);
 	void keyboard_release(unsigned char btn, int x, int y);
+
+	void addTX(float tx)
+	{
+		this->tx += tx;
+	}
+
+	void addTY(float ty)
+	{
+		this->ty += ty;
+	}
+
+	glm::vec3 getT() const
+	{
+		return { tx,ty,tz };
+	}
 
 	void addFOV(float v)
 	{

@@ -75,10 +75,15 @@ void Mesh::Draw(unsigned int shader) {
 		else if (name == "texture_height") {
 			number = std::to_string(heightNr++);
 		}
-
 		glUniform1i(glGetUniformLocation(shader, (name + number).c_str()), i);
 		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 	}
+	// dessine la mesh
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+
+	glActiveTexture(GL_TEXTURE0);
 }
 
 void Mesh::setupMesh() {
@@ -184,7 +189,7 @@ Mesh Model3D::processMesh(aiMesh *mesh, const aiScene *scene) {
 		else
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 		// tangent
-		vector.x = mesh->mTangents[i].x;
+		/*vector.x = mesh->mTangents[i].x;
 		vector.y = mesh->mTangents[i].y;
 		vector.z = mesh->mTangents[i].z;
 		vertex.Tangent = vector;
@@ -193,6 +198,7 @@ Mesh Model3D::processMesh(aiMesh *mesh, const aiScene *scene) {
 		vector.y = mesh->mBitangents[i].y;
 		vector.z = mesh->mBitangents[i].z;
 		vertex.Bitangent = vector;
+		*/
 		vertices.push_back(vertex);
 	}
 	// now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.

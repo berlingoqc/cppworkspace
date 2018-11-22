@@ -3,9 +3,9 @@
 
 namespace ENGINE
 {
-	uchar* MyTexture::GetContent(const char* filename)
+	uchar* MyTexture::GetContent(std::string filename)
 	{
-		uchar*	img = SOIL_load_image(filename, &w, &h, &channel, SOIL_LOAD_AUTO);
+		uchar*	img = SOIL_load_image(filename.c_str(), &w, &h, &channel, SOIL_LOAD_AUTO);
 		return img;
 	}
 
@@ -23,7 +23,7 @@ namespace ENGINE
 
 
 
-	uint MyTexture::GetTexture(const char* filename)
+	uint MyTexture::GetTexture(std::string filename)
 	{
 		uint text;
 
@@ -49,7 +49,7 @@ namespace ENGINE
 		return text;
 	}
 
-	uint MyTexture::GetTextureSky(std::vector<const char*> faces)
+	uint MyTexture::GetTextureSky(std::vector<std::string> faces)
 	{
 		GLuint textureID;
 		unsigned char* image;

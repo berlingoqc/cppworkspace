@@ -374,7 +374,8 @@ public:
 
 struct BuildingValue
 {
-	glm::vec3		p;
+	glm::vec3		size;
+	glm::vec3		translate;
 	uint			texture_side;
 	uint			texture_roof;
 
@@ -393,8 +394,8 @@ class BuildingGenerator : protected BaseGenerator
 
 	std::vector<BuildingValue>		building_values;
 
-	uint							max_building = 60;
-	uint							min_building = 40;
+	uint							max_building = 130;
+	uint							min_building = 100;
 	uint							nbr_building;
 
 
@@ -404,7 +405,7 @@ public:
 	void generateBase();
 
 	bool LoadBuildingTextures(fs::path building_folder);
-	void GenerateNewValue();
+	void Reset();
 	void Render(uint shader);
 };
 

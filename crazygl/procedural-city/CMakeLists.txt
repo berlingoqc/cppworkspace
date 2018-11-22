@@ -8,6 +8,7 @@ file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders ${CMAKE_CURRENT_SOURCE_DIR}/textu
 
 
 include_directories ("${PROJECT_SOURCE_DIR}/crazygl")
+include_directories ("${PROJECT_SOURCE_DIR}/imgui")
 
 
 

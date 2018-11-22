@@ -1,6 +1,10 @@
 #include "engine.h"
-
-
+#ifdef WITH_STB_IMAGE
+	#define STB_IMAGE_IMPLEMENTATION
+	#include <stb_image.h>
+	#define STB_IMAGE_WRITE_IMPLEMENTATION
+	#include <stb_image_write.h>
+#endif
 namespace ENGINE {
 	Position<float> getVecLineEndPoint(const VecLine& vl) {
 		return { vl.p.x + vl.v.x, vl.p.y + vl.v.y };

@@ -25,6 +25,7 @@ set(ASSIMP_LIBRARY "" CACHE PATH "The directory that contains assimp.lib" )
 
 set(STB_INCLUDE_PATH "" CACHE PATH "The directory that contains stb_image.h")
 
+
 set( GL_LIBS glew32 freeglut SOIL assimp-vc140-mt )
 
 include_directories(
@@ -35,6 +36,7 @@ include_directories(
 	${ASSIMP_INCLUDE_PATH}
 	${STB_INCLUDE_PATH}
 )
+#add_definitions(-DWITH_STB_IMAGE)
 
 link_directories(
 	${GLEW_LIBRARY}
@@ -46,6 +48,7 @@ link_directories(
 
 # Incluez les sous-projets.
 add_subdirectory ("crazygl")
+#add_subdirectory ("imgui")
 add_subdirectory ("procedural-city")
 
 

@@ -2,6 +2,8 @@
 
 #include <GL/freeglut.h>
 
+#include <iostream>
+
 FPSCamera::FPSCamera()
 {
 }
@@ -46,8 +48,24 @@ void FPSCamera::update()
 		camera_pos.y += 2.0f;
 	}
 	if (btns[6] == true) {
-
+		std::cout << "TY " << ty << std::endl;
 	}
+	
+	if (btns[7] == true) { // i
+		ty -= 0.1;
+	}
+
+	if (btns[8] == true) { // k
+		ty += 0.1;
+	}
+
+	if (btns[9] == true) { // j
+	}
+
+	if (btns[10] == true) { // l
+	}
+
+
 	if (camera_pos.z <= -200.0)
 	{
 		camera_pos.z = -200.0;
@@ -131,10 +149,23 @@ void FPSCamera::keyboard_press(unsigned char btn, int x, int y)
 	case 'r':
 		btns[6] = true;
 		break;
+	case 'i':
+		btns[7] = true;
+		break;
+	case 'k':
+		btns[8] = true;
+		break;
+	case 'j':
+		btns[9] = true;
+		break;
+	case 'l':
+		btns[10] = true;
+		break;
+
 
 	case 27:
 		glutLeaveMainLoop();
-		break;
+
 	}
 }
 
@@ -163,5 +194,18 @@ void FPSCamera::keyboard_release(unsigned char btn, int x, int y)
 	case 'r':
 		btns[6] = false;
 		break;
+	case 'i':
+		btns[7] = false;
+		break;
+	case 'k':
+		btns[8] = false;
+		break;
+	case 'j':
+		btns[9] = false;
+		break;
+	case 'l':
+		btns[10] = false;
+		break;
+
 	}
 }

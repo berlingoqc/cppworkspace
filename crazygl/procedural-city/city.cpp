@@ -14,10 +14,12 @@ bool SkyGenerator::LoadSkyTextures(fs::path sky_folder)
 {
 	loadTexturesFolder(texture_cloud, sky_folder / "sky");
 	loadTexturesFolder(texture_horizon, sky_folder / "horizon");
-	std::vector<const char*> faces;
+	std::vector<std::string> faces;
 	for(int i = 0;i < 6;i++)
 	{
-		faces.push_back((sky_folder / "box" / (std::to_string(i) + ".jpg")).string().c_str());
+		fs::path p = sky_folder / "box";
+		p = p.append(std::to_string(i) + ".jpg");
+		faces.push_back(p.string());
 	}
 	texture_skybox = texture_loader.GetTextureSky(faces);
 	return true;
@@ -166,27 +168,53 @@ void BuildingGenerator::generateBase()
 	glBindVertexArray(0);
 }
 
-void BuildingGenerator::GenerateNewValue()
+void BuildingGenerator::Reset()
 {
 	nbr_building = generateUintInRange(min_building, max_building);
-	building_values.resize(nbr_building);
-	for(uint i = 0;i < nbr_building; i++)
+	int count = 0;
+	uint v = nbr_building / 10;
+	float toggle = 1.0f;
+	for (uint z = 1; z < v; z++)
 	{
-		BuildingValue bv;
-		bv.p = generate_random_vec3(0.5f, 2.0f, 0.5f, 5.0f, .75f, 2.00f);
-		bv.texture_roof = get_random_item_vector(textures_roof);
-		bv.texture_side = get_random_item_vector(textures_side);
-		building_values.push_back(bv);
+		for (uint x = 1; x < nbr_building / v; x++)
+		{
+			BuildingValue bv;
+			bv.size = generate_random_vec3(0.5f, 2.0f, 0.5f, 5.0f, .75f, 2.00f);
+			bv.translate = glm::vec3(13.0f*x, 0.0f, -15.0f*z*toggle);
+			bv.texture_roof = get_random_item_vector(textures_roof);
+			bv.texture_side = get_random_item_vector(textures_side);
+			building_values.push_back(bv);
+			toggle *= -1.0f;
+			count++;
+		}
 	}
+	nbr_building = count;
 }
 
 void BuildingGenerator::Render(uint shader)
 {
-	float randY = 1.0;
-	bool hasTop = false;
 	glm::mat4 modele = glm::mat4(1.0);
 
-	for (int y = 1; y < nbr_building / (nbr_building / 10); y++) {
+	for (auto bv : building_values) {
+		modele = glm::mat4(1.0);
+		modele = glm::translate(modele, bv.translate);
+		modele = glm::scale(modele, bv.size);
+		glUniformMatrix4fv(glGetUniformLocation(shader, "gModele"), 1, GL_FALSE, &modele[0][0]);
+		glBindVertexArray(vao_base);
+		glBindTexture(GL_TEXTURE_2D, bv.texture_side);
+		glUniform1i(glGetUniformLocation(shader, "ourTexture1"), 0);
+		glDrawElements(GL_TRIANGLES, 12 * 3, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+
+		glBindVertexArray(vao_toit);
+		glBindTexture(GL_TEXTURE_2D, bv.texture_roof);
+		glUniform1i(glGetUniformLocation(shader, "ourTexture1"), 0);
+		glDrawElements(GL_TRIANGLES, 6 * 3, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+	}
+
+
+	/*for (int y = 1; y < nbr_building / (nbr_building / 10); y++) {
 		for (int x = 1; x < nbr_building / (nbr_building / 10); x++) {
 			if(x*y >= building_values.size())
 				continue;
@@ -209,7 +237,7 @@ void BuildingGenerator::Render(uint shader)
 			modele = glm::scale(modele, bv.p);
 		}
 		randY *= -1;
-	}
+	}*/
 }
 
 
@@ -249,7 +277,7 @@ bool ProceduralCity::configure(fs::path root_folder)
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	model_obj = Model3D("obj/nanosuit/nanosuit.obj");
+	model_obj = Model3D("obj/effeil.stl");
 
 
 
@@ -274,12 +302,12 @@ bool ProceduralCity::configure(fs::path root_folder)
 
 	}
 
-	building_generator.GenerateNewValue();
 
 	ground_generator.generateBase();
 	sky_generator.generateBase();
 	building_generator.generateBase();
 
+	building_generator.Reset();
 
 	return true;
 
@@ -295,7 +323,6 @@ void ProceduralCity::render()
 	// Update la position de la camera selon les inputs recu entre les appels de render
 	camera.update();
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	projection = glm::perspective(glm::radians(camera.getFOV()), glutGet(GLUT_WINDOW_WIDTH) / glutGet(GLUT_WINDOW_HEIGHT)*1.0f, 0.1f, 800.0f);
 	loadUniforms(&shader_skybox);
@@ -311,18 +338,18 @@ void ProceduralCity::render()
 	assert(u_model != 0xFFFFFFFF);
 
 
-	/*loadUniforms(&shader_obj);
+	loadUniforms(&shader_obj);
 	// view/projection transformations
 	glUniformMatrix4fv(u_projection, 1, GL_FALSE, &projection[0][0]);
 	glUniformMatrix4fv(u_view, 1, GL_FALSE, &view[0][0]);
 	// render the loaded model
-	glm::mat4 model;
+	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(10.0f, 0.0f, 10.0f)); // translate it down so it's at the center of the scene
-	model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));	// it's a bit too big for our scene, so scale it down
+	model = glm::rotate(model,glm::radians(-90.0f),glm::vec3(1,0,0));
+	model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
 	u_model = glGetUniformLocation(shader_obj, "gModele");
 	glUniformMatrix4fv(u_model, 1, GL_FALSE, &model[0][0]);
 	model_obj.Draw(shader_obj);
-	*/
 
 
 	loadUniforms(&shader_texture);
@@ -332,7 +359,6 @@ void ProceduralCity::render()
 
 	glActiveTexture(GL_TEXTURE0);
 
-	// Dessine les immeubles
 	building_generator.Render(shader_texture);
 
 
@@ -345,7 +371,6 @@ void ProceduralCity::render()
 	sky_generator.drawCloud(&shader_texture);
 	sky_generator.drawHorizon(&shader_texture);
 
-	glutSwapBuffers();
 }
 
 void ProceduralCity::loadUniforms(uint* shader_id)

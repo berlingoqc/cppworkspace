@@ -15,6 +15,9 @@ ProceduralCity	city;
 
 
 void traitementMenuPrincipal(int value) {
+
+	if (value == SAVE_DRAWING)
+		takeScreenShot();
 }
 
 void createMenu() {
@@ -35,6 +38,8 @@ void mouse(int x, int y)
 
 void keyboard(uchar btn, int x, int y)
 {
+	if (btn == 't')
+		takeScreenShot();
 	city.getCamera().keyboard_press(btn, x, y);
 }
 
@@ -59,7 +64,14 @@ void mouse_roll(int roue,int dir, int x,int y)
 
 void render()
 {
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+;
+	
 	city.render();
+
+	glutSwapBuffers();
+	glutPostRedisplay();
 }
 
 void close()
@@ -81,6 +93,7 @@ int main(int argc, char** argv) {
 	/*******************/
 	glewInit();
 
+	float z = 1.0f;
 	glutDisplayFunc(render);
 	glutCloseFunc(close);
 	glutKeyboardFunc(keyboard);
@@ -98,6 +111,7 @@ int main(int argc, char** argv) {
 	glutSetCursor(GLUT_CURSOR_NONE);
 
 	createMenu();
+
 
 	if(!city.configure("textures"))
 	{

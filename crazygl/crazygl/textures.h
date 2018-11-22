@@ -24,13 +24,13 @@ namespace ENGINE
 		uint	mag_filter;
 		uint	img_format;
 
-		uchar*		GetContent(const char* filename);
+		uchar*		GetContent(std::string filepath);
 
 	public:
 		MyTexture(uint wraps, uint wrapt, uint minfilter, uint magfilter, uint img_format);
 
-		uint		GetTexture(const char* filename);
-		uint		GetTextureSky(std::vector<const char*> faces);
+		uint		GetTexture(std::string filename);
+		uint		GetTextureSky(std::vector<std::string> faces);
 
 		void setMinFilter(uint minfilter)
 		{
