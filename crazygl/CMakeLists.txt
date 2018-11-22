@@ -20,26 +20,25 @@ set(FREEGLUT_LIBRARY "" CACHE PATH "The directory that contains freeglut.lib" )
 set(SOIL_INCLUDE_PATH "" CACHE PATH "The directory that contains SOIL.h" )
 set(SOIL_LIBRARY "" CACHE PATH "The directory that contains SOIL.lib" )
 
-#set(ASSIMP_INCLUDE_PATH "" CACHE PATH "The directory that contains assimp/assimp.h" )
-#set(ASSIMP_LIBRARY "" CACHE PATH "The directory that contains assimp.lib" )
-#find_package( assimp REQUIRED)
+set(ASSIMP_INCLUDE_PATH "" CACHE PATH "The directory that contains assimp/assimp.h" )
+set(ASSIMP_LIBRARY "" CACHE PATH "The directory that contains assimp.lib" )
 
 set(STB_INCLUDE_PATH "" CACHE PATH "The directory that contains stb_image.h")
 
-set( GL_LIBS glew32 freeglut SOIL )
+set( GL_LIBS glew32 freeglut SOIL assimp-vc140-mt )
 
 include_directories(
 	${GLEW_INCLUDE_PATH}
 	${FREEGLUT_INCLUDE_PATH}
 	${GLM_INCLUDE_PATH}
 	${SOIL_INCLUDE_PATH}
-	#${ASSIMP_INCLUDE_PATH}
+	${ASSIMP_INCLUDE_PATH}
 	${STB_INCLUDE_PATH}
 )
 
 link_directories(
 	${GLEW_LIBRARY}
-	#${ASSIMP_LIBRARY}
+	${ASSIMP_LIBRARY}
 	${FREEGLUT_LIBRARY}
 	${SOIL_LIBRARY}
 )

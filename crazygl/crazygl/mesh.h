@@ -7,6 +7,10 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <iostream>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 struct Vertex {
 	// position
@@ -14,7 +18,7 @@ struct Vertex {
 	// normal
 	glm::vec3 Normal;
 	// textCoords
-	glm::vec3 TexCoords;
+	glm::vec2 TexCoords;
 	// tangent
 	glm::vec3 Tangent;
 	// bitangent
@@ -22,9 +26,9 @@ struct Vertex {
 };
 
 struct Texture {
-	unsigned int ID;
-	const char* Type;
-	const char& Path;
+	unsigned int id;
+	const char* type;
+	const char* path;
 };
 
 class Mesh {
@@ -43,13 +47,15 @@ public:
 
 class Model3D {
 public:
-	Model3D(const char* path);
+	Model3D() {}
+	Model3D(fs::path filename);
 	void Draw(unsigned int shaderID);
 private:
 	std::vector<Mesh> meshes;
-	const char* directory;
+	std::vector<Texture> textures_loaded;
+	fs::path directory;
 
-	void loadModel(std::string path);
+	void loadModel(fs::path filename);
 	void processNode(aiNode *node, const aiScene *scene);
 	Mesh processMesh(aiMesh *mesh, const aiScene *scene);
 	std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);

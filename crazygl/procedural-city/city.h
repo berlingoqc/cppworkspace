@@ -4,6 +4,7 @@
 #include "engine.h"
 #include "shaders.h"
 #include "textures.h"
+#include "mesh.h"
 #include <glm/vec3.hpp>
 #include <filesystem>
 #include "camera.h"
@@ -11,6 +12,19 @@
 using namespace std;
 using namespace ENGINE;
 namespace fs = std::filesystem;
+
+inline glm::vec3 generate_random_vec3(float minx, float maxx, float miny, float maxy, float minz, float maxz)
+{
+	return glm::vec3(((2.0f - 0.25f) * ((float)rand() / RAND_MAX)) + 0.25f, ((5.0f - 0.25f) * ((float)rand() / RAND_MAX)) + 0.25f,
+		((2.0f - 0.75f) * ((float)rand() / RAND_MAX)) + 0.75f);
+	//return glm::vec3(generateFloatInRange(minx, maxx), generateFloatInRange(miny,maxy), generateFloatInRange(minz,maxz));
+}
+
+inline uint get_random_item_vector(std::vector<uint>& vector)
+{
+	return vector[generateUintInRange(0, vector.size() - 1)];
+}
+
 
 class BaseGenerator
 {
@@ -347,8 +361,7 @@ class GroundGenerator : protected BaseGenerator
 	uint					texture_building;
 
 	uint					vao_sol;
-	uint					vao_toit;
-	uint					vao_base;
+
 
 public:
 	GroundGenerator();
@@ -359,16 +372,40 @@ public:
 	void drawGround(uint* shader);
 };
 
+struct BuildingValue
+{
+	glm::vec3		p;
+	uint			texture_side;
+	uint			texture_roof;
+
+
+};
+
 class BuildingGenerator : protected BaseGenerator
 {
-	std::vector<uint>		textures_side;
-	std::vector<uint>		textures_roof;
+	std::vector<uint>				textures_side;
+	std::vector<uint>				textures_roof;
+
+	uint							vao_toit;
+	uint							vao_base;
+
+	glm::mat4						models = glm::mat4(1.0f);
+
+	std::vector<BuildingValue>		building_values;
+
+	uint							max_building = 60;
+	uint							min_building = 40;
+	uint							nbr_building;
+
 
 public:
 	BuildingGenerator();
-	bool LoadBuildingTextures(fs::path building_folder);
 
-	void init_base();
+	void generateBase();
+
+	bool LoadBuildingTextures(fs::path building_folder);
+	void GenerateNewValue();
+	void Render(uint shader);
 };
 
 class ProceduralCity
@@ -376,10 +413,13 @@ class ProceduralCity
 
 	uint	shader_texture;
 	uint	shader_skybox;
+	uint	shader_obj;
 
 	uint	u_projection;
 	uint	u_view;
 	uint	u_model;
+
+	Model3D		model_obj;
 
 
 	BuildingGenerator		building_generator;

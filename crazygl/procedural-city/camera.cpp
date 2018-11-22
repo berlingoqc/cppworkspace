@@ -38,7 +38,7 @@ void FPSCamera::update()
 	}
 	if(btns[4] == true)
 	{
-		if (camera_pos.y > 0.5f)
+		//if (camera_pos.y > 0.5f)
 			camera_pos.y -= 2.0f;
 	}
 	if(btns[5] == true)

@@ -49,12 +49,17 @@ namespace ENGINE {
 		return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 	}
 
-	std::mt19937 gen(std::random_device{}());
 
 	float generateFloatInRange(float min, float max) {
 		assert(max > min);
 		std::uniform_real_distribution<float> dis(min, max);
 		return dis(gen);
+	}
+	uint generateUintInRange(uint min, uint max)
+	{
+		assert(max > min);
+		std::uniform_real_distribution<float> dis(min, max);
+		return (uint)dis(gen);
 	}
 
 

@@ -144,7 +144,9 @@ namespace ENGINE
 
 
 	float generateFloatInRange(float min, float max);
+	uint generateUintInRange(uint min, uint max);
 
+	inline std::mt19937 gen(std::random_device{}());
 	void renderString(float x, float y, void* font, const char* str);
 
 	void generateRandomColor(RGBColor<float>& randomColor);

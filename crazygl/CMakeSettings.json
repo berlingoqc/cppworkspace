@@ -9,7 +9,7 @@
       ],
       "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
       "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
-      "cmakeCommandArgs": "-DSOIL_INCLUDE_PATH=D:\\VC17_LIB\\soil\\include -DSOIL_LIBRARY=D:\\VC17_LIB\\soil\\lib -DSTB_INCLUDE_PATH=D:\\VC17_LIB\\stb -DGLM_INCLUDE_PATH=D:\\VC17_LIB\\glm\\include -DGLEW_INCLUDE_PATH=D:\\VC17_LIB\\glew\\include -DGLEW_LIBRARY=D:\\VC17_LIB\\glew\\lib -DFREEGLUT_INCLUDE_PATH=D:\\VC17_LIB\\freeglut\\include -DFREEGLUT_LIBRARY=D:\\VC17_LIB\\freeglut\\lib -DASSIMP_LIBRARY=D:\\VC17_LIB\\Assimp\\lib -DASSIMP_INCLUDE_PATH=D:\\VC17_LIB\\Assimp\\include",
+      "cmakeCommandArgs": "-DSOIL_INCLUDE_PATH=D:\\VC17_LIB\\soil\\include -DSOIL_LIBRARY=D:\\VC17_LIB\\soil\\lib -DSTB_INCLUDE_PATH=D:\\VC17_LIB\\stb -DGLM_INCLUDE_PATH=D:\\VC17_LIB\\glm\\include -DGLEW_INCLUDE_PATH=D:\\VC17_LIB\\glew\\include -DGLEW_LIBRARY=D:\\VC17_LIB\\glew\\lib -DFREEGLUT_INCLUDE_PATH=D:\\VC17_LIB\\freeglut\\include -DFREEGLUT_LIBRARY=D:\\VC17_LIB\\freeglut\\lib -DASSIMP_LIBRARY=D:\\Assimp\\lib\\x64 -DASSIMP_INCLUDE_PATH=D:\\Assimp\\include",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": ""
     }

@@ -2,9 +2,6 @@
 *.a
 *.o
 
-*.jpg
-*.png
-*.bmp
 
 build/
 .vs/
