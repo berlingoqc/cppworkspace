@@ -26,6 +26,13 @@ set(ASSIMP_LIBRARY "" CACHE PATH "The directory that contains assimp.lib" )
 set(STB_INCLUDE_PATH "" CACHE PATH "The directory that contains stb_image.h")
 
 
+if(win32)
+	set( GL_LIBS glew32 freeglut SOIL assimp-vc140-mt )
+else(win32)
+	set( GL_LIBS GL glut GLU GLEW stdc++fs )
+endif(win32)
+
+
 set( GL_LIBS glew32 freeglut SOIL assimp-vc140-mt )
 
 include_directories(

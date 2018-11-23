@@ -34,8 +34,8 @@ namespace ENGINE {
 		return s;
 	}
 
-	unsigned int MyShader::GetShaderID() {
-		return ID;
+	Shrapper MyShader::GetShaderID() {
+		return Shrapper(ID);
 	}
 
 	void MyShader::PrintErrorStack() {

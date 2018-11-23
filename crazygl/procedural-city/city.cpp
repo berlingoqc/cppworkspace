@@ -61,33 +61,33 @@ void SkyGenerator::generateBase()
 
 }
 
-void SkyGenerator::drawBox(uint* shader)
+void SkyGenerator::drawBox(uint shader)
 {
 	glActiveTexture(GL_TEXTURE0);
-	glUniform1i(glGetUniformLocation(*shader, "Skybox"), 0);
+	glUniform1i(glGetUniformLocation(shader, "Skybox"), 0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_skybox);
 	glBindVertexArray(vao_skybox);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
 
-void SkyGenerator::drawCloud(uint* shader)
+void SkyGenerator::drawCloud(uint shader)
 {
 	for (int i = 0; i < 2; i++) {
 		glBindVertexArray(vao_cloud[i]);
 		glBindTexture(GL_TEXTURE_2D, texture_cloud[0]);
-		glUniform1i(glGetUniformLocation(*shader, "ourTexture1"), 0);
+		glUniform1i(glGetUniformLocation(shader, "ourTexture1"), 0);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
 	}
 }
 
-void SkyGenerator::drawHorizon(uint* shader)
+void SkyGenerator::drawHorizon(uint shader)
 {
 	for (int i = 0; i < 4; i++) {
 		glBindVertexArray(vao_horizon[i]);
 		glBindTexture(GL_TEXTURE_2D, texture_horizon[0]);
-		glUniform1i(glGetUniformLocation(*shader, "ourTexture1"), 0);
+		glUniform1i(glGetUniformLocation(shader, "ourTexture1"), 0);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
 	}
@@ -122,11 +122,11 @@ void GroundGenerator::generateBase()
 
 }
 
-void GroundGenerator::drawGround(uint* shader)
+void GroundGenerator::drawGround(uint shader)
 {
 	glBindVertexArray(vao_sol);
 	glBindTexture(GL_TEXTURE_2D, texture_street);
-	glUniform1i(glGetUniformLocation(*shader, "ourTexture1"), 0);
+	glUniform1i(glGetUniformLocation(shader, "ourTexture1"), 0);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
 }
@@ -213,31 +213,6 @@ void BuildingGenerator::Render(uint shader)
 		glBindVertexArray(0);
 	}
 
-
-	/*for (int y = 1; y < nbr_building / (nbr_building / 10); y++) {
-		for (int x = 1; x < nbr_building / (nbr_building / 10); x++) {
-			if(x*y >= building_values.size())
-				continue;
-			BuildingValue bv = building_values[x*y];
-			glUniformMatrix4fv(glGetUniformLocation(shader, "gModele"), 1, GL_FALSE, &modele[0][0]);
-			glBindVertexArray(vao_base);
-			glBindTexture(GL_TEXTURE_2D, bv.texture_side);
-			glUniform1i(glGetUniformLocation(shader, "ourTexture1"), 0);
-			glDrawElements(GL_TRIANGLES, 12 * 3, GL_UNSIGNED_INT, 0);
-			glBindVertexArray(0);
-
-			glBindVertexArray(vao_toit);
-			glBindTexture(GL_TEXTURE_2D, bv.texture_roof);
-			glUniform1i(glGetUniformLocation(shader, "ourTexture1"), 0);
-			glDrawElements(GL_TRIANGLES, 6 * 3, GL_UNSIGNED_INT, 0);
-			glBindVertexArray(0);
-
-			modele = glm::mat4(1.0f);
-			modele = glm::translate(modele, glm::vec3(10.0*x, 1.0, 10.0*y));
-			modele = glm::scale(modele, bv.p);
-		}
-		randY *= -1;
-	}*/
 }
 
 
@@ -252,6 +227,7 @@ ProceduralCity::ProceduralCity()
 
 bool ProceduralCity::configure(fs::path root_folder)
 {
+	this->root_folder = root_folder;
 	// Load les shaders 
 	MyShader shader;
 	if(!shader.OpenMyShader("shaders/vert_shader.glsl", "shaders/frag_shader.glsl"))
@@ -277,40 +253,55 @@ bool ProceduralCity::configure(fs::path root_folder)
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	model_obj = Model3D("obj/effeil.stl");
+
+
+	return true;
+
+}
+
+void ProceduralCity::load() {
+	//model_obj = Model3D("obj/nanosuit/nanosuit.obj");
 
 
 
 	// Load les textures
-	if(!building_generator.LoadBuildingTextures(root_folder / "building"))
+	if (!building_generator.LoadBuildingTextures(root_folder / "building"))
 	{
 		std::cout << "Echer au chargement des textures des batiments" << std::endl;
-		return false;
+		return;
 	}
 
-	if(!sky_generator.LoadSkyTextures(root_folder / "outside"))
+	building_generator.generateBase();
+	building_generator.Reset();
+	building_generator.setIsLoaded(true);
+
+	if (!sky_generator.LoadSkyTextures(root_folder / "outside"))
 	{
 		std::cout << "Echer au chargement des textures du ciels" << std::endl;
-		return false;
-	
+		return;
 	}
 
-	if(!ground_generator.LoadGroundTextures(root_folder / "ground"))
+	sky_generator.generateBase();
+	sky_generator.setIsLoaded(true);
+
+
+
+	if (!sky_generator.LoadSkyTextures(root_folder / "outside"))
+	{
+		std::cout << "Echer au chargement des textures du ciels" << std::endl;
+		return;
+
+	}
+
+	if (!ground_generator.LoadGroundTextures(root_folder / "ground"))
 	{
 		std::cout << "Echer au chargement des textures du sol" << std::endl;
-		return false;
+		return;
 
 	}
 
-
 	ground_generator.generateBase();
-	sky_generator.generateBase();
-	building_generator.generateBase();
-
-	building_generator.Reset();
-
-	return true;
-
+	ground_generator.setIsLoaded(true);
 }
 
 const float multipleCouleur[4] = { 1.0,1.0,1.0,1.0 };
@@ -323,62 +314,48 @@ void ProceduralCity::render()
 	// Update la position de la camera selon les inputs recu entre les appels de render
 	camera.update();
 
-
 	projection = glm::perspective(glm::radians(camera.getFOV()), glutGet(GLUT_WINDOW_WIDTH) / glutGet(GLUT_WINDOW_HEIGHT)*1.0f, 0.1f, 800.0f);
-	loadUniforms(&shader_skybox);
-	view = camera.getView();
-	glUniformMatrix4fv(u_projection, 1, GL_FALSE, &projection[0][0]);
-	glUniformMatrix4fv(u_view, 1, GL_FALSE, &view[0][0]);
 
-	sky_generator.drawBox(&shader_skybox);
+	if (sky_generator.getIsLoaded()) {
+		shader_skybox.Use();
+		view = camera.getView();
+		shader_skybox.setMat4("gProjection", projection);
+		shader_skybox.setMat4("gVue", view);
 
+		sky_generator.drawBox(shader_skybox.getID());
+	}
 	view = camera.getLookAt();
 
-	u_model = glGetUniformLocation(shader_texture, "gModele");
-	assert(u_model != 0xFFFFFFFF);
-
-
-	loadUniforms(&shader_obj);
-	// view/projection transformations
-	glUniformMatrix4fv(u_projection, 1, GL_FALSE, &projection[0][0]);
-	glUniformMatrix4fv(u_view, 1, GL_FALSE, &view[0][0]);
-	// render the loaded model
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(10.0f, 0.0f, 10.0f)); // translate it down so it's at the center of the scene
-	model = glm::rotate(model,glm::radians(-90.0f),glm::vec3(1,0,0));
-	model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-	u_model = glGetUniformLocation(shader_obj, "gModele");
-	glUniformMatrix4fv(u_model, 1, GL_FALSE, &model[0][0]);
-	model_obj.Draw(shader_obj);
-
-
-	loadUniforms(&shader_texture);
-	glUniformMatrix4fv(u_projection, 1, GL_FALSE, &projection[0][0]);
-	glUniformMatrix4fv(u_view, 1, GL_FALSE, &view[0][0]);
-	glUniform4fv(glGetUniformLocation(shader_texture, "color"), 1, multipleCouleur);
+	/*
+	shader_obj.Use();
+	shader_obj.setMat4("gProjection", projection);
+	shader_obj.setMat4("gVue", view);
+	modele = glm::mat4(1.0f);
+	modele = glm::translate(modele, glm::vec3(10.0f, 0.0f, 12.0f)); // translate it down so it's at the center of the scene
+	modele = glm::rotate(modele,glm::radians(-90.0f),glm::vec3(0,1,0));
+	modele = glm::scale(modele, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+	shader_obj.setMat4("gModele", modele);
+	model_obj.Draw(shader_obj.getID());
+	*/
+	shader_texture.Use();
+	shader_texture.setMat4("gProjection", projection);
+	shader_texture.setMat4("gVue", view);
 
 	glActiveTexture(GL_TEXTURE0);
 
-	building_generator.Render(shader_texture);
-
+	if (building_generator.getIsLoaded()) {
+		building_generator.Render(shader_texture.getID());
+	}
 
 	modele = glm::mat4(1.0);
-	glUniformMatrix4fv(u_model, 1, GL_FALSE, &modele[0][0]);
-
-
-	ground_generator.drawGround(&shader_texture);
-
-	sky_generator.drawCloud(&shader_texture);
-	sky_generator.drawHorizon(&shader_texture);
+	shader_texture.setMat4("gModele", modele);
+	if (ground_generator.getIsLoaded()) {
+		ground_generator.drawGround(shader_texture.getID());
+	}
+	if (sky_generator.getIsLoaded()) {
+		sky_generator.drawCloud(shader_texture.getID());
+		sky_generator.drawHorizon(shader_texture.getID());
+	}
 
 }
 
-void ProceduralCity::loadUniforms(uint* shader_id)
-{
-	glUseProgram(*shader_id);
-	u_projection = glGetUniformLocation(*shader_id, "gProjection");
-	assert(u_projection != 0xFFFFFFFF);
-
-	u_view = glGetUniformLocation(*shader_id, "gVue");
-	assert(u_projection != 0xFFFFFFFF);
-}

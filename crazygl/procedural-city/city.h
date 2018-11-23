@@ -7,6 +7,10 @@
 #include "mesh.h"
 #include <glm/vec3.hpp>
 #include <filesystem>
+
+#include <thread>
+#include <future>
+
 #include "camera.h"
 
 using namespace std;
@@ -30,6 +34,8 @@ class BaseGenerator
 {
 protected:
 	MyTexture	texture_loader;
+
+	std::atomic<bool>	is_ready = false;
 
 	float m_hauteurBase;
 	glm::vec3 m_sommetsBase[8];
@@ -118,7 +124,15 @@ protected:
 		create_vertex_wall(width / 2, height, depth / 2, horizontal, side);
 		create_texture_wall(iteration);
 	}
+public:
 
+	bool getIsLoaded() {
+		return is_ready;
+	}
+
+	void setIsLoaded(bool v) {
+		is_ready = v;
+	}
 
 private:
 	void create_vertex_base(GLfloat largeur, GLfloat hauteur, GLfloat profondeur)
@@ -331,7 +345,7 @@ private:
 	}
 };
 
-class SkyGenerator : protected BaseGenerator
+class SkyGenerator : public BaseGenerator
 {
 	std::vector<uint>			texture_cloud;
 	std::vector<uint>			texture_horizon;
@@ -342,19 +356,21 @@ class SkyGenerator : protected BaseGenerator
 	uint						vao_horizon[4];
 	uint						vao_skybox;
 
+	std::atomic<bool>			is_loaded;
+
 public:
 	SkyGenerator();
 	bool LoadSkyTextures(fs::path sky_folder);
 
 	void generateBase();
 
-	void drawBox(uint* shader);
-	void drawCloud(uint* shader);
-	void drawHorizon(uint* shader);
+	void drawBox(uint shader);
+	void drawCloud(uint shader);
+	void drawHorizon(uint shader);
 
 };
 
-class GroundGenerator : protected BaseGenerator
+class GroundGenerator : public BaseGenerator
 {
 	uint					texture_grass;
 	uint					texture_street;
@@ -369,7 +385,7 @@ public:
 
 	void generateBase();
 
-	void drawGround(uint* shader);
+	void drawGround(uint shader);
 };
 
 struct BuildingValue
@@ -382,7 +398,7 @@ struct BuildingValue
 
 };
 
-class BuildingGenerator : protected BaseGenerator
+class BuildingGenerator : public BaseGenerator
 {
 	std::vector<uint>				textures_side;
 	std::vector<uint>				textures_roof;
@@ -398,6 +414,8 @@ class BuildingGenerator : protected BaseGenerator
 	uint							min_building = 100;
 	uint							nbr_building;
 
+	int								current_x; // le x rendu pour ajouter un batiment
+	int								current_z; // le z rendu pour ajouter un batiment
 
 public:
 	BuildingGenerator();
@@ -412,9 +430,9 @@ public:
 class ProceduralCity
 {
 
-	uint	shader_texture;
-	uint	shader_skybox;
-	uint	shader_obj;
+	Shrapper	shader_texture;
+	Shrapper	shader_skybox;
+	Shrapper	shader_obj;
 
 	uint	u_projection;
 	uint	u_view;
@@ -429,12 +447,18 @@ class ProceduralCity
 
 	FPSCamera				camera;
 
+	std::future<bool>		loader;
+
+	fs::path				root_folder;
+
+
 
 public:
 	ProceduralCity();
 
-	bool configure(fs::path root_folder);
 
+	bool configure(fs::path root_folder);
+	void load();
 
 	void render();
 
@@ -443,9 +467,9 @@ public:
 		return camera;
 	}
 
-private:
-	void loadUniforms(uint* shader_id);
-
+	std::thread load_thread() {
+		return std::thread{ [this] {this->load(); } };
+	}
 	
 };
 
