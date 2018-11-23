@@ -1,7 +1,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include <SOIL.h>
+#include <SOIL/SOIL.h>
 #include <vector>
 
 #include "engine.h"

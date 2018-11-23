@@ -36,7 +36,7 @@ else(win32)
 endif(win32)
 
 
-set( GL_LIBS glew32 glfw3 glad SOIL assimp-vc140-mt )
+set( GL_LIBS glew32d glfw3 SOIL assimp-vc140-mt )
 
 include_directories(
 	${GLEW_INCLUDE_PATH}
@@ -61,6 +61,7 @@ link_directories(
 # Incluez les sous-projets.
 add_subdirectory ("crazygl")
 add_subdirectory ("imgui")
+add_subdirectory ("video-player")
 add_subdirectory ("procedural-city")
 
 
