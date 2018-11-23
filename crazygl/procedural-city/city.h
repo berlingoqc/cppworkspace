@@ -411,7 +411,7 @@ class BuildingGenerator : public BaseGenerator
 	std::vector<BuildingValue>		building_values;
 
 	uint							max_building = 130;
-	uint							min_building = 100;
+	uint							min_building = 0;
 	uint							nbr_building;
 
 	int								current_x; // le x rendu pour ajouter un batiment
@@ -425,11 +425,44 @@ public:
 	bool LoadBuildingTextures(fs::path building_folder);
 	void Reset();
 	void Render(uint shader);
+
+	int	getMaxBuilding()
+	{
+		return max_building;
+	}
+
+	void setMaxBuilding(int v)
+	{
+		max_building = v;
+	}
+
+	int	getMinBuilding()
+	{
+		return min_building;
+	}
+
+	void setMinBuilding(int v)
+	{
+		min_building = v;
+	}
+
+	int getNbrBuilding()
+	{
+		return nbr_building;
+	}
 };
 
 class ProceduralCity
 {
+public:
+	BuildingGenerator& getBuildingGenerator()
+	{
+		return building_generator;
+	}
 
+
+
+private:
 	Shrapper	shader_texture;
 	Shrapper	shader_skybox;
 	Shrapper	shader_obj;
@@ -450,6 +483,10 @@ class ProceduralCity
 	std::future<bool>		loader;
 
 	fs::path				root_folder;
+
+
+	int		w_height = 900;
+	int		w_width = 1600;
 
 
 

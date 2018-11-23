@@ -70,7 +70,7 @@ namespace ENGINE {
 	void renderString(float x, float y, void* font, const char* str) {
 		glColor3f(0.0, 0.0, 0.0);
 		glRasterPos2f(x, y);
-		glutBitmapString(font, (unsigned char*)str);
+		//glutBitmapString(font, (unsigned char*)str);
 	}
 
 	void generateRandomColor(RGBColor<float>& randomColor) {
@@ -92,16 +92,16 @@ namespace ENGINE {
 
 	Position<float> ConvertToNDC(int x, int y) {
 		Position<float> p;
-		int sizeY = glutGet(GLUT_WINDOW_HEIGHT);
-		int sizeX = glutGet(GLUT_WINDOW_WIDTH);
-		p.x = (x * (Maxndc - Minndc)) / sizeX + Minndc;
-		p.y = -(y - sizeY) * (Maxndc - Minndc) / sizeY + Minndc;
+		//int sizeY = glutGet(GLUT_WINDOW_HEIGHT);
+		//int sizeX = glutGet(GLUT_WINDOW_WIDTH);
+		//p.x = (x * (Maxndc - Minndc)) / sizeX + Minndc;
+		//p.y = -(y - sizeY) * (Maxndc - Minndc) / sizeY + Minndc;
 		return p;
 	}
 
 	void takeScreenShot() {
-		int gW = glutGet(GLUT_WINDOW_WIDTH);
-		int gH = glutGet(GLUT_WINDOW_HEIGHT);
+		int gW;//= glutGet(GLUT_WINDOW_WIDTH);
+		int gH; //= glutGet(GLUT_WINDOW_HEIGHT);
 
 		unsigned char* buffer = (unsigned char*)malloc(gW * gH * 3);
 		glReadPixels(0, 0, gW, gH, GL_RGB, GL_UNSIGNED_BYTE, buffer);
@@ -158,17 +158,17 @@ namespace ENGINE {
 	}
 
 	void GlutEngine::EndApp() {
-		glutDestroyWindow(windowId);
+		//glutDestroyWindow(windowId);
 	}
 
 
 	void GlutEngine::SetFullScreen(bool on) {
 		if (on && !isMax) {
-			glutFullScreen();
+			//glutFullScreen();
 			isMax = true;
 		}
 		else if (!on && isMax) {
-			glutReshapeWindow(wWidth, wHeight);
+			//glutReshapeWindow(wWidth, wHeight);
 			isMax = false;
 		}
 	}
@@ -178,7 +178,7 @@ namespace ENGINE {
 		wHeight += y;
 		wWidth += x;
 
-		glutReshapeWindow(wWidth, wHeight);
+		//glutReshapeWindow(wWidth, wHeight);
 	}
 
 	void GlutEngine::PutWindow(screenpositions position) {
@@ -188,12 +188,12 @@ namespace ENGINE {
 		w = 0;
 		switch (position) {
 		case center:
-			h = (sHeight / 2) - glutGet(GLUT_WINDOW_HEIGHT) / 2;
-			w = (sWidth / 2) - glutGet(GLUT_WINDOW_WIDTH) / 2;
+			//h = (sHeight / 2) - glutGet(GLUT_WINDOW_HEIGHT) / 2;
+			//w = (sWidth / 2) - glutGet(GLUT_WINDOW_WIDTH) / 2;
 			break;
 		case bottomright:
-			w = glutGet(GLUT_SCREEN_WIDTH) - glutGet(GLUT_WINDOW_WIDTH);
-			h = glutGet(GLUT_SCREEN_HEIGHT) - glutGet(GLUT_WINDOW_HEIGHT);
+			//w = glutGet(GLUT_SCREEN_WIDTH) - glutGet(GLUT_WINDOW_WIDTH);
+			//h = glutGet(GLUT_SCREEN_HEIGHT) - glutGet(GLUT_WINDOW_HEIGHT);
 			break;
 		case topleft:
 			h = 0;
@@ -204,45 +204,45 @@ namespace ENGINE {
 		case topright:
 			break;
 		}
-		glutPositionWindow(w, h);
+		//glutPositionWindow(w, h);
 	}
 	void GlutEngine::PutWindow(int x, int y)
 	{
 	}
 	// InitGlutApp initialize une nouveau application avec Glut qui render simplement la scene de la function callback
 	bool GlutEngine::Init(APPINFO info, int argc, char** argv) {
-		glutInit(&argc, argv); // Initialize GLUT chez pas ce que les arguments de la cmd font
+		//glutInit(&argc, argv); // Initialize GLUT chez pas ce que les arguments de la cmd font
 
 		srand(static_cast <unsigned> (time(0)));
 		// Crée une windows double buffer le gros
 		if (mode3d) {
-			glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+			//glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 
 		}
 		else {
-			glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
+			//glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
 		}
 
 		wHeight = info.windowHeight;
 		wWidth = info.windowWidth;
 
-		sHeight = glutGet(GLUT_SCREEN_HEIGHT);
-		sWidth = glutGet(GLUT_SCREEN_WIDTH);
+		//sHeight = glutGet(GLUT_SCREEN_HEIGHT);
+		//sWidth = glutGet(GLUT_SCREEN_WIDTH);
 
-		glutInitWindowSize(info.windowWidth, info.windowHeight);   // Set la H&W de départ
-		glutInitWindowPosition(50, 50); // Set la position de départ
-		windowId = glutCreateWindow(info.title); // Crée notre windows avec un titre bien sur
+		//glutInitWindowSize(info.windowWidth, info.windowHeight);   // Set la H&W de départ
+		//glutInitWindowPosition(50, 50); // Set la position de départ
+		//windowId = glutCreateWindow(info.title); // Crée notre windows avec un titre bien sur
 
 		// Effectue l'init des shits d'opengl
 		if (!InitGL()) {
 			return false;
 		}
 
-		glutKeyboardFunc(keybinding);
-		glutSpecialFunc(funckeybinding);
-		glutMouseFunc(mousebinding);
-		glutMotionFunc(mouseMove);
-		glutDisplayFunc(render); // Enregistre le callback pour le redraw
+		//glutKeyboardFunc(keybinding);
+		//glutSpecialFunc(funckeybinding);
+		//glutMouseFunc(mousebinding);
+		//glutMotionFunc(mouseMove);
+		//glutDisplayFunc(render); // Enregistre le callback pour le redraw
 
 		glewInit();
 
@@ -250,8 +250,8 @@ namespace ENGINE {
 	}
 
 	void GlutEngine::Run() {
-		glutTimerFunc(1000 / SCREEN_FPS, mainloop, 0);
-		glutMainLoop();
+		//glutTimerFunc(1000 / SCREEN_FPS, mainloop, 0);
+		//glutMainLoop();
 	}
 
 	// BasicAppInfo retourne une structure rempli des info par default

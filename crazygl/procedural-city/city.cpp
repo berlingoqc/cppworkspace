@@ -170,6 +170,7 @@ void BuildingGenerator::generateBase()
 
 void BuildingGenerator::Reset()
 {
+	building_values.clear();
 	nbr_building = generateUintInRange(min_building, max_building);
 	int count = 0;
 	uint v = nbr_building / 10;
@@ -260,8 +261,7 @@ bool ProceduralCity::configure(fs::path root_folder)
 }
 
 void ProceduralCity::load() {
-	//model_obj = Model3D("obj/nanosuit/nanosuit.obj");
-
+	model_obj = Model3D("obj/nanosuit/nanosuit.obj");
 
 
 	// Load les textures
@@ -313,8 +313,8 @@ void ProceduralCity::render()
 	glm::mat4	modele;
 	// Update la position de la camera selon les inputs recu entre les appels de render
 	camera.update();
-
-	projection = glm::perspective(glm::radians(camera.getFOV()), glutGet(GLUT_WINDOW_WIDTH) / glutGet(GLUT_WINDOW_HEIGHT)*1.0f, 0.1f, 800.0f);
+	float wh; // glutGet(GLUT_WINDOW_WIDTH) / glutGet(GLUT_WINDOW_HEIGHT)*1.0f
+	projection = glm::perspective(glm::radians(camera.getFOV()),w_width / w_height * 1.0f , 0.1f, 800.0f);
 
 	if (sky_generator.getIsLoaded()) {
 		shader_skybox.Use();
@@ -326,7 +326,6 @@ void ProceduralCity::render()
 	}
 	view = camera.getLookAt();
 
-	/*
 	shader_obj.Use();
 	shader_obj.setMat4("gProjection", projection);
 	shader_obj.setMat4("gVue", view);
@@ -336,7 +335,7 @@ void ProceduralCity::render()
 	modele = glm::scale(modele, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
 	shader_obj.setMat4("gModele", modele);
 	model_obj.Draw(shader_obj.getID());
-	*/
+
 	shader_texture.Use();
 	shader_texture.setMat4("gProjection", projection);
 	shader_texture.setMat4("gVue", view);

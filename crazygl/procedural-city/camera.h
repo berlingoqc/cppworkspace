@@ -24,6 +24,7 @@ private:
 	bool	wrap_mouse = true;
 	bool	first_mouse = 0;
 
+
 	bool	btns[11] { false,false,false,false,false,false,false,false,false,false,false};
 
 	float	tx = 1.0f;

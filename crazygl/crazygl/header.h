@@ -3,7 +3,6 @@
 // Import des header de opengl
 #include <GL/glew.h>
 
-#include <GL/freeglut.h>
 
 // import les trucs de math
 #include <glm/glm.hpp>

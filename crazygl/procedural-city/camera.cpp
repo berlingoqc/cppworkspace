@@ -1,8 +1,9 @@
 #include "camera.h"
 
-#include <GL/freeglut.h>
 
 #include <iostream>
+#include "imgui.h"
+#include <GLFW/glfw3.h>
 
 FPSCamera::FPSCamera()
 {
@@ -26,45 +27,31 @@ void FPSCamera::update()
 	camDevant.z = camera_front.z;
 	camDevant.y = 0.0f;
 
-	if (btns[0] == true) {
+	ImGuiIO& io = ImGui::GetIO();
+
+	if (io.KeysDown[GLFW_KEY_LEFT_SHIFT])
+		mouse_move(0, 0);
+	if (io.KeysDown[GLFW_KEY_A]) {
 		camera_pos -= glm::normalize(glm::cross(camDevant, camera_up)) * cameraSpeed;
 	}
-	if (btns[1] == true) {
+	if (io.KeysDown[GLFW_KEY_W]) {
 		camera_pos += cameraSpeed * camDevant;
 	}
-	if (btns[2] == true) {
+	if (io.KeysDown[GLFW_KEY_S]) {
 		camera_pos -= cameraSpeed * camDevant;
 	}
-	if (btns[3] == true) {
+	if (io.KeysDown[GLFW_KEY_D]) {
 		camera_pos += glm::normalize(glm::cross(camDevant, camera_up)) * cameraSpeed;
 	}
-	if(btns[4] == true)
+	if(io.KeysDown[GLFW_KEY_Q])
 	{
 		if (camera_pos.y > 0.5f)
 			camera_pos.y -= 2.0f;
 	}
-	if(btns[5] == true)
+	if(io.KeysDown[GLFW_KEY_E])
 	{
 		camera_pos.y += 2.0f;
 	}
-	if (btns[6] == true) {
-		std::cout << "TY " << ty << std::endl;
-	}
-	
-	if (btns[7] == true) { // i
-		ty -= 0.1;
-	}
-
-	if (btns[8] == true) { // k
-		ty += 0.1;
-	}
-
-	if (btns[9] == true) { // j
-	}
-
-	if (btns[10] == true) { // l
-	}
-
 
 	if (camera_pos.z <= -200.0)
 	{
@@ -86,6 +73,15 @@ void FPSCamera::update()
 
 void FPSCamera::mouse_move(int x, int y)
 {
+	ImGuiIO& io = ImGui::GetIO();
+	ImVec2 mp = io.MousePos;
+	if(mp.x == -FLT_MAX && mp.y == -FLT_MAX)
+	{
+		return;
+	}
+	x = mp.x;
+	y = mp.y;
+
 	if (wrap_mouse) {
 		wrap_mouse = false;
 		last_x = x;
@@ -120,7 +116,7 @@ void FPSCamera::mouse_move(int x, int y)
 		camera_front = glm::normalize(front);
 
 		wrap_mouse = true;
-		glutWarpPointer(glutGet(GLUT_WINDOW_WIDTH) / 2, glutGet(GLUT_WINDOW_HEIGHT) / 2);
+		//glutWarpPointer(glutGet(GLUT_WINDOW_WIDTH) / 2, glutGet(GLUT_WINDOW_HEIGHT) / 2);
 	}
 }
 
@@ -161,10 +157,9 @@ void FPSCamera::keyboard_press(unsigned char btn, int x, int y)
 	case 'l':
 		btns[10] = true;
 		break;
-
-
 	case 27:
-		glutLeaveMainLoop();
+		//glutLeaveMainLoop();
+		break;
 
 	}
 }
