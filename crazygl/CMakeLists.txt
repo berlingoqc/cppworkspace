@@ -61,7 +61,8 @@ link_directories(
 # Incluez les sous-projets.
 add_subdirectory ("crazygl")
 add_subdirectory ("imgui")
-add_subdirectory ("video-player")
+##add_subdirectory ("video-player")
+add_subdirectory ("tiefighter")
 add_subdirectory ("procedural-city")
 
 
