@@ -32,27 +32,27 @@ void SkyGenerator::generateBase()
 	glGenVertexArrays(1, &vao_skybox);
 
 	glBindVertexArray(vao_cloud[0]);
-	create_wall(600.0, 350.0, 700.0, 1.0, true, false);
+	create_wall(500.0, 350.0, 700.0, 1.0, true, false);
 	glBindVertexArray(0);
 
 	glBindVertexArray(vao_cloud[1]);
-	create_wall(600.0, 150.0, 700.0, 2.0, true, false);
+	create_wall(500.0, 150.0, 700.0, 2.0, true, false);
 	glBindVertexArray(0);
 
 	glBindVertexArray(vao_horizon[0]);
-	create_wall(500.0, 500.0, -500.0, 3.0, false, false);
+	create_wall(500.0, 800.0, -500.0, 3.0, false, false);
 	glBindVertexArray(0);
 
 	glBindVertexArray(vao_horizon[1]);
-	create_wall(500.0, 500.0, 500.0, 3.0, false, false);
+	create_wall(500.0, 800.0, 500.0, 3.0, false, false);
 	glBindVertexArray(0);
 
 	glBindVertexArray(vao_horizon[2]);
-	create_wall(500.0, 500.0, 500.0, 3.0, false, true);
+	create_wall(500.0, 800.0, 500.0, 3.0, false, true);
 	glBindVertexArray(0);
 
 	glBindVertexArray(vao_horizon[3]);
-	create_wall(-500.0, 500.0, 500.0, 3.0, false, true);
+	create_wall(-500.0, 800.0, 500.0, 3.0, false, true);
 	glBindVertexArray(0);
 
 	glBindVertexArray(vao_skybox);
@@ -164,7 +164,7 @@ void BuildingGenerator::generateBase()
 	glBindVertexArray(0);
 
 	glBindVertexArray(vao_toit);
-	create_roof(10.0f, 90.0f, 5.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+	create_roof(10.0f, 15.0f, 5.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 	glBindVertexArray(0);
 }
 
@@ -180,7 +180,7 @@ void BuildingGenerator::Reset()
 		for (uint x = 1; x < nbr_building / v; x++)
 		{
 			BuildingValue bv;
-			bv.size = generate_random_vec3(0.5f, 2.0f, 0.5f, 5.0f, .75f, 2.00f);
+			bv.size = generate_random_vec3(0.5f, 2.0f, 0.2f, 3.0f, .75f, 2.00f);
 			bv.translate = glm::vec3(13.0f*x, 0.0f, -15.0f*z*toggle);
 			bv.texture_roof = get_random_item_vector(textures_roof);
 			bv.texture_side = get_random_item_vector(textures_side);
@@ -352,7 +352,7 @@ void ProceduralCity::render()
 		ground_generator.drawGround(shader_texture.getID());
 	}
 	if (sky_generator.getIsLoaded()) {
-		sky_generator.drawCloud(shader_texture.getID());
+		//sky_generator.drawCloud(shader_texture.getID());
 		sky_generator.drawHorizon(shader_texture.getID());
 	}
 
