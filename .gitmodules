@@ -1,0 +1,3 @@
+[submodule "crazygl/crazygl"]
+	path = crazygl/crazygl
+	url = https://github.com/berlingoqc/crazygl
