@@ -283,7 +283,7 @@ bool ProceduralCity::configure(fs::path root_folder)
 }
 
 void ProceduralCity::load() {
-	model_obj = Model3D("obj/nanosuit/nanosuit.obj");
+	model_obj = Model3D("obj/cube.obj");
 
 	// Load les textures
 	if (!building_generator.LoadBuildingTextures(root_folder / "building"))
@@ -367,7 +367,7 @@ void ProceduralCity::render()
 	shader_obj.setMat4("gProjection", projection);
 	shader_obj.setMat4("gVue", view);
 	modele = glm::mat4(1.0f);
-	modele = glm::translate(modele, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+	modele = glm::translate(modele, glm::vec3(0.0f, 500.0f, 0.0f)); // translate it down so it's at the center of the scene
 	modele = glm::rotate(modele, glm::radians(-90.0f), glm::vec3(0, 1, 0));
 	modele = glm::scale(modele, glm::vec3(50.0f, 50.0f, 50.0f));	// it's a bit too big for our scene, so scale it down
 	shader_obj.setMat4("gModele", modele);
