@@ -9,6 +9,8 @@
 
 #include <iostream>
 #include <filesystem>
+#include <glm/vec3.hpp>
+#include <glm/vec2.hpp>
 
 namespace fs = std::filesystem;
 
@@ -27,8 +29,8 @@ struct Vertex {
 
 struct Texture {
 	unsigned int id;
-	const char* type;
-	const char* path;
+	std::string type;
+	std::string path;
 };
 
 class Mesh {

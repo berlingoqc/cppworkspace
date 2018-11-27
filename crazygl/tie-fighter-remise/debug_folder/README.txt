@@ -1,1 +1,0 @@
-faut appuyer sur shit pour bouger la camera avec la souris . Merci

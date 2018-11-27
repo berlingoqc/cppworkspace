@@ -1,7 +1,7 @@
 #include "mesh.h"
 
-#include <stb_image.h>
-
+#include <GL/glew.h>
+#include <SOIL/SOIL.h>
 using namespace Assimp;
 
 
@@ -14,7 +14,7 @@ unsigned int TextureFromFile(const char *path, const std::string &directory, boo
 	glGenTextures(1, &textureID);
 
 	int width, height, nrComponents;
-	unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+	unsigned char *data = SOIL_load_image(filename.c_str(), &width, &height, &nrComponents, SOIL_LOAD_AUTO);
 	if (data)
 	{
 		GLenum format;
@@ -33,13 +33,13 @@ unsigned int TextureFromFile(const char *path, const std::string &directory, boo
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		stbi_image_free(data);
+		SOIL_free_image_data(data);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	else
 	{
 		std::cout << "Texture failed to load at path: " << path << std::endl;
-		stbi_image_free(data);
+		SOIL_free_image_data(data);
 	}
 
 	return textureID;
@@ -60,7 +60,7 @@ void Mesh::Draw(unsigned int shader) {
 	unsigned int normalNr = 1;
 	unsigned int heightNr = 1;
 	for (unsigned int i = 0; i < textures.size(); i++) {
-		glActiveTexture(GL_TEXTURE0 + 1); // Active l'uniter de texture approprié avant de bind
+		glActiveTexture(GL_TEXTURE0); // Active l'uniter de texture approprié avant de bind
 		std::string number;
 		std::string name = textures[i].type;
 		if (name == "texture_diffuse") {
@@ -197,8 +197,8 @@ Mesh Model3D::processMesh(aiMesh *mesh, const aiScene *scene) {
 		vector.x = mesh->mBitangents[i].x;
 		vector.y = mesh->mBitangents[i].y;
 		vector.z = mesh->mBitangents[i].z;
-		vertex.Bitangent = vector;
-		*/
+		vertex.Bitangent = vector;*/
+		
 		vertices.push_back(vertex);
 	}
 	// now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
@@ -210,7 +210,21 @@ Mesh Model3D::processMesh(aiMesh *mesh, const aiScene *scene) {
 			indices.push_back(face.mIndices[j]);
 	}
 	// process materials
-	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+	for(uint i = 0; i < scene->mNumMaterials;i++)
+	{
+		aiMaterial* material = scene->mMaterials[i];
+		std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+		// 2. specular maps
+		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+		// 3. normal maps
+		std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+		// 4. height maps
+		std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+	}
 	// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
 	// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
 	// Same applies to other texture as the following list summarizes:
@@ -219,17 +233,7 @@ Mesh Model3D::processMesh(aiMesh *mesh, const aiScene *scene) {
 	// normal: texture_normalN
 
 	// 1. diffuse maps
-	std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-	// 2. specular maps
-	std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-	textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-	// 3. normal maps
-	std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-	textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-	// 4. height maps
-	std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-	textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+
 
 	// return a mesh object created from the extracted mesh data
 	return Mesh(vertices, indices, textures);
@@ -241,15 +245,19 @@ std::vector<Texture> Model3D::loadMaterialTextures(aiMaterial *mat, aiTextureTyp
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 	{
 		aiString str;
-		mat->GetTexture(type, i, &str);
-		// check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
-		// if texture hasn't been loaded already, load it
+		if (mat->GetTexture(type, i, &str) == AI_SUCCESS) {
+			// check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
+			// if texture hasn't been loaded already, load it
 			Texture texture;
 			texture.id = TextureFromFile(str.C_Str(), directory.string());
-			texture.type = typeName.c_str();
+			texture.type = typeName;
 			texture.path = str.C_Str();
 			textures.push_back(texture);
 			textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+		} else
+		{
+			printf("Failed load %s\n", typeName.c_str());
+		}
 	}
 	return textures;
 }

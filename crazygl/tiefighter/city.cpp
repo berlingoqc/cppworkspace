@@ -90,7 +90,8 @@ bool ProceduralCity::configure(fs::path root_folder)
 }
 
 void ProceduralCity::load() {
-	model_obj = Model3D("model/TIE-fighter.obj");
+	
+	model_obj = Model3D("model/TIE.obj");
 
 
 	if (!sky_generator.LoadSkyTextures(root_folder / "outside"))

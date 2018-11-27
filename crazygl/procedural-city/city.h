@@ -410,12 +410,24 @@ class BuildingGenerator : public BaseGenerator
 
 	std::vector<BuildingValue>		building_values;
 
-	uint							max_building = 130;
-	uint							min_building = 0;
+	uint							max_building = 1800;
+	uint							min_building = 1200;
 	uint							nbr_building;
+	uint							current_building = 0;
 
-	int								current_x; // le x rendu pour ajouter un batiment
-	int								current_z; // le z rendu pour ajouter un batiment
+	float							x_max = 200.0f;
+	float							x_min = -240.0f;
+	float							z_max = 200.0f;
+	float							z_min = -240.0f;
+
+	bool							limit_ground = false;
+
+	glm::vec3						translation_build = glm::vec3(x_max,0.0f, z_max);
+
+	float							x_gap = 20.0f;
+	float							z_gap = 15.0f;
+
+
 
 public:
 	BuildingGenerator();
@@ -425,6 +437,8 @@ public:
 	bool LoadBuildingTextures(fs::path building_folder);
 	void Reset();
 	void Render(uint shader);
+
+	bool AddBuilding();
 
 	int	getMaxBuilding()
 	{
@@ -448,7 +462,7 @@ public:
 
 	int getNbrBuilding()
 	{
-		return nbr_building;
+		return current_building;
 	}
 };
 

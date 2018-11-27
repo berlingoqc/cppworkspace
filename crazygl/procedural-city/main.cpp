@@ -83,7 +83,6 @@ int main(int argc, char** argv) {
 	//glutCreateWindow("Procedural City");
 	//glutFullScreen();
 	/*******************/
-
 	glfwSetErrorCallback(glfw_error_callback);
 	if(!glfwInit())
 	{
@@ -151,17 +150,15 @@ int main(int argc, char** argv) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		{
-			static int range_building[1] {city.getBuildingGenerator().getMaxBuilding()};
-			std::cout << "yolo " << range_building[0] << std::endl;
-			ImGui::Begin("Configuration Ville Procedural");
-
-			ImGui::TextColored({ 255,255,0,1 }, "Configuration generation batiment");
-			ImGui::SliderInt("Max", &range_building[0], 0, 400);
-
+			ImGui::Begin("Information Ville");
 			ImGui::Text("Nombre de batiment courrant : %d", city.getBuildingGenerator().getNbrBuilding());
 
+			if(ImGui::Button("Ajouter batiment"))
+			{
+				city.getBuildingGenerator().AddBuilding();
+			}
+
 			if (ImGui::Button("Regenerer")) {
-				city.getBuildingGenerator().setMaxBuilding(range_building[0]);
 				city.getBuildingGenerator().Reset();
 			}
 
